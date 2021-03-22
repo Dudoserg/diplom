@@ -4,36 +4,38 @@ import guru.nidi.graphviz.model.Node;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 
 import static guru.nidi.graphviz.model.Factory.node;
 
 public class Start {
-    public Start() {
-        Dict dict = readDictFromFile();
-        Dict subDict = dict.getSubDict(new Word("афиша"), 1);
-        System.out.printf("");
+    public Start() throws DictException, IOException {
+        DictBase dictBase = readDictFromFile();
 
-        Node link = node("a").with(Color.BLACK).link(node("b"));
+        DictBase.draw(DictBase.getGraphViz(dictBase.getMap()), "example/map.png");
+        DictBase.draw(DictBase.getGraphViz(dictBase.getInvertMap()), "example/invert.png");
 
+        dictBase.deleteVertex(new Vertex("объявление"));
 
-        try {
-            Dict.draw(dict.getGraphViz(), "example/main.png");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        for (int i = 1 ; i < 10; i++){
-            try {
-                Dict.draw(dict.getSubDict(new Word("афиша"), i).getGraphViz(), "example/subDict_" + i + ".png");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        DictBase.draw(DictBase.getGraphViz(dictBase.getMap()), "example/map_after.png");
+        DictBase.draw(DictBase.getGraphViz(dictBase.getInvertMap()), "example/invert_after.png");
+
+//        {
+//            DictBase subDictBase = dictBase.getSubDict(new Vertex("афиша"), 1);
+//            subDictBase.addPair(new Vertex("афиша"), new Vertex("test"), new Edge(RelationType.ASS));
+//            dictBase.addSubDict(subDictBase);
+//            DictBase.draw(DictBase.getGraphViz(dictBase.getMap()), "example/subDict_after.png");
+//        }
+
+//        for (int i = 1; i < 10; i++) {
+//            DictBase.draw(dictBase.getSubDict(new Vertex("афиша"), i).getGraphViz(), "example/subDict_" + i + ".png");
+//        }
 
     }
 
-    public Dict readDictFromFile() {
-        Dict dict = new Dict(new HashMap<>());
+    public DictBase readDictFromFile() {
+        DictBase dictBase = new DictBase(new HashMap<>());
         int countLine = 0;
         try {
             File file = new File("inputDict.txt");
@@ -52,8 +54,8 @@ public class Start {
                 countLine++;
                 String[] s = line.split(" ");
 
-                Word first = new Word(s[0]);
-                Word second = new Word(s[1]);
+                Vertex first = new Vertex(s[0]);
+                Vertex second = new Vertex(s[1]);
                 RelationType relationType = null;
                 switch (s[2]) {
                     case "def": {
@@ -73,14 +75,14 @@ public class Start {
                     }
                 }
 
-                dict.addPair(first, second, relationType);
+                dictBase.addPair(first, second, new Edge(relationType));
                 // считываем остальные строки в цикле
                 line = reader.readLine();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return dict;
+        return dictBase;
     }
 
 

@@ -1,12 +1,13 @@
 import java.util.Objects;
 
-public class Word {
+public class Vertex {
     static final int p = 31;
     static  int HSIZE = 10;
 
     private String word;
+    private double weight = 0.0;
 
-    public Word(String word) {
+    public Vertex(String word) {
         this.word = word;
     }
 
@@ -22,8 +23,8 @@ public class Word {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Word word1 = (Word) o;
-        boolean isEqual = Objects.equals(word, word1.word);
+        Vertex vertex1 = (Vertex) o;
+        boolean isEqual = Objects.equals(word, vertex1.word);
         return isEqual;
     }
 
