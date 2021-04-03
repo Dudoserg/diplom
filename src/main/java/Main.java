@@ -1,8 +1,10 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
+import mystem.MyStemText;
 import utils.Bigram;
 import utils.Helper;
+import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,8 +30,12 @@ public class Main {
 //
 //        System.out.println( (System.currentTimeMillis() - l));
 
+        MyStemText myStemText = new MyStemText(Helper.readFile("mystem" + File.separator + "data.txt"));
+//        myStemText = myStemText.removeStopWord();
+        myStemText.saveToFile("mystem" + File.separator + "text_withoutStopWord.txt");
+
         String myStemPath = "mystem" + File.separator + "mystem.exe";
-        String filePath = "mystem" + File.separator + "text.txt";
+        String filePath = "mystem" + File.separator + "text_withoutStopWord.txt";
         String resultFilePath = "mystem" + File.separator + "result.json";
         try {
             // creating a new process.
@@ -49,6 +55,7 @@ public class Main {
         MyStemResult myStemResult = new MyStemResult(Arrays.asList(objectMapper.readValue(json, MyStemItem[].class)));
         MyStemResult onlyWorlds = myStemResult.getOnlyWorlds();
         Map<Bigram, Integer> bigramFrequensy = myStemResult.getBigramFrequensy();
+        Map<Unigram, Integer> unigramFrequensy = myStemResult.getUnigramFrequensy();
         System.out.printf("");
 
 //        Start start = new Start();

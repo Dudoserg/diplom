@@ -3,6 +3,7 @@ package mystem;
 import lombok.Getter;
 import lombok.Setter;
 import utils.Bigram;
+import utils.Unigram;
 
 import java.util.*;
 
@@ -43,6 +44,16 @@ public class MyStemResult {
         Map<Bigram, Integer> map = new HashMap<>();
         for (Bigram bigram : bigramList) {
             map.merge(bigram, 1, Integer::sum);
+        }
+        return map;
+    }
+
+    public Map<Unigram, Integer> getUnigramFrequensy(){
+        Map<Unigram,Integer> map = new HashMap<>();
+        for (MyStemItem myStemItem : itemList) {
+            if(!myStemItem.isDelimeter()){
+                map.merge(new Unigram(myStemItem.getBaseForm()), 1, Integer::sum);
+            }
         }
         return map;
     }
