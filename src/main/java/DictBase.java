@@ -45,6 +45,7 @@ public class DictBase {
         }
         edgeMap.addEdge(second, edge);
 
+        // invertMap для быстрого поиска листов
         EdgeMap invertEdgeMap = this.invertMap.get(second);
         if(invertEdgeMap == null){
             invertEdgeMap = new EdgeMap();
