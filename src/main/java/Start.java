@@ -24,7 +24,7 @@ public class Start {
         //DictBase.draw(DictBase.getGraphViz(dictBase.getInvertMap()), "example/invert_after.png");
 
         List<DictBase.FindPathHelper> path = new ArrayList<>();
-        List<DictBase.FindPathHelper> way = dictBase.findWay(new Vertex("0"), new Vertex("8"), 20);
+        List<DictBase.FindPathHelper> way = dictBase.findWay(new Vertex("0"), new Vertex("8"), 3);
         System.out.println();
 //        {
 //            dict.DictBase subDictBase = dictBase.getSubDict(new dict.Vertex("афиша"), 1);

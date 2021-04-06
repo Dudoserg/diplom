@@ -169,12 +169,14 @@ public class DictBase {
         int prev;
         int weight;
         int index;
+        Set<Vertex> used;
 
-        public FindPathHelper(Vertex vertex, int prev, int weight, int index) {
+        public FindPathHelper(Vertex vertex, int prev, int weight, int index, Set<Vertex> used) {
             this.vertex = vertex;
             this.prev = prev;
             this.weight = weight;
             this.index = index;
+            this.used = used;
         }
     }
 
@@ -184,7 +186,7 @@ public class DictBase {
         // первый этап
         for (Map.Entry<Vertex, Edge> variant : edgeMap.getEdgeMap().entrySet()) {
             Vertex v = variant.getKey();
-            FindPathHelper findPathHelper = new FindPathHelper(v, -1, 1, path.size());
+            FindPathHelper findPathHelper = new FindPathHelper(v, -1, 1, path.size(), new HashSet<>());
             path.add(findPathHelper);
         }
         int maxR = 0;
@@ -204,7 +206,10 @@ public class DictBase {
             edgeMap = map.get(prev.vertex);
             if (edgeMap != null)
                 for (Map.Entry<Vertex, Edge> v : edgeMap.getEdgeMap().entrySet()) {
-                    path.add(new FindPathHelper(v.getKey(), prev.index, prev.weight + 1, path.size()));
+                    FindPathHelper f = new FindPathHelper(v.getKey(), prev.index, prev.weight + 1, path.size(), prev.used);
+                    if (!f.used.add(v.getKey()))
+                        continue;
+                    path.add(f);
                 }
         }
         /// Ищем все возможные пути

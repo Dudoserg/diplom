@@ -17,6 +17,7 @@ public class Vertex {
     public Vertex(String word) {
         this.word = Word.getStr(word);
     }
+
     public Vertex(Word word) {
         this.word = word;
     }
@@ -34,4 +35,5 @@ public class Vertex {
     public int hashCode() {
         return word.hashCode();
     }
+
 }
