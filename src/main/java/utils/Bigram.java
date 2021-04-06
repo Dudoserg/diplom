@@ -13,6 +13,7 @@ public class Bigram {
         this.second = second;
     }
 
+    private int frequency = 0;
     private String first;
     private String second;
 

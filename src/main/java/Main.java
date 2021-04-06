@@ -7,11 +7,8 @@ import utils.Helper;
 import utils.Unigram;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -31,19 +28,17 @@ public class Main {
 //        System.out.println( (System.currentTimeMillis() - l));
 
         MyStemText myStemText = new MyStemText(Helper.readFile("mystem" + File.separator + "data.txt"));
-//        myStemText = myStemText.removeStopWord();
-        myStemText.saveToFile("mystem" + File.separator + "text_withoutStopWord.txt");
+        myStemText = myStemText.removeStopWord();
+        myStemText.saveToFile("mystem" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt);
 
-        String myStemPath = "mystem" + File.separator + "mystem.exe";
-        String filePath = "mystem" + File.separator + "text_withoutStopWord.txt";
-        String resultFilePath = "mystem" + File.separator + "result.json";
+        String myStemPath = "mystem" + File.separator + Helper.MYSTEM_exe;
+        String filePath = "mystem" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt;
+
+        String resultFilePath = "mystem" + File.separator + Helper.MYSTEM_RESULT_json;
         try {
-            // creating a new process.
-            System.out.println("MyStem start");
             Process p = Runtime.getRuntime()
                     .exec(myStemPath + " " + filePath + " " + resultFilePath + " " + "--format json -c -l -s -i");
             p.waitFor();
-            System.out.println("You have exited from MyStem");
         } catch (Exception ex) {
             System.out.println("exception is:" + ex);
         }
@@ -57,7 +52,8 @@ public class Main {
         Map<Bigram, Integer> bigramFrequensy = myStemResult.getBigramFrequensy();
         Map<Unigram, Integer> unigramFrequensy = myStemResult.getUnigramFrequensy();
         System.out.printf("");
-
+        Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
+        Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
 //        Start start = new Start();
     }
 }

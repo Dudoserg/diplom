@@ -21,6 +21,12 @@ public class MyStemText {
         this.text = words.stream().collect(Collectors.joining(" ")).trim();
     }
     public MyStemText(String text) throws IOException {
+        text = text.replace("\r\n", " ");
+        text = text.replace("\n", " ");
+        text = text.replace(".", ". ");
+        text = text.replace(",", ", ");
+        text = text.replace("!", "! ");
+        text = text.replace("?", "? ");
         this.text = text.trim().replaceAll(" +", " ");
         this.words = Arrays.stream(this.text.split(" "))
                 .filter(s -> !s.equals(" "))
@@ -39,7 +45,14 @@ public class MyStemText {
             stopWords = Helper.readFileLineByLine("mystem" + File.separator + "stop_words.txt");
         }
         MyStemText result = new MyStemText(words);
-        result.words = result.words.stream().filter(s -> !stopWords.contains(s)).collect(Collectors.toList());
+        result.words = result.words.stream()
+                .filter(s -> {
+                    String tmp = s.trim().replaceAll("[ .?!,]", "");
+                    if(stopWords.contains(tmp))
+                        return false;
+                    return true;
+                })
+                .collect(Collectors.toList());
         result.text = result.words.stream().collect(Collectors.joining(" ")).trim();
         return result;
     }

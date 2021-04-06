@@ -13,6 +13,7 @@ public class Unigram {
         this.first = first;
     }
 
+    private int frequency = 0;
     private String first;
 
     @Override

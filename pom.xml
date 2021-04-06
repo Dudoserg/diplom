@@ -39,6 +39,14 @@
             <version>2.11.1</version>
         </dependency>
 
+
+        <!--    csv reader    -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.3</version>
+        </dependency>
+
     </dependencies>
 
 </project>
