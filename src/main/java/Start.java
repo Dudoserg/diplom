@@ -1,5 +1,4 @@
-import guru.nidi.graphviz.attribute.Color;
-import guru.nidi.graphviz.model.Node;
+import dict.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,20 +21,20 @@ public class Start {
         DictBase.draw(DictBase.getGraphViz(dictBase.getInvertMap()), "example/invert_after.png");
 
 //        {
-//            DictBase subDictBase = dictBase.getSubDict(new Vertex("афиша"), 1);
-//            subDictBase.addPair(new Vertex("афиша"), new Vertex("test"), new Edge(RelationType.ASS));
+//            dict.DictBase subDictBase = dictBase.getSubDict(new dict.Vertex("афиша"), 1);
+//            subDictBase.addPair(new dict.Vertex("афиша"), new dict.Vertex("test"), new dict.Edge(dict.RelationType.ASS));
 //            dictBase.addSubDict(subDictBase);
-//            DictBase.draw(DictBase.getGraphViz(dictBase.getMap()), "example/subDict_after.png");
+//            dict.DictBase.draw(dict.DictBase.getGraphViz(dictBase.getMap()), "example/subDict_after.png");
 //        }
 
 //        for (int i = 1; i < 10; i++) {
-//            DictBase.draw(dictBase.getSubDict(new Vertex("афиша"), i).getGraphViz(), "example/subDict_" + i + ".png");
+//            dict.DictBase.draw(dictBase.getSubDict(new dict.Vertex("афиша"), i).getGraphViz(), "example/subDict_" + i + ".png");
 //        }
 
     }
 
     public DictBase readDictFromFile() {
-        DictBase dictBase = new DictBase(new HashMap<>());
+        DictBase dictBase = new DictBase();
         int countLine = 0;
         try {
             File file = new File("inputDict.txt");

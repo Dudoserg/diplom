@@ -1,3 +1,5 @@
+package dict;
+
 import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Font;
 import guru.nidi.graphviz.attribute.Label;
@@ -25,18 +27,23 @@ public class DictBase {
 
     private Map<Vertex, EdgeMap> invertMap;
 
-    public DictBase(Map<Vertex, EdgeMap> map) {
-        this.map = map;
+    public DictBase() {
+        this.map = new HashMap<>();
         invertMap = new HashMap<>();
     }
 
 
-    /**
-     * Добавить ребро в граф
-     * @param first первая вершина
-     * @param second вторая вершина
-     * @param edge дуга
-     */
+    public void addPair(String first, String second, Edge edge) {
+        this.addPair(new Vertex(first), new Vertex(second), edge);
+    }
+
+        /**
+         * Добавить ребро в граф
+         *
+         * @param first  первая вершина
+         * @param second вторая вершина
+         * @param edge   дуга
+         */
     public void addPair(Vertex first, Vertex second, Edge edge) {
         EdgeMap edgeMap = this.map.get(first);
         if (edgeMap == null) {
@@ -47,7 +54,7 @@ public class DictBase {
 
         // invertMap для быстрого поиска листов
         EdgeMap invertEdgeMap = this.invertMap.get(second);
-        if(invertEdgeMap == null){
+        if (invertEdgeMap == null) {
             invertEdgeMap = new EdgeMap();
             this.invertMap.put(second, invertEdgeMap);
         }
@@ -57,9 +64,10 @@ public class DictBase {
 
     /**
      * Удаляем вершину из графа
+     *
      * @param vertex вершину которую необходимо удалить
      */
-    public void deleteVertex(Vertex vertex){
+    public void deleteVertex(Vertex vertex) {
         // афиша
 //        афиша объявление def
 //        афиша спектакль ass
@@ -68,7 +76,7 @@ public class DictBase {
 //        афиша кинофильм ass
         EdgeMap removedMap = this.map.remove(vertex);
 
-        if(removedMap != null && !removedMap.isEmpty()){
+        if (removedMap != null && !removedMap.isEmpty()) {
             // удаляем в инвертированном словаре данные связи
             // removedMap(объявление, спектакль, концерт, лекция, кинофильм )
             for (Map.Entry<Vertex, Edge> vertexEdgeEntry : removedMap.getEdgeMap().entrySet()) {
@@ -83,7 +91,7 @@ public class DictBase {
 
         //// по инвертированному списку пробуем найти вершины-листы, чтобы удалить связи до них
         EdgeMap invertEdgeMap = invertMap.get(vertex);
-        if(invertEdgeMap != null && !invertEdgeMap.isEmpty()){
+        if (invertEdgeMap != null && !invertEdgeMap.isEmpty()) {
             for (Map.Entry<Vertex, Edge> vertexEdgeEntry : invertEdgeMap.getEdgeMap().entrySet()) {
                 Vertex invertKey = vertexEdgeEntry.getKey();        // от этой вершины идет дука к удаляемое
                 Edge invertValue = vertexEdgeEntry.getValue();
@@ -96,8 +104,6 @@ public class DictBase {
     }
 
 
-
-
     /**
      * Получить подСловарь
      *
@@ -106,15 +112,16 @@ public class DictBase {
      * @return подсловарь
      */
     public DictBase getSubDict(Vertex w, int r) {
-        DictBase dictBase = new DictBase(new HashMap<>());
+        DictBase dictBase = new DictBase();
         this.getSubDict(w, r, dictBase);
         return dictBase;
     }
 
     /**
      * Получить подсловарь
-     * @param w центр словаря
-     * @param r радиус словаря (количество дуг)
+     *
+     * @param w        центр словаря
+     * @param r        радиус словаря (количество дуг)
      * @param dictBase (пустой словарь в котором будет результат)
      */
     private void getSubDict(Vertex w, int r, DictBase dictBase) {
@@ -134,9 +141,10 @@ public class DictBase {
 
     /**
      * Добавить в текущий слоловарь подсловарь
+     *
      * @param dictBase добавляемый словарь
      */
-    public void addSubDict(DictBase dictBase){
+    public void addSubDict(DictBase dictBase) {
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.map.entrySet()) {
             Vertex first_vertex = vertexEdgeMapEntry.getKey();
             EdgeMap edgeMap = vertexEdgeMapEntry.getValue();
@@ -149,15 +157,14 @@ public class DictBase {
     }
 
 
-
-
     /**
      * # Получить ноды для отрисовки графа в графвизе
+     *
      * @param map словарь который будем рисовать
-     * @return  Список нод для библиотеки графвиз
-     * @throws DictException    такого типа отношений не существует
+     * @return Список нод для библиотеки графвиз
+     * @throws DictException такого типа отношений не существует
      */
-    public static List<Node> getGraphViz( Map<Vertex, EdgeMap> map) throws DictException {
+    public static List<Node> getGraphViz(Map<Vertex, EdgeMap> map) throws DictException {
         List<Node> result = new ArrayList<>();
         Set<Map.Entry<Vertex, EdgeMap>> entries = map.entrySet();
 
@@ -170,8 +177,8 @@ public class DictBase {
                 Edge edge = wordRelationTypeEntry.getValue();
                 RelationType type = edge.getRelationType();
 
-                Node link1 = node(first.getWord()).with(Color.BLACK);
-                Node link2 = node(second.getWord()).with(Color.BLACK);
+                Node link1 = node(first.getWord().getStr()).with(Color.BLACK);
+                Node link2 = node(second.getWord().getStr()).with(Color.BLACK);
                 Node resultNode = null;
 
                 switch (type) {

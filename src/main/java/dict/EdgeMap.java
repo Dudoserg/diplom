@@ -1,3 +1,5 @@
+package dict;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,15 +12,15 @@ public class EdgeMap {
     private Map<Vertex, Edge> edgeMap = new HashMap<>();
 
 
-    public void addEdge(Vertex vertex, Edge edge){
+    public void addEdge(Vertex vertex, Edge edge) {
         this.edgeMap.put(vertex, edge);
     }
 
-    public int size(){
-        return  this.edgeMap.size();
+    public int size() {
+        return this.edgeMap.size();
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return this.edgeMap.size() == 0;
     }
 }

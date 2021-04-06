@@ -7,26 +7,32 @@ import utils.Helper;
 import utils.Unigram;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws Exception {
 //        long l = System.currentTimeMillis();
-//        Map<Word, Word> map = new HashMap<>();
+//        Map<dict.Word, dict.Word> map = new HashMap<>();
 //        TreeSet<Integer> treeSet = new TreeSet<>();
 //        for (int i = 0; i < 2*1000*1000; i++) {
-//            Word word = new Word("hello" + i);
-//            map.put(word, new Word("hello"));
+//            dict.Word word = new dict.Word("hello" + i);
+//            map.put(word, new dict.Word("hello"));
 //            treeSet.add(word.hashCode());
 ////            if(i % (10*1000) == 0)
 ////                System.out.println(i);
 //        }
 //
-//        Word hello = map.get(new Word("hello"));
+//        dict.Word hello = map.get(new dict.Word("hello"));
 //
 //        System.out.println( (System.currentTimeMillis() - l));
 
+
+        Start start = new Start();
+    }
+
+    public void mystemTest() throws IOException {
         MyStemText myStemText = new MyStemText(Helper.readFile("mystem" + File.separator + "data.txt"));
         myStemText = myStemText.removeStopWord();
         myStemText.saveToFile("mystem" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt);
@@ -54,6 +60,5 @@ public class Main {
         System.out.printf("");
         Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
-//        Start start = new Start();
     }
 }

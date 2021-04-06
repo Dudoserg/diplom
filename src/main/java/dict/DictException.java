@@ -1,4 +1,4 @@
-
+package dict;
 
 
 public class DictException  extends Exception{
