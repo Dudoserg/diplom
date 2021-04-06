@@ -37,13 +37,13 @@ public class DictBase {
         this.addPair(new Vertex(first), new Vertex(second), edge);
     }
 
-        /**
-         * Добавить ребро в граф
-         *
-         * @param first  первая вершина
-         * @param second вторая вершина
-         * @param edge   дуга
-         */
+    /**
+     * Добавить ребро в граф
+     *
+     * @param first  первая вершина
+     * @param second вторая вершина
+     * @param edge   дуга
+     */
     public void addPair(Vertex first, Vertex second, Edge edge) {
         EdgeMap edgeMap = this.map.get(first);
         if (edgeMap == null) {
@@ -157,6 +157,80 @@ public class DictBase {
     }
 
 
+    public void funLink_2(Word first, Word second, double betta) {
+        final double eps = 0.05;
+        final double maxLink = 0.95;
+        final int r = 5;
+
+    }
+
+    public class FindPathHelper {
+        Vertex vertex;
+        int prev;
+        int weight;
+        int index;
+
+        public FindPathHelper(Vertex vertex, int prev, int weight, int index) {
+            this.vertex = vertex;
+            this.prev = prev;
+            this.weight = weight;
+            this.index = index;
+        }
+    }
+
+    public List<FindPathHelper> findWay(Vertex first, Vertex second, int R) {
+        List<FindPathHelper> path = new ArrayList<>();
+        EdgeMap edgeMap = map.get(first);
+        // первый этап
+        for (Map.Entry<Vertex, Edge> variant : edgeMap.getEdgeMap().entrySet()) {
+            Vertex v = variant.getKey();
+            FindPathHelper findPathHelper = new FindPathHelper(v, -1, 1, path.size());
+            path.add(findPathHelper);
+        }
+        int maxR = 0;
+        int index = 0;
+        while (true) {
+            FindPathHelper prev = null;
+            try {
+                 prev = path.get(index++);
+
+            }catch (IndexOutOfBoundsException e){
+                System.out.println();
+                break;
+            }
+            maxR = Math.max(maxR, prev.weight);
+            if (maxR > R - 1)
+                break;
+            edgeMap = map.get(prev.vertex);
+            if (edgeMap != null)
+                for (Map.Entry<Vertex, Edge> v : edgeMap.getEdgeMap().entrySet()) {
+                    path.add(new FindPathHelper(v.getKey(), prev.index, prev.weight + 1, path.size()));
+                }
+        }
+        /// Ищем все возможные пути
+        for (int i = 0; i < path.size(); i++) {
+            FindPathHelper f = path.get(i);
+            if (f.vertex.getWord().getStr().equals("8")) {
+                System.out.print("8  ");
+                FindPathHelper tmp = f;
+                while (true) {
+                    tmp = path.get(tmp.prev);
+                    System.out.print(tmp.vertex.getWord().getStr() + "  ");
+
+                    if (tmp.prev == -1){
+                        System.out.println("0");
+                        break;
+                    }
+                }
+            }
+        }
+        return path;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * # Получить ноды для отрисовки графа в графвизе
      *
@@ -220,6 +294,4 @@ public class DictBase {
                 );
         Graphviz.fromGraph(g).height(1200).render(Format.PNG).toFile(new File(fileName));
     }
-
-
 }

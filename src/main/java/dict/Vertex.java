@@ -17,6 +17,9 @@ public class Vertex {
     public Vertex(String word) {
         this.word = Word.getStr(word);
     }
+    public Vertex(Word word) {
+        this.word = word;
+    }
 
     @Override
     public boolean equals(Object o) {
