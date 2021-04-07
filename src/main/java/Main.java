@@ -57,7 +57,7 @@ public class Main {
         MyStemResult onlyWorlds = myStemResult.getOnlyWorlds();
         Map<Bigram, Integer> bigramFrequensy = myStemResult.getBigramFrequensy();
         Map<Unigram, Integer> unigramFrequensy = myStemResult.getUnigramFrequensy();
-        System.out.printf("");
+
         Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
     }

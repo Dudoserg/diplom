@@ -5,9 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static guru.nidi.graphviz.model.Factory.node;
 
@@ -15,7 +14,7 @@ public class Start {
     public Start() throws DictException, IOException {
         DictBase dictBase = readDictFromFile();
 
-        DictBase.draw(DictBase.getGraphViz(dictBase.getMap()), "example/map.png");
+        //DictBase.draw(DictBase.getGraphViz(dictBase.getMap()), "example/map.png");
         //DictBase.draw(DictBase.getGraphViz(dictBase.getInvertMap()), "example/invert.png");
 
         //dictBase.deleteVertex(new Vertex("объявление"));
@@ -24,8 +23,16 @@ public class Start {
         //DictBase.draw(DictBase.getGraphViz(dictBase.getInvertMap()), "example/invert_after.png");
 
         List<DictBase.FindPathHelper> path = new ArrayList<>();
-        List<DictBase.FindPathHelper> way = dictBase.findWay(new Vertex("0"), new Vertex("8"), 3);
-        System.out.println();
+
+        List<Vertex> anyWay = dictBase.findAnyWay(new Vertex("0"), new Vertex("8"), 10);
+
+        List<List<Vertex>> ways = dictBase.findWays(new Vertex("0"), new Vertex("8"), 10);
+
+        for (List<Vertex> way : ways) {
+            System.out.println(way.stream().map(vertex -> vertex.getWord().getStr()).collect(Collectors.joining("  ")));
+        }
+
+        System.out.print("");
 //        {
 //            dict.DictBase subDictBase = dictBase.getSubDict(new dict.Vertex("афиша"), 1);
 //            subDictBase.addPair(new dict.Vertex("афиша"), new dict.Vertex("test"), new dict.Edge(dict.RelationType.ASS));

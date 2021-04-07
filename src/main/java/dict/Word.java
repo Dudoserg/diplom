@@ -29,14 +29,15 @@ public class Word {
             w = new Word(str);
             words_cash.put(str, w);
         } else
-            System.out.println(""); //TODO
+            System.out.print(""); //TODO
         return w;
     }
 
-    public Word(String str, WordType wt) {
+    private Word(String str, WordType wt) {
         this.str = str;
         this.wordType = wt;
     }
+
     public Word(String str) {
         this.str = str;
     }

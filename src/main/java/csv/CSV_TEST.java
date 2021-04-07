@@ -38,7 +38,7 @@ public class CSV_TEST {
             Word.getStr(wordTo.getSpelling()).setWordType(WordType.create(wordTo.getPosId()));
         }
 
-        System.out.println();
+        System.out.print("");
 //        for (CSV_words word : words) {
 //            System.out.println(word.getId() + "\t" + word.getSpelling() + "\t" + word.getPosId());
 //        }

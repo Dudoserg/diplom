@@ -180,7 +180,15 @@ public class DictBase {
         }
     }
 
-    public List<FindPathHelper> findWay(Vertex first, Vertex second, int R) {
+    /**
+     * Поиск путей между вершинами first, last
+     *
+     * @param first - вершина из которой ведется поиск
+     * @param last  - вершина которую необходимо достигнуть
+     * @param R     - максимальная длина пути, которые рассматриваем
+     * @return List<List < Vertex>> список всех возможных путей между вершинами
+     */
+    public List<List<Vertex>> findWays(Vertex first, Vertex last, int R) {
         List<FindPathHelper> path = new ArrayList<>();
         EdgeMap edgeMap = map.get(first);
         // первый этап
@@ -193,16 +201,14 @@ public class DictBase {
         int index = 0;
         while (true) {
             FindPathHelper prev = null;
-            try {
-                 prev = path.get(index++);
-
-            }catch (IndexOutOfBoundsException e){
-                System.out.println();
+            if (path.size() <= index)
                 break;
-            }
+            prev = path.get(index++);
+
             maxR = Math.max(maxR, prev.weight);
             if (maxR > R - 1)
                 break;
+
             edgeMap = map.get(prev.vertex);
             if (edgeMap != null)
                 for (Map.Entry<Vertex, Edge> v : edgeMap.getEdgeMap().entrySet()) {
@@ -212,24 +218,90 @@ public class DictBase {
                     path.add(f);
                 }
         }
-        /// Ищем все возможные пути
-        for (int i = 0; i < path.size(); i++) {
-            FindPathHelper f = path.get(i);
-            if (f.vertex.getWord().getStr().equals("8")) {
-                System.out.print("8  ");
+        /// извлекаем все возможные пути
+        List<List<Vertex>> result = new ArrayList<>();
+
+        for (FindPathHelper f : path) {
+            if (f.vertex.equals(last)) {
+                List<Vertex> currentPath = new ArrayList<>(Collections.singletonList(first));
+                result.add(currentPath);
                 FindPathHelper tmp = f;
                 while (true) {
                     tmp = path.get(tmp.prev);
-                    System.out.print(tmp.vertex.getWord().getStr() + "  ");
-
-                    if (tmp.prev == -1){
-                        System.out.println("0");
+                    currentPath.add(tmp.vertex);
+                    if (tmp.prev == -1) {
+                        currentPath.add(last);
                         break;
                     }
                 }
             }
         }
-        return path;
+
+        return result;
+    }
+
+    public List<Vertex> findAnyWay(Vertex first, Vertex last, int R) {
+        List<FindPathHelper> path = new ArrayList<>();
+        EdgeMap edgeMap = map.get(first);
+
+        // первый этап
+        for (Map.Entry<Vertex, Edge> variant : edgeMap.getEdgeMap().entrySet()) {
+            Vertex v = variant.getKey();
+            FindPathHelper findPathHelper = new FindPathHelper(v, -1, 1, path.size(), new HashSet<>());
+            path.add(findPathHelper);
+        }
+        int maxR = 0;
+        int index = 0;
+
+        outerloop:
+        while (true) {
+            FindPathHelper prev = null;
+            if (path.size() <= index)
+                break;
+            prev = path.get(index++);
+
+            maxR = Math.max(maxR, prev.weight);
+            if (maxR > R - 1)
+                break;
+
+            edgeMap = map.get(prev.vertex);
+            if (edgeMap != null)
+                for (Map.Entry<Vertex, Edge> v : edgeMap.getEdgeMap().entrySet()) {
+                    FindPathHelper f = new FindPathHelper(v.getKey(), prev.index, prev.weight + 1, path.size(), prev.used);
+                    if (!f.used.add(v.getKey()))
+                        continue;
+                    path.add(f);
+                    if(f.vertex.equals(last))
+                        break outerloop;
+                }
+        }
+
+        /// извлекаем все возможные пути
+        List<Vertex> result = new ArrayList<>(Collections.singletonList(first));
+
+        for (FindPathHelper f : path) {
+            if (f.vertex.equals(last)) {
+                FindPathHelper tmp = f;
+                while (true) {
+                    tmp = path.get(tmp.prev);
+                    result.add(tmp.vertex);
+                    if (tmp.prev == -1) {
+                        result.add(last);
+                        break;
+                    }
+                }
+            }
+        }
+        Collections.reverse(result);
+
+        return result;
+    }
+
+    public void funLink_2(Vertex first, Vertex second, double betta) {
+        final double eps = 0.05;        // минимально рассматриваемый вес пути
+        final double maxLink = 0.95;    // максимально допустимый вес дуги
+        final int r = 5;                // радиус поиска связи между вершинами
+//        if()
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
