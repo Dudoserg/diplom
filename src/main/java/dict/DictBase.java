@@ -181,13 +181,22 @@ public class DictBase {
      * @return List<List < Vertex>> список всех возможных путей между вершинами
      */
     public List<List<Vertex>> findWays(Vertex first, Vertex last, int R) {
+        /// извлекаем все возможные пути
+        List<List<Vertex>> result = new ArrayList<>();
+
         List<FindPathHelper> path = new ArrayList<>();
         EdgeMap edgeMap = map.get(first);
         // первый этап
         for (Map.Entry<Vertex, Edge> variant : edgeMap.getEdgeMap().entrySet()) {
             Vertex v = variant.getKey();
-            FindPathHelper findPathHelper = new FindPathHelper(v, -1, 1, path.size(), new HashSet<>());
-            path.add(findPathHelper);
+            if(v.equals(last)){
+                // сразу нашли слово, вот это повезло(нет)
+                result.add(new ArrayList<>(Arrays.asList(first, last)));
+                // TODO посчтитать веса
+            }else{
+                FindPathHelper findPathHelper = new FindPathHelper(v, -1, 1, path.size(), new HashSet<>());
+                path.add(findPathHelper);
+            }
         }
         int maxR = 0;
         int index = 0;
@@ -210,22 +219,19 @@ public class DictBase {
                     path.add(f);
                 }
         }
-        /// извлекаем все возможные пути
-        List<List<Vertex>> result = new ArrayList<>();
+
 
         for (FindPathHelper f : path) {
             if (f.vertex.equals(last)) {
                 List<Vertex> currentPath = new ArrayList<>(Collections.singletonList(last));
                 result.add(currentPath);
                 FindPathHelper tmp = f;
-                while (true) {
+                while (tmp.prev != -1) {
                     tmp = path.get(tmp.prev);
                     currentPath.add(tmp.vertex);
-                    if (tmp.prev == -1) {
-                        currentPath.add(first);
-                        break;
-                    }
                 }
+                currentPath.add(tmp.vertex);
+                currentPath.add(first);
                 Collections.reverse(currentPath);
             }
         }

@@ -39,7 +39,7 @@ public class CSV_TEST {
             Word.getStr(wordFrom.getSpelling()).setWordType(WordType.create(wordFrom.getPosId()));
             Word.getStr(wordTo.getSpelling()).setWordType(WordType.create(wordTo.getPosId()));
         }
-        //dict.addPair("соответствующий", "значение", new Edge(0.0,0.0,0.0));
+        dict.addPair("соответствующий", "значение", new Edge(0.0,0.0,0.0));
 
         //List<List<Vertex>> ways = dict.findWays(new Vertex("значение"), new Vertex("соответствующий"), 5);
 //        for (List<Vertex> way : ways) {
