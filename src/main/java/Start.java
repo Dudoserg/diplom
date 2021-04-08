@@ -25,6 +25,7 @@ public class Start {
         List<DictBase.FindPathHelper> path = new ArrayList<>();
 
         List<Vertex> anyWay = dictBase.findAnyWay(new Vertex("0"), new Vertex("8"), 10);
+        System.out.println(anyWay.stream().map(vertex -> vertex.getWord().getStr()).collect(Collectors.joining("  ")));
 
         List<List<Vertex>> ways = dictBase.findWays(new Vertex("0"), new Vertex("8"), 10);
 

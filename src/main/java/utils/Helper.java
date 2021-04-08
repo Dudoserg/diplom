@@ -1,5 +1,10 @@
 package utils;
 
+import dict.DictBase;
+import dict.Edge;
+import dict.EdgeMap;
+import dict.Vertex;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -87,6 +92,25 @@ public class Helper {
                     new String(new char[integer - bigram.getFirst().length() - bigram.getSecond().length()  + 10]).replace('\0', ' ') +
                     bigram.getFrequency() + "\n");
 
+        }
+        writer.close();
+    }
+
+
+    public static void printConnective(DictBase dict, String path) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dict.getMap().entrySet()) {
+            Vertex v = vertexEdgeMapEntry.getKey();
+            EdgeMap emap = vertexEdgeMapEntry.getValue();
+            for (Map.Entry<Vertex, Edge> vertexEdgeEntry : emap.getEdgeMap().entrySet()) {
+                Vertex v2 = vertexEdgeEntry.getKey();
+                Edge e = vertexEdgeEntry.getValue();
+//                System.out.println(v.getWord().getStr() + "\t" + v.getWord().getStr() + "\t" +
+//                        "a=" +e.getAss_weight() + "   d=" + e.getDef_weight() + "   s=" + e.getSyn_weight());
+                writer.write(v.getWord().getStr() + "__" + v2.getWord().getStr() + " " +
+                        "a=" +e.getAss_weight() + " d=" + e.getDef_weight() + " s=" + e.getSyn_weight() + "\n");
+            }
         }
         writer.close();
     }

@@ -2,16 +2,18 @@ package csv;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 import dict.*;
+import utils.Helper;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CSV_TEST {
-    public static void main(String[] args) throws FileNotFoundException, DictException {
+    public static void main(String[] args) throws IOException, DictException {
         String words_fileName = "data" + File.separator + "words.csv";
         String connections_fileName = "data" + File.separator + "connections.csv";
 
@@ -37,6 +39,21 @@ public class CSV_TEST {
             Word.getStr(wordFrom.getSpelling()).setWordType(WordType.create(wordFrom.getPosId()));
             Word.getStr(wordTo.getSpelling()).setWordType(WordType.create(wordTo.getPosId()));
         }
+        //dict.addPair("соответствующий", "значение", new Edge(0.0,0.0,0.0));
+
+        //List<List<Vertex>> ways = dict.findWays(new Vertex("значение"), new Vertex("соответствующий"), 5);
+//        for (List<Vertex> way : ways) {
+//            System.out.print(way.stream().map(vertex -> vertex.getWord().getStr()).collect(Collectors.joining("  ")));
+//            System.out.println("\t\t" + way.size());
+//        }
+        System.out.print("\n\n\n");
+        List<List<Vertex>> ways = dict.findWays(new Vertex("соответствующий"), new Vertex("значение"), 5);
+        for (List<Vertex> way : ways) {
+            System.out.print(way.stream().map(vertex -> vertex.getWord().getStr()).collect(Collectors.joining("  ")));
+            System.out.println("\t\t" + way.size());
+        }
+
+        Helper.printConnective(dict, "dict.txt");
 
         System.out.print("");
 //        for (CSV_words word : words) {

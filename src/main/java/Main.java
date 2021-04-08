@@ -30,11 +30,12 @@ public class Main {
 
 
         Start start = new Start();
+        mystemTest();
     }
 
-    public void mystemTest() throws IOException {
+    public static void mystemTest() throws IOException {
         MyStemText myStemText = new MyStemText(Helper.readFile("mystem" + File.separator + "data.txt"));
-        myStemText = myStemText.removeStopWord();
+        //myStemText = myStemText.removeStopWord();
         myStemText.saveToFile("mystem" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt);
 
         String myStemPath = "mystem" + File.separator + Helper.MYSTEM_exe;
@@ -55,6 +56,9 @@ public class Main {
 
         MyStemResult myStemResult = new MyStemResult(Arrays.asList(objectMapper.readValue(json, MyStemItem[].class)));
         MyStemResult onlyWorlds = myStemResult.getOnlyWorlds();
+        for (MyStemItem myStemItem : onlyWorlds.getItemList()) {
+            System.out.println(myStemItem.getAnalysisList().get(0).getLex());
+        }
         Map<Bigram, Integer> bigramFrequensy = myStemResult.getBigramFrequensy();
         Map<Unigram, Integer> unigramFrequensy = myStemResult.getUnigramFrequensy();
 

@@ -156,14 +156,6 @@ public class DictBase {
         }
     }
 
-
-    public void funLink_2(Word first, Word second, double betta) {
-        final double eps = 0.05;
-        final double maxLink = 0.95;
-        final int r = 5;
-
-    }
-
     public class FindPathHelper {
         Vertex vertex;
         int prev;
@@ -223,20 +215,20 @@ public class DictBase {
 
         for (FindPathHelper f : path) {
             if (f.vertex.equals(last)) {
-                List<Vertex> currentPath = new ArrayList<>(Collections.singletonList(first));
+                List<Vertex> currentPath = new ArrayList<>(Collections.singletonList(last));
                 result.add(currentPath);
                 FindPathHelper tmp = f;
                 while (true) {
                     tmp = path.get(tmp.prev);
                     currentPath.add(tmp.vertex);
                     if (tmp.prev == -1) {
-                        currentPath.add(last);
+                        currentPath.add(first);
                         break;
                     }
                 }
+                Collections.reverse(currentPath);
             }
         }
-
         return result;
     }
 
@@ -292,7 +284,6 @@ public class DictBase {
                 }
             }
         }
-        Collections.reverse(result);
 
         return result;
     }

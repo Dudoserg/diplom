@@ -34,12 +34,12 @@ public class Word {
     }
 
     private Word(String str, WordType wt) {
-        this.str = str;
+        this.str = str.toLowerCase();
         this.wordType = wt;
     }
 
     public Word(String str) {
-        this.str = str;
+        this.str = str.toLowerCase();
     }
 
     private String str;
