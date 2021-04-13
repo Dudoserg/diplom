@@ -1,5 +1,6 @@
 package dict;
 
+import dict.Edge.Edge;
 import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Font;
 import guru.nidi.graphviz.attribute.Label;
@@ -33,18 +34,18 @@ public class DictBase {
     }
 
 
-    public void addPair(String first, String second, Edge edge) {
-        this.addPair(new Vertex(first), new Vertex(second), edge);
+    public EdgeMap getNeighbours(Vertex v) {
+        return this.map.get(v);
     }
 
     /**
-     * Добавить ребро в граф
+     * Добавить дугу в граф
      *
      * @param first  первая вершина
      * @param second вторая вершина
      * @param edge   дуга
      */
-    public void addPair(Vertex first, Vertex second, Edge edge) {
+    private void addPair(Vertex first, Vertex second, Edge edge) {
         EdgeMap edgeMap = this.map.get(first);
         if (edgeMap == null) {
             edgeMap = new EdgeMap();
@@ -61,6 +62,13 @@ public class DictBase {
         invertEdgeMap.addEdge(first, edge);
 
     }
+
+    public void addPair(String first, String second, double weight, RelationType relationType) {
+        Vertex f = new Vertex(first);
+        Vertex s = new Vertex(second);
+        this.addPair(f, s, new Edge(f, s, weight, relationType));
+    }
+
 
     /**
      * Удаляем вершину из графа
@@ -158,13 +166,15 @@ public class DictBase {
 
     public class FindPathHelper {
         Vertex vertex;
+        Edge edge;
         int prev;
         int weight;
         int index;
-        Set<Vertex> used;
+        Set<Vertex> used;       // для отсечения циклов
 
-        public FindPathHelper(Vertex vertex, int prev, int weight, int index, Set<Vertex> used) {
+        public FindPathHelper(Vertex vertex, Edge edge, int prev, int weight, int index, Set<Vertex> used) {
             this.vertex = vertex;
+            this.edge = edge;
             this.prev = prev;
             this.weight = weight;
             this.index = index;
@@ -180,26 +190,32 @@ public class DictBase {
      * @param R     - максимальная длина пути, которые рассматриваем
      * @return List<List < Vertex>> список всех возможных путей между вершинами
      */
-    public List<List<Vertex>> findWays(Vertex first, Vertex last, int R) {
+    public List<Way> findWays(Vertex first, Vertex last, int R) {
         /// извлекаем все возможные пути
         List<List<Vertex>> result = new ArrayList<>();
+        List<Way> waysList = new ArrayList<>();
 
         List<FindPathHelper> path = new ArrayList<>();
         EdgeMap edgeMap = map.get(first);
         // первый этап
         for (Map.Entry<Vertex, Edge> variant : edgeMap.getEdgeMap().entrySet()) {
             Vertex v = variant.getKey();
-            if(v.equals(last)){
+            Edge e = variant.getValue();
+            if (v.equals(last)) {
                 // сразу нашли слово, вот это повезло(нет)
                 result.add(new ArrayList<>(Arrays.asList(first, last)));
+
+                ArrayList<Edge> edges = new ArrayList<>(Collections.singletonList(e));
+                waysList.add(new Way(edges, e.getWeight(), 1.0));
                 // TODO посчтитать веса
-            }else{
-                FindPathHelper findPathHelper = new FindPathHelper(v, -1, 1, path.size(), new HashSet<>());
+            } else {
+                FindPathHelper findPathHelper = new FindPathHelper(v, e, -1, 1, path.size(), new HashSet<>());
                 path.add(findPathHelper);
             }
         }
         int maxR = 0;
         int index = 0;
+
         while (true) {
             FindPathHelper prev = null;
             if (path.size() <= index)
@@ -213,7 +229,7 @@ public class DictBase {
             edgeMap = map.get(prev.vertex);
             if (edgeMap != null)
                 for (Map.Entry<Vertex, Edge> v : edgeMap.getEdgeMap().entrySet()) {
-                    FindPathHelper f = new FindPathHelper(v.getKey(), prev.index, prev.weight + 1, path.size(), prev.used);
+                    FindPathHelper f = new FindPathHelper(v.getKey(), v.getValue(), prev.index, prev.weight + 1, path.size(), prev.used);
                     if (!f.used.add(v.getKey()))
                         continue;
                     path.add(f);
@@ -225,19 +241,31 @@ public class DictBase {
             if (f.vertex.equals(last)) {
                 List<Vertex> currentPath = new ArrayList<>(Collections.singletonList(last));
                 result.add(currentPath);
+
+                List<Edge> currentPath_edge = new ArrayList<>(Collections.singletonList(f.edge));
+                Double wayWeight = f.edge.getWeight();
+
                 FindPathHelper tmp = f;
                 while (tmp.prev != -1) {
                     tmp = path.get(tmp.prev);
                     currentPath.add(tmp.vertex);
+                    currentPath_edge.add(tmp.edge);
+                    wayWeight *= tmp.edge.getWeight();
                 }
-                currentPath.add(tmp.vertex);
+//                currentPath.add(tmp.vertex);
                 currentPath.add(first);
                 Collections.reverse(currentPath);
+
+
+                Collections.reverse(currentPath_edge);
+                waysList.add(new Way(currentPath_edge, wayWeight, currentPath_edge.size()));
             }
         }
-        return result;
+
+        return waysList;
     }
 
+    @Deprecated
     public List<Vertex> findAnyWay(Vertex first, Vertex last, int R) {
         List<FindPathHelper> path = new ArrayList<>();
         EdgeMap edgeMap = map.get(first);
@@ -245,7 +273,8 @@ public class DictBase {
         // первый этап
         for (Map.Entry<Vertex, Edge> variant : edgeMap.getEdgeMap().entrySet()) {
             Vertex v = variant.getKey();
-            FindPathHelper findPathHelper = new FindPathHelper(v, -1, 1, path.size(), new HashSet<>());
+            Edge e = variant.getValue();
+            FindPathHelper findPathHelper = new FindPathHelper(v, e, -1, 1, path.size(), new HashSet<>());
             path.add(findPathHelper);
         }
         int maxR = 0;
@@ -265,17 +294,17 @@ public class DictBase {
             edgeMap = map.get(prev.vertex);
             if (edgeMap != null)
                 for (Map.Entry<Vertex, Edge> v : edgeMap.getEdgeMap().entrySet()) {
-                    FindPathHelper f = new FindPathHelper(v.getKey(), prev.index, prev.weight + 1, path.size(), prev.used);
+                    FindPathHelper f = new FindPathHelper(v.getKey(), v.getValue(), prev.index, prev.weight + 1, path.size(), prev.used);
                     if (!f.used.add(v.getKey()))
                         continue;
                     path.add(f);
-                    if(f.vertex.equals(last))
+                    if (f.vertex.equals(last))
                         break outerloop;
                 }
         }
 
         /// извлекаем все возможные пути
-        List<Vertex> result = new ArrayList<>(Collections.singletonList(first));
+        List<Vertex> result = new ArrayList<>(Collections.singletonList(last));
 
         for (FindPathHelper f : path) {
             if (f.vertex.equals(last)) {
@@ -284,21 +313,57 @@ public class DictBase {
                     tmp = path.get(tmp.prev);
                     result.add(tmp.vertex);
                     if (tmp.prev == -1) {
-                        result.add(last);
+                        result.add(first);
                         break;
                     }
                 }
             }
         }
-
+        Collections.reverse(result);
         return result;
+    }
+
+
+    /**
+     * Поиск пути с максимальным весом
+     * @param first вершина от который ищем путь
+     * @param last вершина до которой ищем путь
+     * @param R максимальный размер пути
+     * @return наилучший путь между двумя вершинами, с максимальным весом
+     */
+    public Way findMaxWay(Vertex first, Vertex last, int R) {
+        List<Way> ways = this.findWays(first, last, R);
+
+        Way bestWay = null;
+        double bestWayWeight = 0.0;
+
+        for (Way way : ways) {
+            double tmp = 1.0;
+            for (Edge edge : way.getWay()) {
+                tmp *= edge.getWeight();
+            }
+            if(tmp > bestWayWeight){
+                bestWayWeight = tmp;
+                bestWay = way;
+            }
+        }
+        System.out.println();
+        return bestWay;
     }
 
     public void funLink_2(Vertex first, Vertex second, double betta) {
         final double eps = 0.05;        // минимально рассматриваемый вес пути
         final double maxLink = 0.95;    // максимально допустимый вес дуги
         final int r = 5;                // радиус поиска связи между вершинами
-//        if()
+        Way way =  findMaxWay(first,second, r);
+        if( !way.isEmpty()){
+            for (Edge edge : way.getWay()) {
+                edge.setWeight(edge.getWeight() * betta);
+            }
+        }else{
+            //TODO
+            addPair(first, second, eps * betta, RelationType.UNKNOWN);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

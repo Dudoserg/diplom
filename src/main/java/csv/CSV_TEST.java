@@ -2,10 +2,10 @@ package csv;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 import dict.*;
+import dict.Edge.Edge;
 import utils.Helper;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -34,30 +34,49 @@ public class CSV_TEST {
         for (CSV_connections con : connections) {
             CSV_words wordFrom = words_map.get(con.getWordFrom());
             CSV_words wordTo = words_map.get(con.getWordTo());
-            dict.addPair(wordFrom.getSpelling(), wordTo.getSpelling(), new Edge(con.getDefWeight(),con.getSynWeight(), con.getAssWeight() ));
+
+            double weight = 0.0;
+            RelationType relationType = null;
+
+            if(con.getDefWeight() > 0){
+                weight = con.getDefWeight();
+                relationType = RelationType.DEF;
+            }else if(con.getAssWeight() > 0){
+                weight = con.getAssWeight();
+                relationType = RelationType.ASS;
+            }else if(con.getSynWeight() > 0){
+                weight = con.getSynWeight();
+                relationType = RelationType.SYN;
+            }else {
+                throw new DictException("weight of edge equals 0.0 [id=" + con.getId() + "]");
+            }
+            dict.addPair(wordFrom.getSpelling(), wordTo.getSpelling(), weight, relationType);
 
             Word.getStr(wordFrom.getSpelling()).setWordType(WordType.create(wordFrom.getPosId()));
             Word.getStr(wordTo.getSpelling()).setWordType(WordType.create(wordTo.getPosId()));
         }
-        dict.addPair("соответствующий", "значение", new Edge(0.0,0.0,0.0));
+        dict.addPair("соответствующий", "значение", 0.0, RelationType.DEF);
 
-        //List<List<Vertex>> ways = dict.findWays(new Vertex("значение"), new Vertex("соответствующий"), 5);
+//        System.out.print("\n\n\n");
+//        List<List<Vertex>> ways = dict.findWays(new Vertex("соответствующий"), new Vertex("значение"), 5);
 //        for (List<Vertex> way : ways) {
 //            System.out.print(way.stream().map(vertex -> vertex.getWord().getStr()).collect(Collectors.joining("  ")));
 //            System.out.println("\t\t" + way.size());
 //        }
-        System.out.print("\n\n\n");
-        List<List<Vertex>> ways = dict.findWays(new Vertex("соответствующий"), new Vertex("значение"), 5);
-        for (List<Vertex> way : ways) {
-            System.out.print(way.stream().map(vertex -> vertex.getWord().getStr()).collect(Collectors.joining("  ")));
-            System.out.println("\t\t" + way.size());
+//
+//        Helper.printConnective(dict, "dict.txt");
+//
+//        System.out.print("");
+    }
+DictBase dictBase;
+
+    void funWeight(Vertex v, double weightAdd, int radius, double gamma) {
+        if (weightAdd == 0) return;
+        v.setWeight(v.getWeight() + weightAdd);
+        for (Map.Entry<Vertex, Edge> neighbour : dictBase.getNeighbours(v).getEdgeMap().entrySet()) {
+            Edge edge = neighbour.getValue();
+            Vertex v2 = neighbour.getKey();
+            funWeight(v2, weightAdd * gamma * edge.getWeight(), radius - 1, gamma * gamma);
         }
-
-        Helper.printConnective(dict, "dict.txt");
-
-        System.out.print("");
-//        for (CSV_words word : words) {
-//            System.out.println(word.getId() + "\t" + word.getSpelling() + "\t" + word.getPosId());
-//        }
     }
 }

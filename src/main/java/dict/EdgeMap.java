@@ -1,5 +1,6 @@
 package dict;
 
+import dict.Edge.Edge;
 import lombok.Getter;
 import lombok.Setter;
 

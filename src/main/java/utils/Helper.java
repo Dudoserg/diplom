@@ -1,7 +1,7 @@
 package utils;
 
 import dict.DictBase;
-import dict.Edge;
+import dict.Edge.Edge;
 import dict.EdgeMap;
 import dict.Vertex;
 
@@ -109,7 +109,7 @@ public class Helper {
 //                System.out.println(v.getWord().getStr() + "\t" + v.getWord().getStr() + "\t" +
 //                        "a=" +e.getAss_weight() + "   d=" + e.getDef_weight() + "   s=" + e.getSyn_weight());
                 writer.write(v.getWord().getStr() + "__" + v2.getWord().getStr() + " " +
-                        "a=" +e.getAss_weight() + " d=" + e.getDef_weight() + " s=" + e.getSyn_weight() + "\n");
+                        "w=" +e.getWeight() + " "  + " r="+ e.getRelationType() + "\n");
             }
         }
         writer.close();

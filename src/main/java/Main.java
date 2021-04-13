@@ -8,11 +8,28 @@ import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+/*        DecimalFormat decimalFormat = new DecimalFormat("#0.00");
+        double x = 0.95;
+
+        for(int i = 0 ; i < 5 ; i++){
+            System.out.print(decimalFormat.format(x) + "  ");
+            x = x * x;
+        }
+        System.out.println();
+
+        x = 0.95;
+        for(int i = 0 ; i < 5 ; i++){
+            System.out.print(decimalFormat.format(x) + "  ");
+            x = x * x * x;
+        }
+        if(true)
+            return;*/
 //        long l = System.currentTimeMillis();
 //        Map<dict.Word, dict.Word> map = new HashMap<>();
 //        TreeSet<Integer> treeSet = new TreeSet<>();
@@ -27,7 +44,6 @@ public class Main {
 //        dict.Word hello = map.get(new dict.Word("hello"));
 //
 //        System.out.println( (System.currentTimeMillis() - l));
-
 
         Start start = new Start();
         mystemTest();

@@ -1,4 +1,5 @@
 import dict.*;
+import dict.Edge.Edge;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,16 +28,20 @@ public class Start {
         List<Vertex> anyWay = dictBase.findAnyWay(new Vertex("0"), new Vertex("8"), 10);
         System.out.println(anyWay.stream().map(vertex -> vertex.getWord().getStr()).collect(Collectors.joining("  ")));
 
-        List<List<Vertex>> ways = dictBase.findWays(new Vertex("0"), new Vertex("8"), 10);
+        System.out.println();
+        List<Way> ways = dictBase.findWays(new Vertex("0"), new Vertex("8"), 10);
 
-        for (List<Vertex> way : ways) {
-            System.out.println(way.stream().map(vertex -> vertex.getWord().getStr()).collect(Collectors.joining("  ")));
+        for (Way way : ways) {
+            System.out.println(way.print());
         }
+        System.out.println();
+        Way maxWay = dictBase.findMaxWay(new Vertex("0"), new Vertex("8"), 10);
+        System.out.println(maxWay.print());
 
         System.out.print("");
 //        {
 //            dict.DictBase subDictBase = dictBase.getSubDict(new dict.Vertex("афиша"), 1);
-//            subDictBase.addPair(new dict.Vertex("афиша"), new dict.Vertex("test"), new dict.Edge(dict.RelationType.ASS));
+//            subDictBase.addPair(new dict.Vertex("афиша"), new dict.Vertex("test"), new dict.Edge.Edge(dict.RelationType.ASS));
 //            dictBase.addSubDict(subDictBase);
 //            dict.DictBase.draw(dict.DictBase.getGraphViz(dictBase.getMap()), "example/subDict_after.png");
 //        }
@@ -88,7 +93,7 @@ public class Start {
                     }
                 }
 
-                dictBase.addPair(first, second, new Edge(relationType));
+                dictBase.addPair(first.getWord().getStr(), second.getWord().getStr(),Double.valueOf(s[3]), relationType);
                 // считываем остальные строки в цикле
                 line = reader.readLine();
             }
