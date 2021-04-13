@@ -3,7 +3,6 @@ package csv;
 import com.opencsv.bean.CsvToBeanBuilder;
 import dict.*;
 import dict.Edge.Edge;
-import utils.Helper;
 
 import java.io.File;
 import java.io.FileReader;
@@ -52,8 +51,8 @@ public class CSV_TEST {
             }
             dict.addPair(wordFrom.getSpelling(), wordTo.getSpelling(), weight, relationType);
 
-            Word.getStr(wordFrom.getSpelling()).setWordType(WordType.create(wordFrom.getPosId()));
-            Word.getStr(wordTo.getSpelling()).setWordType(WordType.create(wordTo.getPosId()));
+            Word.getWord(wordFrom.getSpelling()).setWordType(WordType.create(wordFrom.getPosId()));
+            Word.getWord(wordTo.getSpelling()).setWordType(WordType.create(wordTo.getPosId()));
         }
         dict.addPair("соответствующий", "значение", 0.0, RelationType.DEF);
 

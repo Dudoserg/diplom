@@ -14,6 +14,7 @@ import lombok.Setter;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.*;
 
 import static guru.nidi.graphviz.attribute.Rank.RankDir.LEFT_TO_RIGHT;
@@ -33,10 +34,11 @@ public class DictBase {
         invertMap = new HashMap<>();
     }
 
-
     public EdgeMap getNeighbours(Vertex v) {
         return this.map.get(v);
     }
+
+
 
     /**
      * Добавить дугу в граф
@@ -64,10 +66,16 @@ public class DictBase {
     }
 
     public void addPair(String first, String second, double weight, RelationType relationType) {
-        Vertex f = new Vertex(first);
-        Vertex s = new Vertex(second);
+        Vertex f = Vertex.getVertex(first);
+        Vertex s = Vertex.getVertex(second);
         this.addPair(f, s, new Edge(f, s, weight, relationType));
     }
+
+    public void addPair(Vertex first, Vertex second, double weight, RelationType relationType) {
+        this.addPair(first, second, new Edge(first, second, weight, relationType));
+    }
+
+
 
 
     /**
@@ -110,6 +118,8 @@ public class DictBase {
             invertMap.remove(vertex);
         }
     }
+
+
 
 
     /**
@@ -164,6 +174,8 @@ public class DictBase {
         }
     }
 
+
+
     public class FindPathHelper {
         Vertex vertex;
         Edge edge;
@@ -183,7 +195,7 @@ public class DictBase {
     }
 
     /**
-     * Поиск путей между вершинами first, last
+     * Поиск всех путей между вершинами first, last удовлеворяющих условию
      *
      * @param first - вершина из которой ведется поиск
      * @param last  - вершина которую необходимо достигнуть
@@ -206,7 +218,7 @@ public class DictBase {
                 result.add(new ArrayList<>(Arrays.asList(first, last)));
 
                 ArrayList<Edge> edges = new ArrayList<>(Collections.singletonList(e));
-                waysList.add(new Way(edges, e.getWeight(), 1.0));
+                waysList.add(new Way(edges, e.getWeight(), 1));
                 // TODO посчтитать веса
             } else {
                 FindPathHelper findPathHelper = new FindPathHelper(v, e, -1, 1, path.size(), new HashSet<>());
@@ -326,9 +338,10 @@ public class DictBase {
 
     /**
      * Поиск пути с максимальным весом
+     *
      * @param first вершина от который ищем путь
-     * @param last вершина до которой ищем путь
-     * @param R максимальный размер пути
+     * @param last  вершина до которой ищем путь
+     * @param R     максимальный размер пути
      * @return наилучший путь между двумя вершинами, с максимальным весом
      */
     public Way findMaxWay(Vertex first, Vertex last, int R) {
@@ -342,7 +355,7 @@ public class DictBase {
             for (Edge edge : way.getWay()) {
                 tmp *= edge.getWeight();
             }
-            if(tmp > bestWayWeight){
+            if (tmp > bestWayWeight) {
                 bestWayWeight = tmp;
                 bestWay = way;
             }
@@ -351,17 +364,30 @@ public class DictBase {
         return bestWay;
     }
 
-    public void funLink_2(Vertex first, Vertex second, double betta) {
+
+
+
+    /**
+     * Функция корректировки весов дуг по биграмм
+     *
+     * @param first  первая часть биграммы
+     * @param second вторая часть биграммы
+     * @param betta  коэффициент усилиния веса > 1
+     */
+    public void funcEdgeWeightCorrection(Vertex first, Vertex second, double betta) throws DictException {
+        if (betta < 1) {
+            throw new DictException(" betta should be more than 1.0 ");
+        }
         final double eps = 0.05;        // минимально рассматриваемый вес пути
         final double maxLink = 0.95;    // максимально допустимый вес дуги
         final int r = 5;                // радиус поиска связи между вершинами
-        Way way =  findMaxWay(first,second, r);
-        if( !way.isEmpty()){
+        Way way = findMaxWay(first, second, r);
+        if (!way.isEmpty()) {
             for (Edge edge : way.getWay()) {
                 edge.setWeight(edge.getWeight() * betta);
             }
-        }else{
-            //TODO
+        } else {
+            //TODO установить верный тип связи
             addPair(first, second, eps * betta, RelationType.UNKNOWN);
         }
     }
@@ -373,11 +399,12 @@ public class DictBase {
     /**
      * # Получить ноды для отрисовки графа в графвизе
      *
-     * @param map словарь который будем рисовать
+     * @param dictBase словарь который будем рисовать
      * @return Список нод для библиотеки графвиз
      * @throws DictException такого типа отношений не существует
      */
-    public static List<Node> getGraphViz(Map<Vertex, EdgeMap> map) throws DictException {
+    public static List<Node> getGraphViz(DictBase dictBase) throws DictException {
+        Map<Vertex, EdgeMap> map = dictBase.getMap();
         List<Node> result = new ArrayList<>();
         Set<Map.Entry<Vertex, EdgeMap>> entries = map.entrySet();
 
@@ -393,23 +420,24 @@ public class DictBase {
                 Node link1 = node(first.getWord().getStr()).with(Color.BLACK);
                 Node link2 = node(second.getWord().getStr()).with(Color.BLACK);
                 Node resultNode = null;
-
+                DecimalFormat decimalFormat = new DecimalFormat("#0.00");
+                String weight_str = ("(" + decimalFormat.format(edge.getWeight()) + ")").replace(",", ".");
                 switch (type) {
                     case ASS: {
                         resultNode = link1.link(
-                                to(link2).with(Color.BLACK, Label.of("ass"))
+                                to(link2).with(Color.BLACK,Font.size(9), Label.of("ass" + weight_str))
                         );
                         break;
                     }
                     case SYN: {
                         resultNode = link1.link(
-                                to(link2).with(Color.RED, Label.of("syn"))
+                                to(link2).with(Color.RED,Font.size(9), Label.of("syn" + weight_str))
                         );
                         break;
                     }
                     case DEF: {
                         resultNode = link1.link(
-                                to(link2).with(Color.GREEN, Label.of("def"))
+                                to(link2).with(Color.GREEN,Font.size(9), Label.of("def" + weight_str))
                         );
                         break;
                     }
@@ -423,6 +451,12 @@ public class DictBase {
         return result;
     }
 
+    /**
+     * Отрисовать граф
+     * @param graphViz Данный для отрисовки
+     * @param fileName путь по которому сохраняется файл
+     * @throws IOException еррорина
+     */
     public static void draw(List<Node> graphViz, String fileName) throws IOException {
         Graph g = graph("example1").directed()
                 .graphAttr().with(Rank.dir(LEFT_TO_RIGHT))

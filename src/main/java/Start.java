@@ -1,5 +1,5 @@
 import dict.*;
-import dict.Edge.Edge;
+import guru.nidi.graphviz.model.Node;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,27 +18,31 @@ public class Start {
         //DictBase.draw(DictBase.getGraphViz(dictBase.getMap()), "example/map.png");
         //DictBase.draw(DictBase.getGraphViz(dictBase.getInvertMap()), "example/invert.png");
 
-        //dictBase.deleteVertex(new Vertex("объявление"));
+        //dictBase.deleteVertex(Vertex.getVertex("объявление"));
 
         //DictBase.draw(DictBase.getGraphViz(dictBase.getMap()), "example/map_after.png");
         //DictBase.draw(DictBase.getGraphViz(dictBase.getInvertMap()), "example/invert_after.png");
 
         List<DictBase.FindPathHelper> path = new ArrayList<>();
 
-        List<Vertex> anyWay = dictBase.findAnyWay(new Vertex("0"), new Vertex("8"), 10);
+        List<Vertex> anyWay = dictBase.findAnyWay(Vertex.getVertex("0"), Vertex.getVertex("8"), 10);
         System.out.println(anyWay.stream().map(vertex -> vertex.getWord().getStr()).collect(Collectors.joining("  ")));
 
         System.out.println();
-        List<Way> ways = dictBase.findWays(new Vertex("0"), new Vertex("8"), 10);
 
-        for (Way way : ways) {
+
+        List<Way> ways = dictBase.findWays(Vertex.getVertex("0"), Vertex.getVertex("8"), 10);
+        for (Way way : ways)
             System.out.println(way.print());
-        }
         System.out.println();
-        Way maxWay = dictBase.findMaxWay(new Vertex("0"), new Vertex("8"), 10);
-        System.out.println(maxWay.print());
 
-        System.out.print("");
+
+        Way maxWay = dictBase.findMaxWay(Vertex.getVertex("0"), Vertex.getVertex("8"), 10);
+        System.out.println(maxWay.print());
+        System.out.println();
+
+
+        DictBase.draw(DictBase.getGraphViz(dictBase), "example" + File.separator + "dictBaseGraph.jpg");
 //        {
 //            dict.DictBase subDictBase = dictBase.getSubDict(new dict.Vertex("афиша"), 1);
 //            subDictBase.addPair(new dict.Vertex("афиша"), new dict.Vertex("test"), new dict.Edge.Edge(dict.RelationType.ASS));
@@ -72,8 +76,8 @@ public class Start {
                 countLine++;
                 String[] s = line.split(" ");
 
-                Vertex first = new Vertex(s[0]);
-                Vertex second = new Vertex(s[1]);
+                Vertex first = Vertex.getVertex(s[0]);
+                Vertex second = Vertex.getVertex(s[1]);
                 RelationType relationType = null;
                 switch (s[2]) {
                     case "def": {
@@ -93,7 +97,7 @@ public class Start {
                     }
                 }
 
-                dictBase.addPair(first.getWord().getStr(), second.getWord().getStr(),Double.valueOf(s[3]), relationType);
+                dictBase.addPair(first.getWord().getStr(), second.getWord().getStr(), Double.valueOf(s[3]), relationType);
                 // считываем остальные строки в цикле
                 line = reader.readLine();
             }

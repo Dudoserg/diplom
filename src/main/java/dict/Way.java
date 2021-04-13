@@ -11,9 +11,9 @@ import java.util.List;
 public class Way {
     private List<Edge> way;
     private double weight;
-    private double length;
+    private int length;
 
-    public Way(List<Edge> way, double weight, double length) {
+    public Way(List<Edge> way, double weight, int length) {
         this.way = way;
         this.weight = weight;
         this.length = length;

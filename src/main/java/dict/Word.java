@@ -22,7 +22,7 @@ public class Word {
      * @param str
      * @return
      */
-    public static Word getStr(String str) {
+    public static Word getWord(String str) {
         Word w = words_cash.get(str);
 
         if (w == null) {
@@ -38,7 +38,7 @@ public class Word {
         this.wordType = wt;
     }
 
-    public Word(String str) {
+    private Word(String str) {
         this.str = str.toLowerCase();
     }
 
