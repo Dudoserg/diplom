@@ -96,41 +96,56 @@ public class DictBase {
     /**
      * Удаляем вершину из графа
      *
-     * @param vertex вершину которую необходимо удалить
+     * @param vertexForDel вершину которую необходимо удалить
      */
-    public void deleteVertex(Vertex vertex) {
+    public void deleteVertex(Vertex vertexForDel) throws DictException {
         // афиша
 //        афиша объявление def
 //        афиша спектакль ass
 //        афиша концерт   ass
 //        афиша лекция    ass
 //        афиша кинофильм ass
-        EdgeMap removedMap = this.map.remove(vertex);
+        EdgeMap removedMap = this.map.remove(vertexForDel);
 
         if (removedMap != null && !removedMap.isEmpty()) {
             // удаляем в инвертированном словаре данные связи
             // removedMap(объявление, спектакль, концерт, лекция, кинофильм )
             for (Map.Entry<Vertex, Edge> vertexEdgeEntry : removedMap.getEdgeMap().entrySet()) {
                 Vertex v = vertexEdgeEntry.getKey();    // объявление
-                Edge e = vertexEdgeEntry.getValue();    // ... афиша ...
+                //Edge e = vertexEdgeEntry.getValue();    // ... афиша ...
 
                 // обратный словарь
                 EdgeMap edgeMap = invertMap.get(v);
-                Edge invertRemovedMap = edgeMap.getEdgeMap().remove(vertex);
+                Edge invertRemovedMap = edgeMap.getEdgeMap().remove(vertexForDel);
             }
         }
 
         //// по инвертированному списку пробуем найти вершины-листы, чтобы удалить связи до них
-        EdgeMap invertEdgeMap = invertMap.get(vertex);
-        if (invertEdgeMap != null && !invertEdgeMap.isEmpty()) {
-            for (Map.Entry<Vertex, Edge> vertexEdgeEntry : invertEdgeMap.getEdgeMap().entrySet()) {
-                Vertex invertKey = vertexEdgeEntry.getKey();        // от этой вершины идет дука к удаляемое
-                Edge invertValue = vertexEdgeEntry.getValue();
+//        EdgeMap invertEdgeMap = invertMap.get(vertexForDel);
+//        if (invertEdgeMap != null && !invertEdgeMap.isEmpty()) {
+//            for (Map.Entry<Vertex, Edge> vertexEdgeEntry : invertEdgeMap.getEdgeMap().entrySet()) {
+//                Vertex invertKey = vertexEdgeEntry.getKey();        // от этой вершины идет дука к удаляемое
+//                Edge invertValue = vertexEdgeEntry.getValue();
+//
+//                EdgeMap mapWhereNeedToRemove = this.map.get(invertKey);
+//                mapWhereNeedToRemove.getEdgeMap().remove(vertexForDel);
+//            }
+//            invertMap.remove(vertexForDel);
+//        }
 
-                EdgeMap mapWhereNeedToRemove = this.map.get(invertKey);
-                mapWhereNeedToRemove.getEdgeMap().remove(vertex);
+        EdgeMap removedInvertMap = this.invertMap.remove(vertexForDel);
+        if(removedInvertMap != null && ! removedInvertMap.isEmpty()){
+            for (Map.Entry<Vertex, Edge> vertexEdgeEntry : removedInvertMap.getEdgeMap().entrySet()) {
+                Vertex v = vertexEdgeEntry.getKey();
+                Edge edge = vertexEdgeEntry.getValue();
+
+                EdgeMap edgeMap = this.map.get(v);
+                if(edgeMap != null && !edgeMap.getEdgeMap().isEmpty()){
+                    edgeMap.getEdgeMap().remove(vertexForDel);
+                }else{
+                    throw new DictException("neightboor is empty");
+                }
             }
-            invertMap.remove(vertex);
         }
     }
 
@@ -450,7 +465,7 @@ public class DictBase {
      * @param training
      * @return
      */
-    public void removeUnusedVertex(DictBase dictBase, DictBase training, int R) {
+    public void removeUnusedVertex(DictBase dictBase, DictBase training, int R) throws DictException {
 
         training.setFlagTrain();
 
