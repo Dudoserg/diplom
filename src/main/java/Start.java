@@ -1,10 +1,7 @@
+import data.Reviews;
 import dict.*;
-import guru.nidi.graphviz.model.Node;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,6 +10,19 @@ import static guru.nidi.graphviz.model.Factory.node;
 
 public class Start {
     public Start() throws DictException, IOException {
+
+
+        Reviews reviews = Reviews.readFromFile(System.getProperty("user.dir") + File.separator +
+                "data" + File.separator + "semeval" + File.separator +
+                "restaurant" + File.separator + "train" + File.separator + "se16_ru_rest_train.xml");
+
+
+        List<String> texts = reviews.getTexts();
+
+        for (String s : texts) {
+            System.out.println(s);
+            System.out.println("\n\n");
+        }
         DictBase dictBase = readDictFromFile();
 
         //DictBase.draw(DictBase.getGraphViz(dictBase.getMap()), "example/map.png");
@@ -55,6 +65,7 @@ public class Start {
 //        }
 
     }
+
 
     public DictBase readDictFromFile() {
         DictBase dictBase = new DictBase();

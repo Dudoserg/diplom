@@ -1,0 +1,1 @@
+https://alt.qcri.org/semeval2016/task5/index.php?id=data-and-tools

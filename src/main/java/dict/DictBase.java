@@ -39,6 +39,15 @@ public class DictBase {
     }
 
 
+    public Edge getEdge(Vertex f, Vertex t) {
+        EdgeMap edgeMap = this.getMap().get(f);
+        if (edgeMap == null) {
+            return null;
+        }
+        Edge edge = edgeMap.getEdgeMap().get(t);
+        return edge;
+    }
+
 
     /**
      * Добавить дугу в граф
@@ -74,8 +83,6 @@ public class DictBase {
     public void addPair(Vertex first, Vertex second, double weight, RelationType relationType) {
         this.addPair(first, second, new Edge(first, second, weight, relationType));
     }
-
-
 
 
     /**
@@ -118,8 +125,6 @@ public class DictBase {
             invertMap.remove(vertex);
         }
     }
-
-
 
 
     /**
@@ -173,7 +178,6 @@ public class DictBase {
             }
         }
     }
-
 
 
     public class FindPathHelper {
@@ -365,8 +369,6 @@ public class DictBase {
     }
 
 
-
-
     /**
      * Функция корректировки весов дуг по биграмм
      *
@@ -388,10 +390,30 @@ public class DictBase {
             }
         } else {
             //TODO установить верный тип связи
-            addPair(first, second, eps * betta, RelationType.UNKNOWN);
+            addPair(first, second, eps * betta, RelationType.ASS);
         }
     }
 
+
+    /**
+     * Из всего графа, выделяем только те слова, что находятся в обучающей выборке + слова в радиусе R
+     *
+     * @param training
+     * @return
+     */
+    public DictBase kek(DictBase training, int R) {
+        DictBase result = new DictBase();
+        DictBase base = this;
+
+        // Выбираем из базового словаря все слова из тренировочной, + все слова в радиусе 5 для каждой вершины из тренировочной выборки
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : training.getMap().entrySet()) {
+            Vertex vertexFrom_training = vertexEdgeMapEntry.getKey();
+
+            DictBase subDict = base.getSubDict(vertexFrom_training, R);
+            result.addSubDict(subDict);
+        }
+        return result;
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -425,19 +447,19 @@ public class DictBase {
                 switch (type) {
                     case ASS: {
                         resultNode = link1.link(
-                                to(link2).with(Color.BLACK,Font.size(9), Label.of("ass" + weight_str))
+                                to(link2).with(Color.BLACK, Font.size(9), Label.of("ass" + weight_str))
                         );
                         break;
                     }
                     case SYN: {
                         resultNode = link1.link(
-                                to(link2).with(Color.RED,Font.size(9), Label.of("syn" + weight_str))
+                                to(link2).with(Color.RED, Font.size(9), Label.of("syn" + weight_str))
                         );
                         break;
                     }
                     case DEF: {
                         resultNode = link1.link(
-                                to(link2).with(Color.GREEN,Font.size(9), Label.of("def" + weight_str))
+                                to(link2).with(Color.GREEN, Font.size(9), Label.of("def" + weight_str))
                         );
                         break;
                     }
@@ -453,6 +475,7 @@ public class DictBase {
 
     /**
      * Отрисовать граф
+     *
      * @param graphViz Данный для отрисовки
      * @param fileName путь по которому сохраняется файл
      * @throws IOException еррорина
