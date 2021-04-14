@@ -65,13 +65,21 @@ public class DictBase {
         edgeMap.addEdge(second, edge);
 
         // invertMap для быстрого поиска листов
-        EdgeMap invertEdgeMap = this.invertMap.get(second);
-        if (invertEdgeMap == null) {
-            invertEdgeMap = new EdgeMap();
-            this.invertMap.put(second, invertEdgeMap);
+        {
+            EdgeMap invertEdgeMap = this.invertMap.get(second);
+            if (invertEdgeMap == null) {
+                invertEdgeMap = new EdgeMap();
+                this.invertMap.put(second, invertEdgeMap);
+            }
+            invertEdgeMap.addEdge(first, edge);
         }
-        invertEdgeMap.addEdge(first, edge);
-
+        {
+            EdgeMap invertEdgeMap = this.invertMap.get(first);
+            if (invertEdgeMap == null) {
+                invertEdgeMap = new EdgeMap();
+                this.invertMap.put(first, invertEdgeMap);
+            }
+        }
     }
 
     public void addPair(String first, String second, double weight, RelationType relationType) {
@@ -162,10 +170,9 @@ public class DictBase {
         }
     }
 
-    public DictBase getSubDict(Vertex w, int r, Map<Vertex, Integer> used) {
-        DictBase dictBase = new DictBase();
-        this.getSubDict_aroundVertex(w, r, dictBase, used);
-        return dictBase;
+    public DictBase getSubDict(DictBase result, Vertex w, int r, Map<Vertex, Integer> used) {
+        this.getSubDict_aroundVertex(w, r, result, used);
+        return result;
     }
 
     /**
@@ -175,7 +182,7 @@ public class DictBase {
      * @param r        радиус словаря (количество дуг)
      * @param dictBase (пустой словарь в котором будет результат)
      */
-    private void getSubDict_aroundVertex(Vertex w, int r, DictBase dictBase, Map<Vertex, Integer> used) {
+    private void getSubDict_aroundVertex(Vertex w, int r, DictBase result, Map<Vertex, Integer> used) {
         if (r < 0)
             return;
 
@@ -189,7 +196,7 @@ public class DictBase {
                 continue;
             } else {
                 Edge edge = edgeMap.getEdgeMap().get(s);
-                dictBase.addPair(w, s, edge);
+                result.addPair(w, s, edge);
                 if (used.get(s) == null) {
                     used.put(s, r);
                 } else {
@@ -197,7 +204,7 @@ public class DictBase {
                         used.put(s, r);
                     }
                 }
-                getSubDict_aroundVertex(s, r - 1, dictBase, used);
+                getSubDict_aroundVertex(s, r - 1, result, used);
             }
 
         }
@@ -447,17 +454,28 @@ public class DictBase {
         DictBase result = new DictBase();
         DictBase base = dictBase;
 
+        training.setFlagTrain();
+
+
         // Выбираем из базового словаря все слова из тренировочной, + все слова в радиусе 5 для каждой вершины из тренировочной выборки
         int x = 0;
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : training.getMap().entrySet()) {
             Vertex vertexFrom_training = vertexEdgeMapEntry.getKey();
 
             Map<Vertex, Integer> tmpMap = new HashMap<>();
-            DictBase subDict = base.getSubDict(vertexFrom_training, R, tmpMap);
-            result.addSubDict(subDict);
+            base.getSubDict(result, vertexFrom_training, R, tmpMap);
+            //result.addSubDict(subDict);
             System.out.println(x++ + "/" + training.getMap().size());
         }
         return result;
+    }
+
+
+
+    public void setFlagTrain(){
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
+            vertexEdgeMapEntry.getKey().setFlag_train(true);
+        }
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

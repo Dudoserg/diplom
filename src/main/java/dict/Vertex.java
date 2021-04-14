@@ -20,6 +20,7 @@ public class Vertex {
 
     private Word word;
     private double weight = 0.0;
+    private boolean flag_train = false;
 
     private Vertex(Word word) {
         this.word = word;
