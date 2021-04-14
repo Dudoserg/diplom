@@ -450,29 +450,67 @@ public class DictBase {
      * @param training
      * @return
      */
-    public static DictBase removeUnusedVertex(DictBase dictBase, DictBase training, int R) {
-        DictBase result = new DictBase();
-        DictBase base = dictBase;
+    public void removeUnusedVertex(DictBase dictBase, DictBase training, int R) {
 
         training.setFlagTrain();
 
-
-        // Выбираем из базового словаря все слова из тренировочной, + все слова в радиусе 5 для каждой вершины из тренировочной выборки
-        int x = 0;
-        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : training.getMap().entrySet()) {
-            Vertex vertexFrom_training = vertexEdgeMapEntry.getKey();
-
-            Map<Vertex, Integer> tmpMap = new HashMap<>();
-            base.getSubDict(result, vertexFrom_training, R, tmpMap);
-            //result.addSubDict(subDict);
-            System.out.println(x++ + "/" + training.getMap().size());
+        List<Vertex> deletingVertex = new ArrayList<>();
+        for (Map.Entry<Vertex, EdgeMap> d : dictBase.invertMap.entrySet()) {
+            Vertex key = d.getKey();
+            Boolean found = findTrainInRadius(key, R);
+            if (!found) {
+                deletingVertex.add(key);
+            }
         }
-        return result;
+
+        for (int i = deletingVertex.size() - 1; i >= 0; i--) {
+            dictBase.deleteVertex(deletingVertex.get(i));
+        }
+        System.out.println();
+        // Выбираем из базового словаря все слова из тренировочной, + все слова в радиусе 5 для каждой вершины из тренировочной выборки
+//        int x = 0;
+//        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : training.getMap().entrySet()) {
+//            Vertex vertexFrom_training = vertexEdgeMapEntry.getKey();
+//
+//            Map<Vertex, Integer> tmpMap = new HashMap<>();
+//            base.getSubDict(result, vertexFrom_training, R, tmpMap);
+//            //result.addSubDict(subDict);
+//            System.out.println(x++ + "/" + training.getMap().size());
+//        }
     }
 
+    /**
+     * Проверяем, входит ли вершина в радиус тренировочной выборки
+     *
+     * @param vertex вершина, которую проверяем, входит ли она в радиус Р тренировочной выборки
+     * @param R      радиус
+     * @return да\нет
+     */
+    public Boolean findTrainInRadius(Vertex vertex, Integer R) {
+        if (R == 0)
+            return false;
+        EdgeMap edgeMap = invertMap.get(vertex);
+        if (edgeMap == null)
+            System.out.println();
+        // Все вершины входящие в текущую
+        boolean result = false;
+        for (Map.Entry<Vertex, Edge> vertexEdgeEntry : edgeMap.getEdgeMap().entrySet()) {
+            Vertex v = vertexEdgeEntry.getKey();
+            if (vertex.isFlag_train())
+                return true;
+            if (v == null)
+                System.out.println();
+            result = findTrainInRadius(v, R - 1);
+            if (result)
+                return true;
+        }
+        return false;
+    }
 
-
-    public void setFlagTrain(){
+    /**
+     * Помечаем все вершины как тренировочные
+     */
+    public void setFlagTrain() {
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
             vertexEdgeMapEntry.getKey().setFlag_train(true);
         }

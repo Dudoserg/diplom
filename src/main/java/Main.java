@@ -100,7 +100,7 @@ public class Main {
         }
 
         DictBase dictBase = CSV_DICT.loadFullDict();
-        DictBase dict = DictBase.removeUnusedVertex(dictBase, dictTrain, 5);
+        dictBase.removeUnusedVertex(dictBase, dictTrain, 5);
         System.out.println();
     }
 }
