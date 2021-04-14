@@ -8,4 +8,5 @@ import lombok.Setter;
 public class MyStemAnalysis {
     private String lex;
     private String gr;
+    private String qual;
 }

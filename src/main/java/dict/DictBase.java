@@ -136,7 +136,7 @@ public class DictBase {
      */
     public DictBase getSubDict(Vertex w, int r) {
         DictBase dictBase = new DictBase();
-        this.getSubDict(w, r, dictBase);
+        this.getSubDict_aroundVertex(w, r, dictBase);
         return dictBase;
     }
 
@@ -147,7 +147,7 @@ public class DictBase {
      * @param r        радиус словаря (количество дуг)
      * @param dictBase (пустой словарь в котором будет результат)
      */
-    private void getSubDict(Vertex w, int r, DictBase dictBase) {
+    private void getSubDict_aroundVertex(Vertex w, int r, DictBase dictBase) {
         if (r < 0)
             return;
 
@@ -158,9 +158,51 @@ public class DictBase {
         for (Vertex s : edgeMap.getEdgeMap().keySet()) {
             Edge edge = edgeMap.getEdgeMap().get(s);
             dictBase.addPair(w, s, edge);
-            getSubDict(s, r - 1, dictBase);
+            getSubDict_aroundVertex(s, r - 1, dictBase);
         }
     }
+
+    public DictBase getSubDict(Vertex w, int r, Map<Vertex, Integer> used) {
+        DictBase dictBase = new DictBase();
+        this.getSubDict_aroundVertex(w, r, dictBase, used);
+        return dictBase;
+    }
+
+    /**
+     * Получить подсловарь
+     *
+     * @param w        центр словаря
+     * @param r        радиус словаря (количество дуг)
+     * @param dictBase (пустой словарь в котором будет результат)
+     */
+    private void getSubDict_aroundVertex(Vertex w, int r, DictBase dictBase, Map<Vertex, Integer> used) {
+        if (r < 0)
+            return;
+
+        EdgeMap edgeMap = map.get(w);
+        if (edgeMap == null)
+            return;
+
+        for (Vertex s : edgeMap.getEdgeMap().keySet()) {
+            Integer integer = used.get(s);
+            if (integer != null && r < integer) {
+                continue;
+            } else {
+                Edge edge = edgeMap.getEdgeMap().get(s);
+                dictBase.addPair(w, s, edge);
+                if (used.get(s) == null) {
+                    used.put(s, r);
+                } else {
+                    if (r > used.get(s)) {
+                        used.put(s, r);
+                    }
+                }
+                getSubDict_aroundVertex(s, r - 1, dictBase, used);
+            }
+
+        }
+    }
+
 
     /**
      * Добавить в текущий слоловарь подсловарь
@@ -401,16 +443,19 @@ public class DictBase {
      * @param training
      * @return
      */
-    public DictBase kek(DictBase training, int R) {
+    public static DictBase removeUnusedVertex(DictBase dictBase, DictBase training, int R) {
         DictBase result = new DictBase();
-        DictBase base = this;
+        DictBase base = dictBase;
 
         // Выбираем из базового словаря все слова из тренировочной, + все слова в радиусе 5 для каждой вершины из тренировочной выборки
+        int x = 0;
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : training.getMap().entrySet()) {
             Vertex vertexFrom_training = vertexEdgeMapEntry.getKey();
 
-            DictBase subDict = base.getSubDict(vertexFrom_training, R);
+            Map<Vertex, Integer> tmpMap = new HashMap<>();
+            DictBase subDict = base.getSubDict(vertexFrom_training, R, tmpMap);
             result.addSubDict(subDict);
+            System.out.println(x++ + "/" + training.getMap().size());
         }
         return result;
     }
@@ -488,6 +533,17 @@ public class DictBase {
                 .with(
                         graphViz
                 );
-        Graphviz.fromGraph(g).height(1200).render(Format.PNG).toFile(new File(fileName));
+        Graphviz.fromGraph(g).totalMemory(1000000000).render(Format.PNG).toFile(new File(fileName));
+    }
+
+    public static void graphSaveToFile(List<Node> graphViz, String fileName) throws IOException {
+        Graph g = graph("example1").directed()
+                .graphAttr().with(Rank.dir(LEFT_TO_RIGHT))
+                .nodeAttr().with(Font.name("arial"))
+                .linkAttr().with("class", "link-class")
+                .with(
+                        graphViz
+                );
+        Graphviz.fromGraph(g).totalMemory(1000000000).render(Format.DOT).toFile(new File(fileName));
     }
 }

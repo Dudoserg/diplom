@@ -8,6 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Edge {
+    public static final Double DEF_BASE_WEIGHT = 1.0;
+    public static final Double SYN_BASE_WEIGHT = 0.8;
+    public static final Double ASS_BASE_WEIGHT = 0.5;
     private RelationType relationType;
 //    private double def_weight = 0.0;
 //    private double syn_weight = 0.0;

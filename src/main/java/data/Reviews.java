@@ -4,13 +4,22 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 @JacksonXmlRootElement(localName = "Reviews")
 public class Reviews {
+
+    public static final String RU_TRAIN_PATH = System.getProperty("user.dir") + File.separator +
+            "data" + File.separator + "semeval" + File.separator +
+            "restaurant" + File.separator + "train" + File.separator + "se16_ru_rest_train.xml";
+
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "Review")
     private List<Review> review;
