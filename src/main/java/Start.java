@@ -52,7 +52,7 @@ public class Start {
         System.out.println();
 
 
-        DictBase.draw(DictBase.getGraphViz(dictBase), "example" + File.separator + "dictBaseGraph.jpg");
+        DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(dictBase), "example" + File.separator + "dictBaseGraph.jpg");
 //        {
 //            dict.DictBase subDictBase = dictBase.getSubDict(new dict.Vertex("афиша"), 1);
 //            subDictBase.addPair(new dict.Vertex("афиша"), new dict.Vertex("test"), new dict.Edge.Edge(dict.RelationType.ASS));

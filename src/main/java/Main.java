@@ -5,6 +5,7 @@ import dict.DictBase;
 import dict.DictException;
 import dict.Edge.Edge;
 import dict.RelationType;
+import guru.nidi.graphviz.engine.Format;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
 import mystem.MyStemText;
@@ -60,7 +61,7 @@ public class Main {
         String data = "";
         //data = Helper.readFile("mystem" + File.separator + "data.txt");
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
-//        reviews.setReview(reviews.getReview().subList(0, 5));
+        reviews.setReview(reviews.getReview().subList(0, 1));
         data = String.join(" ", reviews.getTexts());
         MyStemText myStemText = new MyStemText(data);
         myStemText = myStemText.removeStopWord();
@@ -100,7 +101,10 @@ public class Main {
         }
 
         DictBase dictBase = CSV_DICT.loadFullDict();
-        dictBase.removeUnusedVertex(dictBase, dictTrain, 5);
+        DictBase.removeUnusedVertex(dictBase, dictTrain, 2);
+
+        dictBase.correctEdgeWeight(bigramFrequensy, 10, 2);
+        DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
         System.out.println();
     }
 }

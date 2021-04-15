@@ -11,6 +11,7 @@ import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Node;
 import lombok.Getter;
 import lombok.Setter;
+import utils.Bigram;
 
 import java.io.File;
 import java.io.IOException;
@@ -134,15 +135,15 @@ public class DictBase {
 //        }
 
         EdgeMap removedInvertMap = this.invertMap.remove(vertexForDel);
-        if(removedInvertMap != null && ! removedInvertMap.isEmpty()){
+        if (removedInvertMap != null && !removedInvertMap.isEmpty()) {
             for (Map.Entry<Vertex, Edge> vertexEdgeEntry : removedInvertMap.getEdgeMap().entrySet()) {
                 Vertex v = vertexEdgeEntry.getKey();
                 Edge edge = vertexEdgeEntry.getValue();
 
                 EdgeMap edgeMap = this.map.get(v);
-                if(edgeMap != null && !edgeMap.getEdgeMap().isEmpty()){
+                if (edgeMap != null && !edgeMap.getEdgeMap().isEmpty()) {
                     edgeMap.getEdgeMap().remove(vertexForDel);
-                }else{
+                } else {
                     throw new DictException("neightboor is empty");
                 }
             }
@@ -184,19 +185,22 @@ public class DictBase {
             getSubDict_aroundVertex(s, r - 1, dictBase);
         }
     }
-
+/*
+    @Deprecated
     public DictBase getSubDict(DictBase result, Vertex w, int r, Map<Vertex, Integer> used) {
         this.getSubDict_aroundVertex(w, r, result, used);
         return result;
-    }
+    }*/
 
     /**
      * Получить подсловарь
      *
      * @param w        центр словаря
      * @param r        радиус словаря (количество дуг)
-     * @param dictBase (пустой словарь в котором будет результат)
+     * @param result (пустой словарь в котором будет результат)
+     * @param used (пустой словарь в котором будет результат)
      */
+    /*@Deprecated
     private void getSubDict_aroundVertex(Vertex w, int r, DictBase result, Map<Vertex, Integer> used) {
         if (r < 0)
             return;
@@ -223,7 +227,7 @@ public class DictBase {
             }
 
         }
-    }
+    }*/
 
 
     /**
@@ -277,6 +281,9 @@ public class DictBase {
 
         List<FindPathHelper> path = new ArrayList<>();
         EdgeMap edgeMap = map.get(first);
+        if(edgeMap == null){
+            return waysList;
+        }
         // первый этап
         for (Map.Entry<Vertex, Edge> variant : edgeMap.getEdgeMap().entrySet()) {
             Vertex v = variant.getKey();
@@ -428,10 +435,13 @@ public class DictBase {
                 bestWay = way;
             }
         }
-        System.out.println();
+        //System.out.println();
         return bestWay;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////    КОРРЕКТИРОВКА ВЕСОВ ДУГ //////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Функция корректировки весов дуг по биграмм
@@ -440,24 +450,44 @@ public class DictBase {
      * @param second вторая часть биграммы
      * @param betta  коэффициент усилиния веса > 1
      */
-    public void funcEdgeWeightCorrection(Vertex first, Vertex second, double betta) throws DictException {
+    private void funcEdgeWeightCorrection(Vertex first, Vertex second, int r, double betta) throws DictException {
         if (betta < 1) {
             throw new DictException(" betta should be more than 1.0 ");
         }
         final double eps = 0.05;        // минимально рассматриваемый вес пути
         final double maxLink = 0.95;    // максимально допустимый вес дуги
-        final int r = 5;                // радиус поиска связи между вершинами
         Way way = findMaxWay(first, second, r);
-        if (!way.isEmpty()) {
-            for (Edge edge : way.getWay()) {
-                edge.setWeight(edge.getWeight() * betta);
+        try {
+            if (way != null && !way.isEmpty() && way.getWeight() > eps) {
+                for (Edge edge : way.getWay()) {
+                    edge.setWeight(edge.getWeight() * betta);
+                }
+            } else {
+                //TODO установить верный тип связи
+                addPair(first, second, eps * betta, RelationType.ASS);
             }
-        } else {
-            //TODO установить верный тип связи
-            addPair(first, second, eps * betta, RelationType.ASS);
+        }catch (NullPointerException e){
+            throw e;
         }
     }
 
+    public void correctEdgeWeight(Map<Bigram, Integer> bigramFrequensy, int treshold, int radius) throws DictException {
+        Integer maxH = bigramFrequensy.entrySet().stream()
+                .max((first, second) -> first.getValue() > second.getValue() ? 1 : -1).get().getValue();
+
+        for (Map.Entry<Bigram, Integer> one : bigramFrequensy.entrySet()) {
+            Bigram bigram = one.getKey();
+            Integer h = one.getValue();
+            if (h > treshold) {
+                double betta = (double) h / (double) maxH + 1;
+                this.funcEdgeWeightCorrection(Vertex.getVertex(bigram.getFirst()), Vertex.getVertex(bigram.getSecond()), radius, betta);
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////    УДАЛЕНИЕ ЛИШНИХ СЛОВ ИЗ БАЗОВОГО ГРАФА  ////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Из всего графа, выделяем только те слова, что находятся в обучающей выборке + слова в радиусе R
@@ -465,14 +495,14 @@ public class DictBase {
      * @param training
      * @return
      */
-    public void removeUnusedVertex(DictBase dictBase, DictBase training, int R) throws DictException {
+    public static void removeUnusedVertex(DictBase dictBase, DictBase training, int R) throws DictException {
 
         training.setFlagTrain();
 
         List<Vertex> deletingVertex = new ArrayList<>();
         for (Map.Entry<Vertex, EdgeMap> d : dictBase.invertMap.entrySet()) {
             Vertex key = d.getKey();
-            Boolean found = findTrainInRadius(key, R);
+            Boolean found = findTrainInRadius(dictBase, key, R);
             if (!found) {
                 deletingVertex.add(key);
             }
@@ -481,7 +511,7 @@ public class DictBase {
         for (int i = deletingVertex.size() - 1; i >= 0; i--) {
             dictBase.deleteVertex(deletingVertex.get(i));
         }
-        System.out.println();
+        //System.out.println();
         // Выбираем из базового словаря все слова из тренировочной, + все слова в радиусе 5 для каждой вершины из тренировочной выборки
 //        int x = 0;
 //        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : training.getMap().entrySet()) {
@@ -495,16 +525,25 @@ public class DictBase {
     }
 
     /**
+     * Помечаем все вершины как тренировочные
+     */
+    public void setFlagTrain() {
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
+            vertexEdgeMapEntry.getKey().setFlag_train(true);
+        }
+    }
+
+    /**
      * Проверяем, входит ли вершина в радиус тренировочной выборки
      *
      * @param vertex вершина, которую проверяем, входит ли она в радиус Р тренировочной выборки
      * @param R      радиус
      * @return да\нет
      */
-    public Boolean findTrainInRadius(Vertex vertex, Integer R) {
+    private static Boolean findTrainInRadius(DictBase dictBase, Vertex vertex, Integer R) {
         if (R == 0)
             return false;
-        EdgeMap edgeMap = invertMap.get(vertex);
+        EdgeMap edgeMap = dictBase.invertMap.get(vertex);
         if (edgeMap == null)
             System.out.println();
         // Все вершины входящие в текущую
@@ -515,21 +554,14 @@ public class DictBase {
                 return true;
             if (v == null)
                 System.out.println();
-            result = findTrainInRadius(v, R - 1);
+            result = findTrainInRadius(dictBase, v, R - 1);
             if (result)
                 return true;
         }
         return false;
     }
 
-    /**
-     * Помечаем все вершины как тренировочные
-     */
-    public void setFlagTrain() {
-        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
-            vertexEdgeMapEntry.getKey().setFlag_train(true);
-        }
-    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -541,7 +573,7 @@ public class DictBase {
      * @return Список нод для библиотеки графвиз
      * @throws DictException такого типа отношений не существует
      */
-    public static List<Node> getGraphViz(DictBase dictBase) throws DictException {
+    public static List<Node> graphviz_getGraphViz(DictBase dictBase) throws DictException {
         Map<Vertex, EdgeMap> map = dictBase.getMap();
         List<Node> result = new ArrayList<>();
         Set<Map.Entry<Vertex, EdgeMap>> entries = map.entrySet();
@@ -596,7 +628,7 @@ public class DictBase {
      * @param fileName путь по которому сохраняется файл
      * @throws IOException еррорина
      */
-    public static void draw(List<Node> graphViz, String fileName) throws IOException {
+    public static void graphviz_draw(List<Node> graphViz, String fileName) throws IOException {
         Graph g = graph("example1").directed()
                 .graphAttr().with(Rank.dir(LEFT_TO_RIGHT))
                 .nodeAttr().with(Font.name("arial"))
@@ -607,7 +639,7 @@ public class DictBase {
         Graphviz.fromGraph(g).totalMemory(1000000000).render(Format.PNG).toFile(new File(fileName));
     }
 
-    public static void graphSaveToFile(List<Node> graphViz, String fileName) throws IOException {
+    public static void graphviz_graphSaveToFile(List<Node> graphViz, String fileName, Format format) throws IOException {
         Graph g = graph("example1").directed()
                 .graphAttr().with(Rank.dir(LEFT_TO_RIGHT))
                 .nodeAttr().with(Font.name("arial"))
@@ -615,6 +647,6 @@ public class DictBase {
                 .with(
                         graphViz
                 );
-        Graphviz.fromGraph(g).totalMemory(1000000000).render(Format.DOT).toFile(new File(fileName));
+        Graphviz.fromGraph(g).totalMemory(1000000000).render(format).toFile(new File(fileName));
     }
 }
