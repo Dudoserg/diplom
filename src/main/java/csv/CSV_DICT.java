@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 public class CSV_DICT {
     public static DictBase loadFullDict() throws DictException, FileNotFoundException {
+        System.out.print("loadFullDict...");
+
         String words_fileName = "data" + File.separator + "words.csv";
         String connections_fileName = "data" + File.separator + "connections.csv";
 
@@ -53,6 +55,9 @@ public class CSV_DICT {
             Word.getWord(wordFrom.getSpelling()).setWordType(WordType.create(wordFrom.getPosId()));
             Word.getWord(wordTo.getSpelling()).setWordType(WordType.create(wordTo.getPosId()));
         }
+        System.out.println("\t\t\tdone");
+
         return dict;
+
     }
 }

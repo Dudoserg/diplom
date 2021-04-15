@@ -9,14 +9,17 @@ import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Node;
+import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
 import utils.Bigram;
+import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static guru.nidi.graphviz.attribute.Rank.RankDir.LEFT_TO_RIGHT;
 import static guru.nidi.graphviz.model.Factory.graph;
@@ -247,7 +250,6 @@ public class DictBase {
         }
     }
 
-
     public class FindPathHelper {
         Vertex vertex;
         Edge edge;
@@ -281,7 +283,7 @@ public class DictBase {
 
         List<FindPathHelper> path = new ArrayList<>();
         EdgeMap edgeMap = map.get(first);
-        if(edgeMap == null){
+        if (edgeMap == null) {
             return waysList;
         }
         // первый этап
@@ -439,6 +441,89 @@ public class DictBase {
         return bestWay;
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////    КОРРЕКТИРОВКА ВЕСОВ ВЕРШИН     ///////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void setVertexWeight(Map<Unigram, Integer> unigramFrequensy) {
+        System.out.print("setVertexWeight");
+
+        Map<String, Integer> collect =
+                unigramFrequensy.entrySet().stream()
+                        .collect(Collectors.toMap(
+                                o -> o.getKey().getFirst(), Map.Entry::getValue
+                        ));
+
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+            Vertex key = vertexEdgeMapEntry.getKey();
+            Integer integer = collect.get(key.getWord().getStr());
+            if (integer != null) {
+                key.setWeight(integer.doubleValue());
+            } else {
+                key.setWeight(0.0);
+            }
+        }
+        System.out.println("\t\t\tdone");
+
+    }
+
+    /**
+     * распространение веса вершины на ее соседей в радиусе R
+     *  0,95	0,9025	0,857375	0,81450625	0,773780938
+     *
+     * @param r         радиус
+     * @param gamma     коэффициент затухания
+     */
+    public void correctVertexWeight( int r, double gamma) {
+        System.out.print("correctVertexWeight...");
+
+        Map<Vertex, Double> tmpWeight = new HashMap<>();
+        double weightAdd = 0;
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+            Vertex v = vertexEdgeMapEntry.getKey();
+            weightAdd = v.getWeight();
+            funWeight(v, weightAdd, r, gamma, tmpWeight);
+        }
+        List<Pair<Vertex, Double>> collect = tmpWeight.entrySet().stream()
+                .map(v -> new Pair<>(v.getKey(), v.getValue()))
+                .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
+                .collect(Collectors.toList());
+        collect.forEach(v->{
+            System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
+        });
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+            Vertex v = vertexEdgeMapEntry.getKey();
+            Double aDouble = tmpWeight.get(v);
+            v.setWeight(v.getWeight() + aDouble);
+        }
+        System.out.println("\t\t\tdone");
+    }
+
+    private void funWeight(Vertex vertex, double weightAdd, int r, double gamma, Map<Vertex, Double> tmpWeight) {
+        if (r < 0)
+            return;
+        if (weightAdd <= 0)
+            return;
+
+        // добавляем вершине вес (пока что в массиве тмп, иначе будет лавинообразное добавление)
+        Double tmpW = tmpWeight.get(vertex);
+        if (tmpW == null)
+            tmpW = 0.0;
+        tmpWeight.put(vertex, tmpW + weightAdd);
+
+
+        EdgeMap edgeMap = map.get(vertex);
+        if (edgeMap == null)
+            return;
+
+        for (Map.Entry<Vertex, Edge> vertexEdgeEntry : edgeMap.getEdgeMap().entrySet()) {
+            Vertex sosed = vertexEdgeEntry.getKey();
+            Edge edge = vertexEdgeEntry.getValue();
+            funWeight(sosed, weightAdd * gamma * edge.getWeight(), r - 1, gamma * gamma, tmpWeight);
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////    КОРРЕКТИРОВКА ВЕСОВ ДУГ //////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -466,12 +551,14 @@ public class DictBase {
                 //TODO установить верный тип связи
                 addPair(first, second, eps * betta, RelationType.ASS);
             }
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             throw e;
         }
     }
 
     public void correctEdgeWeight(Map<Bigram, Integer> bigramFrequensy, int treshold, int radius) throws DictException {
+        System.out.print("correctEdgeWeight...");
+
         Integer maxH = bigramFrequensy.entrySet().stream()
                 .max((first, second) -> first.getValue() > second.getValue() ? 1 : -1).get().getValue();
 
@@ -483,6 +570,7 @@ public class DictBase {
                 this.funcEdgeWeightCorrection(Vertex.getVertex(bigram.getFirst()), Vertex.getVertex(bigram.getSecond()), radius, betta);
             }
         }
+        System.out.println("\t\t\tdone");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -496,6 +584,7 @@ public class DictBase {
      * @return
      */
     public static void removeUnusedVertex(DictBase dictBase, DictBase training, int R) throws DictException {
+        System.out.print("removeUnusedVertex...");
 
         training.setFlagTrain();
 
@@ -522,6 +611,7 @@ public class DictBase {
 //            //result.addSubDict(subDict);
 //            System.out.println(x++ + "/" + training.getMap().size());
 //        }
+        System.out.println("\t\t\tdone");
     }
 
     /**

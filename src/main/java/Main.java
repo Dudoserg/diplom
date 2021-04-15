@@ -61,7 +61,7 @@ public class Main {
         String data = "";
         //data = Helper.readFile("mystem" + File.separator + "data.txt");
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
-        reviews.setReview(reviews.getReview().subList(0, 1));
+//        reviews.setReview(reviews.getReview().subList(0, 50));
         data = String.join(" ", reviews.getTexts());
         MyStemText myStemText = new MyStemText(data);
         myStemText = myStemText.removeStopWord();
@@ -71,6 +71,8 @@ public class Main {
         String filePath = "mystem" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt;
 
         String resultFilePath = "mystem" + File.separator + Helper.MYSTEM_RESULT_json;
+
+        System.out.print("myStemPath execution...");
         try {
             Process p = Runtime.getRuntime()
                     .exec(myStemPath + " " + filePath + " " + resultFilePath + " " + "--format json -c -l -s -i");
@@ -78,6 +80,7 @@ public class Main {
         } catch (Exception ex) {
             System.out.println("exception is:" + ex);
         }
+        System.out.println("\t\t\tdone");
 
         String json = Helper.readFile(resultFilePath);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -94,16 +97,23 @@ public class Main {
         Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
 
+        System.out.print("build dict train...");
         DictBase dictTrain = new DictBase();
         for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
             Bigram key = bigramIntegerEntry.getKey();
             dictTrain.addPair(key.getFirst(), key.getSecond(), Edge.ASS_BASE_WEIGHT, RelationType.ASS);
         }
+        System.out.println("\t\t\tdone");
 
         DictBase dictBase = CSV_DICT.loadFullDict();
-        DictBase.removeUnusedVertex(dictBase, dictTrain, 2);
 
-        dictBase.correctEdgeWeight(bigramFrequensy, 10, 2);
+        DictBase.removeUnusedVertex(dictBase, dictTrain, 4);
+
+        dictBase.correctEdgeWeight(bigramFrequensy, 10, 4);
+
+        dictBase.setVertexWeight(unigramFrequensy);
+        dictBase.correctVertexWeight(4, 0.8);
+
         DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
         System.out.println();
     }
