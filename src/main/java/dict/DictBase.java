@@ -15,11 +15,14 @@ import lombok.Setter;
 import utils.Bigram;
 import utils.Unigram;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static guru.nidi.graphviz.attribute.Rank.RankDir.LEFT_TO_RIGHT;
 import static guru.nidi.graphviz.model.Factory.graph;
@@ -250,6 +253,72 @@ public class DictBase {
         }
     }
 
+    public void printSortedEdge(String path) throws IOException {
+        List<Edge> tmp = new ArrayList<>();
+
+        for (Map.Entry<Vertex, EdgeMap> v : this.map.entrySet()) {
+            for (Map.Entry<Vertex, Edge> vertexEdgeEntry : v.getValue().getEdgeMap().entrySet()) {
+                Edge edge = vertexEdgeEntry.getValue();
+                tmp.add(edge);
+            }
+        }
+
+        tmp = tmp.stream()
+                .sorted((o1, o2) -> -Double.compare(o1.getWeight(), o2.getWeight()))
+                .collect(Collectors.toList());
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        DecimalFormat decimalFormat = new DecimalFormat("#0.00");
+
+
+        int maxLenght =
+                tmp.stream().mapToInt(vertex -> vertex.getFrom().getWord().getStr().length() +  vertex.getTo().getWord().getStr().length())
+                        .max().orElseThrow(NoSuchElementException::new);
+
+        int maxWeightLenght =
+                tmp.stream().mapToInt(vertex -> decimalFormat.format(vertex.getWeight()).length())
+                        .max().orElseThrow(NoSuchElementException::new);
+
+        for (Edge edge : tmp) {
+            writer.write(edge.getFrom().getWord().getStr() + "          " +
+                    edge.getTo().getWord().getStr() +
+                    new String(new char[maxLenght - edge.getFrom().getWord().getStr().length() -
+                            edge.getTo().getWord().getStr().length() + 10 +
+                            (maxWeightLenght - decimalFormat.format(edge.getWeight()).length())])
+                            .replace('\0', ' ') +
+                    decimalFormat.format(edge.getWeight()) + "\n");
+        }
+        writer.close();
+    }
+
+    public void printSortedVertex(String path) throws IOException {
+        List<Vertex> tmp = new ArrayList<>();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
+            tmp.add(vertexEdgeMapEntry.getKey());
+        }
+        tmp = tmp.stream().sorted((o1, o2) -> -Double.compare(o1.getWeight(), o2.getWeight()))
+                .collect(Collectors.toList());
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        DecimalFormat decimalFormat = new DecimalFormat("#0.00");
+
+        int maxLenght =
+                tmp.stream().mapToInt(vertex -> vertex.getWord().getStr().length()).max().orElseThrow(NoSuchElementException::new);
+
+        int maxWeightLenght =
+                tmp.stream().mapToInt(vertex -> decimalFormat.format(vertex.getWeight()).length())
+                        .max().orElseThrow(NoSuchElementException::new);
+
+        for (Vertex vertex : tmp) {
+            writer.write(vertex.getWord().getStr() +
+                    new String(new char[maxLenght - vertex.getWord().getStr().length() + 10 +
+                            (maxWeightLenght - decimalFormat.format(vertex.getWeight()).length())])
+                            .replace('\0', ' ') +
+                    decimalFormat.format(vertex.getWeight()) + "\n");
+        }
+        writer.close();
+    }
+
     public class FindPathHelper {
         Vertex vertex;
         Edge edge;
@@ -470,12 +539,12 @@ public class DictBase {
 
     /**
      * распространение веса вершины на ее соседей в радиусе R
-     *  0,95	0,9025	0,857375	0,81450625	0,773780938
+     * 0,95	0,9025	0,857375	0,81450625	0,773780938
      *
-     * @param r         радиус
-     * @param gamma     коэффициент затухания
+     * @param r     радиус
+     * @param gamma коэффициент затухания
      */
-    public void correctVertexWeight( int r, double gamma) {
+    public void correctVertexWeight(int r, double gamma) {
         System.out.print("correctVertexWeight...");
 
         Map<Vertex, Double> tmpWeight = new HashMap<>();
@@ -489,7 +558,7 @@ public class DictBase {
                 .map(v -> new Pair<>(v.getKey(), v.getValue()))
                 .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
                 .collect(Collectors.toList());
-        collect.forEach(v->{
+        collect.forEach(v -> {
             System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
         });
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
@@ -545,7 +614,7 @@ public class DictBase {
         try {
             if (way != null && !way.isEmpty() && way.getWeight() > eps) {
                 for (Edge edge : way.getWay()) {
-                    edge.setWeight(edge.getWeight() * betta);
+                    edge.setWeight(Math.min(maxLink, edge.getWeight() * betta));
                 }
             } else {
                 //TODO установить верный тип связи

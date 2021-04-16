@@ -5,6 +5,7 @@ import dict.DictBase;
 import dict.DictException;
 import dict.Edge.Edge;
 import dict.RelationType;
+import dict.Vertex;
 import guru.nidi.graphviz.engine.Format;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
@@ -64,8 +65,10 @@ public class Main {
 //        reviews.setReview(reviews.getReview().subList(0, 50));
         data = String.join(" ", reviews.getTexts());
         MyStemText myStemText = new MyStemText(data);
+        myStemText.saveToFile("-" + File.separator + "full_text.txt");
         myStemText = myStemText.removeStopWord();
         myStemText.saveToFile("mystem" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt);
+        myStemText.saveToFile("-" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt);
 
         String myStemPath = "mystem" + File.separator + Helper.MYSTEM_exe;
         String filePath = "mystem" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt;
@@ -83,36 +86,56 @@ public class Main {
         System.out.println("\t\t\tdone");
 
         String json = Helper.readFile(resultFilePath);
+        Helper.saveToFile(json, "-" + File.separator + "mystemResult.json");
         ObjectMapper objectMapper = new ObjectMapper();
 
 
         MyStemResult myStemResult = new MyStemResult(Arrays.asList(objectMapper.readValue(json, MyStemItem[].class)));
         //MyStemResult onlyWorlds = myStemResult.getOnlyWorlds();
         //for (MyStemItem myStemItem : onlyWorlds.getItemList()) {
-          //  System.out.println(myStemItem.getAnalysisList().get(0).getLex());
+        //  System.out.println(myStemItem.getAnalysisList().get(0).getLex());
         //}
         Map<Bigram, Integer> bigramFrequensy = myStemResult.getBigramFrequensy();
         Map<Unigram, Integer> unigramFrequensy = myStemResult.getUnigramFrequensy();
 
         Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
+        Helper.printUnigram(unigramFrequensy, "-" + File.separator + "unigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
+        Helper.printBigram(bigramFrequensy, "-" + File.separator + "bigram_frequency.txt");
 
         System.out.print("build dict train...");
-        DictBase dictTrain = new DictBase();
-        for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
-            Bigram key = bigramIntegerEntry.getKey();
-            dictTrain.addPair(key.getFirst(), key.getSecond(), Edge.ASS_BASE_WEIGHT, RelationType.ASS);
-        }
-        System.out.println("\t\t\tdone");
 
         DictBase dictBase = CSV_DICT.loadFullDict();
 
-        DictBase.removeUnusedVertex(dictBase, dictTrain, 4);
+        DictBase dictTrain = new DictBase();
+        for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
+            Bigram key = bigramIntegerEntry.getKey();
+            Edge edge = dictBase.getEdge(Vertex.getVertex(key.getFirst()), Vertex.getVertex(key.getSecond()));
+            if (edge != null)
+                dictTrain.addPair(key.getFirst(), key.getSecond(), edge.getWeight(), edge.getRelationType());
+            else
+                dictTrain.addPair(key.getFirst(), key.getSecond(), Edge.ASS_BASE_WEIGHT, RelationType.ASS);
+        }
+        dictTrain.printSortedEdge("-" + File.separator + "dictionary_train.txt");
+        dictBase.printSortedEdge("-" + File.separator + "_1_dictionary_base.txt");
+        System.out.println("\t\t\tdone");
 
-        dictBase.correctEdgeWeight(bigramFrequensy, 10, 4);
+        int _R_ = 4;
+        double _GAMMA_ = 0.8;
+
+        DictBase.removeUnusedVertex(dictBase, dictTrain, _R_);
+        dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
+
+        dictBase.correctEdgeWeight(bigramFrequensy, 10, _R_);
+        dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
         dictBase.setVertexWeight(unigramFrequensy);
-        dictBase.correctVertexWeight(4, 0.8);
+        dictBase.printSortedVertex("-" + File.separator + "_4_dictionary_base after setVertexWeight.txt");
+
+        dictBase.correctVertexWeight(_R_, _GAMMA_);
+        dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
+                _R_+ ",gamma=" + _GAMMA_ +" ).txt");
+
 
         DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
         System.out.println();

@@ -43,6 +43,12 @@ public class Helper {
         return lines;
     }
 
+    public static void saveToFile(String text, String path) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        writer.write(text);
+        writer.close();
+    }
+
     public static void printUnigram(Map<Unigram, Integer> map, String path) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(path));
 
@@ -89,7 +95,7 @@ public class Helper {
         for (Bigram bigram : bigramList) {
             writer.write("[" + bigram.getFirst() + "]" +
                     "[" + bigram.getSecond() + "]" +
-                    new String(new char[integer - bigram.getFirst().length() - bigram.getSecond().length()  + 10]).replace('\0', ' ') +
+                    new String(new char[integer - bigram.getFirst().length() - bigram.getSecond().length() + 10]).replace('\0', ' ') +
                     bigram.getFrequency() + "\n");
 
         }
@@ -109,7 +115,7 @@ public class Helper {
 //                System.out.println(v.getWord().getStr() + "\t" + v.getWord().getStr() + "\t" +
 //                        "a=" +e.getAss_weight() + "   d=" + e.getDef_weight() + "   s=" + e.getSyn_weight());
                 writer.write(v.getWord().getStr() + "__" + v2.getWord().getStr() + " " +
-                        "w=" +e.getWeight() + " "  + " r="+ e.getRelationType() + "\n");
+                        "w=" + e.getWeight() + " " + " r=" + e.getRelationType() + "\n");
             }
         }
         writer.close();
