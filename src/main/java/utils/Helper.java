@@ -16,9 +16,7 @@ import java.util.stream.Collectors;
 
 public class Helper {
 
-    public static final String TEXT_WITHOUT_STOPWORDS_txt = "text_withoutStopWord.txt";
-    public static final String MYSTEM_exe = "mystem.exe";
-    public static final String MYSTEM_RESULT_json = "mystemResult.json";
+
 
     public static String readFile(String path) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));

@@ -6,20 +6,17 @@ import dict.DictException;
 import dict.Edge.Edge;
 import dict.RelationType;
 import dict.Vertex;
-import guru.nidi.graphviz.engine.Format;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
-import mystem.MyStemText;
+import mystem.MyStem;
 import utils.Bigram;
 import utils.Helper;
 import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -64,39 +61,19 @@ public class Main {
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
 //        reviews.setReview(reviews.getReview().subList(0, 50));
         data = String.join(" ", reviews.getTexts());
-        MyStemText myStemText = new MyStemText(data);
-        myStemText.saveToFile("-" + File.separator + "full_text.txt");
+        MyStem myStemText = new MyStem(data);
+
+        myStemText.saveToFile(MyStem.FULL_TEXT);
         myStemText = myStemText.removeStopWord();
-        myStemText.saveToFile("mystem" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt);
-        myStemText.saveToFile("-" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt);
+        myStemText.saveToFile(MyStem.TEXT_WITHOUT_STOPWORDS_txt);
+        myStemText.saveToFile("-" + File.separator + "text_withoutStopWord.txt");
 
-        String myStemPath = "mystem" + File.separator + Helper.MYSTEM_exe;
-        String filePath = "mystem" + File.separator + Helper.TEXT_WITHOUT_STOPWORDS_txt;
-
-        String resultFilePath = "mystem" + File.separator + Helper.MYSTEM_RESULT_json;
-
-        System.out.print("myStemPath execution...");
-        try {
-            Process p = Runtime.getRuntime()
-                    .exec(myStemPath + " " + filePath + " " + resultFilePath + " " + "--format json -c -l -s -i");
-            p.waitFor();
-        } catch (Exception ex) {
-            System.out.println("exception is:" + ex);
-        }
-        System.out.println("\t\t\tdone");
-
-        String json = Helper.readFile(resultFilePath);
-        Helper.saveToFile(json, "-" + File.separator + "mystemResult.json");
-        ObjectMapper objectMapper = new ObjectMapper();
+        myStemText.lemmatization();
+        myStemText.removeStopWordsFromLemmatization();
 
 
-        MyStemResult myStemResult = new MyStemResult(Arrays.asList(objectMapper.readValue(json, MyStemItem[].class)));
-        //MyStemResult onlyWorlds = myStemResult.getOnlyWorlds();
-        //for (MyStemItem myStemItem : onlyWorlds.getItemList()) {
-        //  System.out.println(myStemItem.getAnalysisList().get(0).getLex());
-        //}
-        Map<Bigram, Integer> bigramFrequensy = myStemResult.getBigramFrequensy();
-        Map<Unigram, Integer> unigramFrequensy = myStemResult.getUnigramFrequensy();
+        Map<Bigram, Integer> bigramFrequensy = myStemText.getMyStemResult().getBigramFrequensy();
+        Map<Unigram, Integer> unigramFrequensy = myStemText.getMyStemResult().getUnigramFrequensy();
 
         Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
         Helper.printUnigram(unigramFrequensy, "-" + File.separator + "unigram_frequency.txt");
@@ -106,6 +83,7 @@ public class Main {
         System.out.print("build dict train...");
 
         DictBase dictBase = CSV_DICT.loadFullDict();
+        dictBase.removeStopWords();
 
         DictBase dictTrain = new DictBase();
         for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
@@ -116,12 +94,13 @@ public class Main {
             else
                 dictTrain.addPair(key.getFirst(), key.getSecond(), Edge.ASS_BASE_WEIGHT, RelationType.ASS);
         }
+        dictTrain.removeStopWords();
         dictTrain.printSortedEdge("-" + File.separator + "dictionary_train.txt");
         dictBase.printSortedEdge("-" + File.separator + "_1_dictionary_base.txt");
         System.out.println("\t\t\tdone");
 
-        int _R_ = 4;
-        double _GAMMA_ = 0.8;
+        int _R_ = 3;
+        double _GAMMA_ = 0.7;
 
         DictBase.removeUnusedVertex(dictBase, dictTrain, _R_);
         dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
@@ -134,10 +113,9 @@ public class Main {
 
         dictBase.correctVertexWeight(_R_, _GAMMA_);
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
-                _R_+ ",gamma=" + _GAMMA_ +" ).txt");
+                _R_+ ",gamma=" + _GAMMA_ + " квадратичное затухание).txt");
 
-
-        DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
+        //DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
         System.out.println();
     }
 }

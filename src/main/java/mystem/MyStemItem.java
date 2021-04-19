@@ -15,17 +15,28 @@ public class MyStemItem {
 
     /**
      * Является ли этот айтем разделителем
+     *
      * @return
      */
-    public boolean isDelimeter(){
+    public boolean isDelimeter() {
         return analysisList == null || analysisList.size() == 0;
     }
 
-    public boolean isPoint(){
+    public boolean isPoint() {
         return text.trim().equals(".");
     }
 
-    public String getBaseForm(){
+    public String getBaseForm() {
         return analysisList.get(0).getLex();
+    }
+
+
+    public boolean isOneOfAnalysisStopWord() {
+        if (analysisList != null && analysisList.size() > 0)
+            for (MyStemAnalysis myStemAnalysis : analysisList) {
+                if (myStemAnalysis.isStopWord())
+                    return true;
+            }
+        return false;
     }
 }

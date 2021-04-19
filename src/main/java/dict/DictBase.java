@@ -12,6 +12,7 @@ import guru.nidi.graphviz.model.Node;
 import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
+import mystem.StopWords;
 import utils.Bigram;
 import utils.Unigram;
 
@@ -317,6 +318,19 @@ public class DictBase {
                     decimalFormat.format(vertex.getWeight()) + "\n");
         }
         writer.close();
+    }
+
+    public void removeStopWords() throws DictException {
+        StopWords stopWords = StopWords.getInstance();
+        List<Vertex> deletingList = new ArrayList<>();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+            Vertex key = vertexEdgeMapEntry.getKey();
+            if(stopWords.contains(key.getWord().getStr()))
+                deletingList.add(key);
+        }
+        for (Vertex vertex : deletingList) {
+            this.deleteVertex(vertex);
+        }
     }
 
     public class FindPathHelper {
@@ -681,6 +695,11 @@ public class DictBase {
 //            System.out.println(x++ + "/" + training.getMap().size());
 //        }
         System.out.println("\t\t\tdone");
+    }
+
+
+    public void removedVertexByStopWords(){
+
     }
 
     /**
