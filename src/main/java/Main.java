@@ -1,4 +1,3 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
 import csv.CSV_DICT;
 import data.Reviews;
 import dict.DictBase;
@@ -6,8 +5,7 @@ import dict.DictException;
 import dict.Edge.Edge;
 import dict.RelationType;
 import dict.Vertex;
-import mystem.MyStemItem;
-import mystem.MyStemResult;
+import javafx.util.Pair;
 import mystem.MyStem;
 import utils.Bigram;
 import utils.Helper;
@@ -15,7 +13,7 @@ import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class Main {
@@ -61,7 +59,7 @@ public class Main {
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
 //        reviews.setReview(reviews.getReview().subList(0, 50));
         data = String.join(" ", reviews.getTexts());
-        MyStem myStemText = new MyStem(data);
+        MyStem myStemText = new MyStem(data, "tt_");
 
         myStemText.saveToFile(MyStem.FULL_TEXT);
         myStemText = myStemText.removeStopWord();
@@ -99,10 +97,24 @@ public class Main {
         dictBase.printSortedEdge("-" + File.separator + "_1_dictionary_base.txt");
         System.out.println("\t\t\tdone");
 
+        {
+//            DictBase dishes = dictBase.getSubDict(Vertex.getVertex("блюдо"), 1);
+//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(dishes), "-"  + File.separator + "dishes.jpg");
+//
+//            DictBase dishes_invert = dictBase.getInvertSubDict(Vertex.getVertex("блюдо"), 1);
+//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(dishes_invert), "-"  + File.separator + "dishes_invert.jpg");
+//
+//            DictBase both = DictBase.createFromDicts(dishes, dishes_invert);
+//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(both), "-"  + File.separator + "both.jpg");
+        }
+
         int _R_ = 3;
         double _GAMMA_ = 0.7;
 
         DictBase.removeUnusedVertex(dictBase, dictTrain, _R_);
+
+
+
         dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
 
         dictBase.correctEdgeWeight(bigramFrequensy, 10, _R_);
@@ -116,6 +128,23 @@ public class Main {
                 _R_+ ",gamma=" + _GAMMA_ + " квадратичное затухание).txt");
 
         //DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
+
+        List<Pair<Vertex, Double>> clastering = dictBase.clastering();
+        System.out.println("==============================================================================");
+        for(int i = 0 ; i < 20; i++){
+            System.out.println(clastering.get(i).getKey().getWord().getStr() + "\t" + clastering.get(i).getValue());
+        }
         System.out.println();
+
+        {
+//            DictBase dishes = dictBase.getSubDict(Vertex.getVertex("интерьер"), 0);
+//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(dishes), "-"  + File.separator + "_интерьер.jpg");
+//
+//            DictBase dishes_invert = dictBase.getInvertSubDict(Vertex.getVertex("интерьер"), 0);
+//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(dishes_invert), "-"  + File.separator + "_интерьер_invert.jpg");
+//
+//            DictBase both = DictBase.createFromDicts(dishes, dishes_invert);
+//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(both), "-"  + File.separator + "_интерьер_both.jpg");
+        }
     }
 }

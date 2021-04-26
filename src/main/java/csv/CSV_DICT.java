@@ -2,12 +2,13 @@ package csv;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 import dict.*;
+import mystem.MyStem;
+import mystem.MyStemItem;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CSV_DICT {
@@ -40,15 +41,21 @@ public class CSV_DICT {
 
             if(con.getDefWeight() > 0){
                 weight = con.getDefWeight();
+                weight = 0.2;
                 relationType = RelationType.DEF;
             }else if(con.getAssWeight() > 0){
                 weight = con.getAssWeight();
+                weight = 0.6;
                 relationType = RelationType.ASS;
             }else if(con.getSynWeight() > 0){
                 weight = con.getSynWeight();
+                weight = 0.3;
                 relationType = RelationType.SYN;
             }else {
                 throw new DictException("weight of edge equals 0.0 [id=" + con.getId() + "]");
+            }
+            if(wordFrom.getSpelling().matches("[a-zA-Z]+") || wordTo.getSpelling().matches("[a-zA-Z]+")){
+                continue;
             }
             dict.addPair(wordFrom.getSpelling(), wordTo.getSpelling(), weight, relationType);
 
@@ -56,6 +63,24 @@ public class CSV_DICT {
             Word.getWord(wordTo.getSpelling()).setWordType(WordType.create(wordTo.getPosId()));
         }
         System.out.println("\t\t\tdone");
+
+
+
+        ////// Вычисляем часть речи каждого из слов
+        List<String> listOfWords = new ArrayList<>();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dict.getInvertMap().entrySet()) {
+            Vertex key = vertexEdgeMapEntry.getKey();
+            listOfWords.add(key.getWord().getStr());
+        }
+
+        MyStem myStem = new MyStem(listOfWords, "dd_");
+        myStem.lemmatization();
+
+
+        for (MyStemItem myStemItem : myStem.getMyStemResult().getItemList()) {
+            myStemItem.calcPartOfSpeech();
+            PartOfSpeech partOfSpeech = myStemItem.getPartOfSpeech();
+        }
 
         return dict;
 

@@ -23,6 +23,7 @@ public class Word {
      * @return
      */
     public static Word getWord(String str) {
+        str = str.toLowerCase();
         Word w = words_cash.get(str);
 
         if (w == null) {
@@ -44,6 +45,7 @@ public class Word {
 
     private String str;
     private WordType wordType;
+    private PartOfSpeech partOfSpeech;
 
     @Override
     public boolean equals(Object o) {

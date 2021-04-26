@@ -19,23 +19,26 @@ import java.util.stream.Collectors;
 public class MyStem {
     private static final String MYSTEM_exe = "mystem" + File.separator + "mystem.exe";
     private static final String MYSTEM_RESULT_json = "mystem" + File.separator + "mystemResult.json";
-
     public static final String FULL_TEXT = "-" + File.separator + "full_text.txt";
     public static final String TEXT_WITHOUT_STOPWORDS_txt = "mystem" + File.separator + "text_withoutStopWord.txt";
 
-    public MyStem(List<String> words) {
+    private String id;
+
+    public MyStem(List<String> words, String id) {
+        this.id = id;
         this.words = words;
         this.text = words.stream().collect(Collectors.joining(" ")).trim();
     }
 
-    public MyStem(String text) throws IOException {
+    public MyStem(String text, String id) throws IOException {
+        this.id = id;
         text = text.replace("\r\n", " ");
         text = text.replace("\n", " ");
         text = text.replace(".", ". ");
         text = text.replace(",", ", ");
         text = text.replace("!", "! ");
         text = text.replace("?", "? ");
-        this.text = text.trim().replaceAll(" +", " ");
+        this.text = text.trim().replaceAll(" +", " ").toLowerCase();
         this.words = Arrays.stream(this.text.split(" "))
                 .filter(s -> !s.equals(" "))
                 .collect(Collectors.toList());
@@ -52,7 +55,7 @@ public class MyStem {
         if (stopWords == null) {
             stopWords = StopWords.getInstance();
         }
-        MyStem result = new MyStem(words);
+        MyStem result = new MyStem(words, id);
         result.words = result.words.stream()
                 .filter(s -> {
                     String tmp = s.trim().replaceAll("[ .?!,]", "");
@@ -66,7 +69,7 @@ public class MyStem {
     }
 
     public void saveToFile(String path) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(addId(path)));
         writer.write(text);
         writer.close();
     }
@@ -75,17 +78,21 @@ public class MyStem {
     public void lemmatization() {
         System.out.print("myStemPath execution...");
         try {
+            String command = MYSTEM_exe + " " + addId(TEXT_WITHOUT_STOPWORDS_txt) + " " + addId(MYSTEM_RESULT_json) + " " +
+                    "--format json -c -l -s -i ";
             Process p = Runtime.getRuntime()
-                    .exec(MYSTEM_exe + " " + TEXT_WITHOUT_STOPWORDS_txt + " " + MYSTEM_RESULT_json + " " + "--format json -c -l -s -i");
+                    .exec(command);
             p.waitFor();
-            String json = Helper.readFile(MYSTEM_RESULT_json);
+            String json = Helper.readFile(addId(MYSTEM_RESULT_json));
 
-            Helper.saveToFile(json, "-" + File.separator + "mystemResult.json");
+            Helper.saveToFile(json, addId("-" + File.separator + "mystemResult.json"));
             ObjectMapper objectMapper = new ObjectMapper();
 
             // читаем результаты работы лемманизатора MyStem
             MyStemItem[] myStemItems = objectMapper.readValue(json, MyStemItem[].class);
             ArrayList<MyStemItem> objects = new ArrayList<>(Arrays.asList(myStemItems));
+            objects.forEach(MyStemItem::calcPartOfSpeech);
+            MyStemItem.setPrint();
             setMyStemResult(new MyStemResult(objects));
 
             // Устанавливаем флаг - является ли этот элемент стоп словом
@@ -118,4 +125,16 @@ public class MyStem {
             }
         }
     }
+
+
+    public String addId(String str){
+        String[] split = str.split("\\" + File.separator);
+        String result = "";
+        for(int i = 0 ; i < split.length - 1; i++){
+            result = result + split[i] + File.separator;
+        }
+        result += id + "_" + split[split.length - 1];
+        return result;
+    }
+
 }

@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static guru.nidi.graphviz.attribute.Rank.RankDir.LEFT_TO_RIGHT;
 import static guru.nidi.graphviz.model.Factory.graph;
@@ -56,6 +55,9 @@ public class DictBase {
         return edge;
     }
 
+    public Set<Map.Entry<Vertex, EdgeMap>> getAllVertex() {
+        return invertMap.entrySet();
+    }
 
     /**
      * Добавить дугу в граф
@@ -171,6 +173,12 @@ public class DictBase {
         return dictBase;
     }
 
+    public DictBase getInvertSubDict(Vertex w, int r) {
+        DictBase dictBase = new DictBase();
+        this.getInvertSubDict_aroundVertex(w, r, dictBase);
+        return dictBase;
+    }
+
     /**
      * Получить подсловарь
      *
@@ -190,6 +198,21 @@ public class DictBase {
             Edge edge = edgeMap.getEdgeMap().get(s);
             dictBase.addPair(w, s, edge);
             getSubDict_aroundVertex(s, r - 1, dictBase);
+        }
+    }
+
+    private void getInvertSubDict_aroundVertex(Vertex w, int r, DictBase dictBase) {
+        if (r < 0)
+            return;
+
+        EdgeMap edgeMap = invertMap.get(w);
+        if (edgeMap == null)
+            return;
+
+        for (Vertex s : edgeMap.getEdgeMap().keySet()) {
+            Edge edge = edgeMap.getEdgeMap().get(s);
+            dictBase.addPair(s, w, edge);
+            getInvertSubDict_aroundVertex(s, r - 1, dictBase);
         }
     }
 /*
@@ -254,6 +277,14 @@ public class DictBase {
         }
     }
 
+    public static DictBase createFromDicts(DictBase... d) {
+        DictBase result = new DictBase();
+        for (DictBase dictBase : d) {
+            result.addSubDict(dictBase);
+        }
+        return result;
+    }
+
     public void printSortedEdge(String path) throws IOException {
         List<Edge> tmp = new ArrayList<>();
 
@@ -273,7 +304,7 @@ public class DictBase {
 
 
         int maxLenght =
-                tmp.stream().mapToInt(vertex -> vertex.getFrom().getWord().getStr().length() +  vertex.getTo().getWord().getStr().length())
+                tmp.stream().mapToInt(vertex -> vertex.getFrom().getWord().getStr().length() + vertex.getTo().getWord().getStr().length())
                         .max().orElseThrow(NoSuchElementException::new);
 
         int maxWeightLenght =
@@ -325,7 +356,7 @@ public class DictBase {
         List<Vertex> deletingList = new ArrayList<>();
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
             Vertex key = vertexEdgeMapEntry.getKey();
-            if(stopWords.contains(key.getWord().getStr()))
+            if (stopWords.contains(key.getWord().getStr()))
                 deletingList.add(key);
         }
         for (Vertex vertex : deletingList) {
@@ -578,7 +609,13 @@ public class DictBase {
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
             Vertex v = vertexEdgeMapEntry.getKey();
             Double aDouble = tmpWeight.get(v);
-            v.setWeight(v.getWeight() + aDouble);
+            if (aDouble == null)
+                aDouble = 0.0;
+            try {
+                v.setWeight(v.getWeight() + aDouble);
+            } catch (NullPointerException e) {
+                System.out.println("throw  e;");
+            }
         }
         System.out.println("\t\t\tdone");
     }
@@ -674,8 +711,11 @@ public class DictBase {
         List<Vertex> deletingVertex = new ArrayList<>();
         for (Map.Entry<Vertex, EdgeMap> d : dictBase.invertMap.entrySet()) {
             Vertex key = d.getKey();
+            if ("кулинария".equals(key.getWord().getStr()))
+                System.out.print("");
             Boolean found = findTrainInRadius(dictBase, key, R);
-            if (!found) {
+            Boolean foundInInvert = findTrainInInvertRadius(dictBase, key, R);
+            if (!(found || foundInInvert)) {            // TODO
                 deletingVertex.add(key);
             }
         }
@@ -698,7 +738,7 @@ public class DictBase {
     }
 
 
-    public void removedVertexByStopWords(){
+    public void removedVertexByStopWords() {
 
     }
 
@@ -739,6 +779,65 @@ public class DictBase {
         return false;
     }
 
+    private static Boolean findTrainInInvertRadius(DictBase dictBase, Vertex vertex, Integer R) {
+        if (R == 0)
+            return false;
+        EdgeMap edgeMap = dictBase.map.get(vertex);
+        if (edgeMap == null) {
+            System.out.println();
+            return false;
+        }
+        // Все вершины входящие в текущую
+        boolean result = false;
+        for (Map.Entry<Vertex, Edge> vertexEdgeEntry : edgeMap.getEdgeMap().entrySet()) {
+            Vertex v = vertexEdgeEntry.getKey();
+            if (vertex.isFlag_train())
+                return true;
+            if (v == null)
+                System.out.println();
+            result = findTrainInInvertRadius(dictBase, v, R - 1);
+            if (result)
+                return true;
+        }
+        return false;
+    }
+
+
+    public List<Pair<Vertex, Double>> clastering() {
+        Map<Vertex, Double> tmpMap = new HashMap<>();
+        for (Map.Entry<Vertex, EdgeMap> elem : this.getAllVertex()) {
+            Vertex vertex = elem.getKey();
+
+            // Смотрим все исходящие вершины
+//            EdgeMap outPutEdgeMap = map.get(vertex);
+//            if (outPutEdgeMap != null) {
+//                for (Map.Entry<Vertex, Edge> outPutElem : outPutEdgeMap.getEdgeMap().entrySet()) {
+//                    Vertex vertex_2 = outPutElem.getKey();
+//                    Edge edge = outPutElem.getValue();
+//
+//                    double mov = vertex_2.getWeight() * edge.getWeight();
+//                    tmpMap.put(vertex, tmpMap.get(vertex) == null ? mov : mov + tmpMap.get(vertex));
+//                }
+//                tmpMap.put(vertex, tmpMap.get(vertex) == null ? 0.0 : tmpMap.get(vertex) / outPutEdgeMap.getEdgeMap().entrySet().size());
+//            }
+            // Смотрим все входящие вершины
+            EdgeMap outPutEdgeMap = invertMap.get(vertex);
+            if (outPutEdgeMap != null) {
+                for (Map.Entry<Vertex, Edge> outPutElem : outPutEdgeMap.getEdgeMap().entrySet()) {
+                    Vertex vertex_2 = outPutElem.getKey();
+                    Edge edge = outPutElem.getValue();
+
+                    double mov = vertex_2.getWeight() * edge.getWeight();
+                    tmpMap.put(vertex, tmpMap.get(vertex) == null ? mov : mov + tmpMap.get(vertex));
+                }
+                //tmpMap.put(vertex, tmpMap.get(vertex) == null ? 0.0 : tmpMap.get(vertex) / outPutEdgeMap.getEdgeMap().entrySet().size());
+            }
+        }
+        return tmpMap.entrySet().stream()
+                .map(v -> new Pair<Vertex, Double>(v.getKey(), v.getValue()))
+                .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
+                .collect(Collectors.toList());
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -814,9 +913,18 @@ public class DictBase {
                 .with(
                         graphViz
                 );
-        Graphviz.fromGraph(g).totalMemory(1000000000).render(Format.PNG).toFile(new File(fileName));
+        Graphviz.fromGraph(g).totalMemory(1000000000).height(3000).render(Format.PNG).toFile(new File(fileName));
     }
-
+    public static void graphviz_drawHight(List<Node> graphViz, String fileName) throws IOException {
+        Graph g = graph("example1").directed()
+                .graphAttr().with(Rank.dir(LEFT_TO_RIGHT))
+                .nodeAttr().with(Font.name("arial"))
+                .linkAttr().with("class", "link-class")
+                .with(
+                        graphViz
+                );
+        Graphviz.fromGraph(g).totalMemory(1000000000).height(22000).render(Format.PNG).toFile(new File(fileName));
+    }
     public static void graphviz_graphSaveToFile(List<Node> graphViz, String fileName, Format format) throws IOException {
         Graph g = graph("example1").directed()
                 .graphAttr().with(Rank.dir(LEFT_TO_RIGHT))
