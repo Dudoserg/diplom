@@ -164,7 +164,7 @@ public class DictBase {
     /**
      * Получить подСловарь
      *
-     * @param w вершина словаря
+     * @param w      вершина словаря
      * @param radius радиус
      * @return подсловарь
      */
@@ -184,7 +184,7 @@ public class DictBase {
      * Получить подсловарь
      *
      * @param w        центр словаря
-     * @param radius        радиус словаря (количество дуг)
+     * @param radius   радиус словаря (количество дуг)
      * @param dictBase (пустой словарь в котором будет результат)
      */
     private void getSubDict_aroundVertex(Vertex w, int radius, DictBase dictBase) {
@@ -354,8 +354,8 @@ public class DictBase {
         for (Vertex vertex : tmp) {
             writer.write(vertex.getWord().getPartOfSpeech() + "\t" + vertex.getWord().getStr() + "\t" +
                     //new String(new char[maxLenght - vertex.getWord().getStr().length() + 10 +
-                            //(maxWeightLenght - decimalFormat.format(vertex.getWeight()).length())])
-                            //.replace('\0', ' ') +
+                    //(maxWeightLenght - decimalFormat.format(vertex.getWeight()).length())])
+                    //.replace('\0', ' ') +
                     decimalFormat.format(vertex.getWeight()) + "\n");
         }
         writer.close();
@@ -381,7 +381,7 @@ public class DictBase {
 
         int count = 0;
         for (Vertex vertex : tmp) {
-            if(PartOfSpeech.NOUN == vertex.getWord().getPartOfSpeech()){
+            if (PartOfSpeech.NOUN == vertex.getWord().getPartOfSpeech()) {
                 writer.write(vertex.getWord().getPartOfSpeech() + "\t" + vertex.getWord().getStr() + "\t" +
                         //new String(new char[maxLenght - vertex.getWord().getStr().length() + 10 +
                         //        (maxWeightLenght - decimalFormat.format(vertex.getWeight()).length())])
@@ -389,7 +389,7 @@ public class DictBase {
                         decimalFormat.format(vertex.getWeight()) + "\n");
             }
             count++;
-            if(count > topX)
+            if (count > topX)
                 break;
         }
         writer.close();
@@ -406,6 +406,44 @@ public class DictBase {
         }
         for (Vertex vertex : deletingList) {
             this.deleteVertex(vertex);
+        }
+    }
+
+    /**
+     * Делаем связь заданного типа не ориентированной (т.е. теперь она направлена в обе стороны)
+     *
+     * @param relationType тип связи, которую делаем двунаправленной
+     */
+    public void bidirectional(RelationType relationType) {
+        class TMP {
+            public final Vertex from;
+            public final Vertex to;
+            public final double weight;
+            public final RelationType relationType;
+
+            public TMP(Vertex from, Vertex to, double weight, RelationType relationType) {
+                this.from = from;
+                this.to = to;
+                this.weight = weight;
+                this.relationType = relationType;
+            }
+        }
+        List<TMP> list = new ArrayList<>();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.map.entrySet()) {
+            Vertex from = vertexEdgeMapEntry.getKey();
+            EdgeMap value = vertexEdgeMapEntry.getValue();
+            for (Map.Entry<Vertex, Edge> toMap : value.getEdgeMap().entrySet()) {
+                Vertex to = toMap.getKey();
+                Edge edge = toMap.getValue();
+                if (relationType.equals(edge.getRelationType())) {
+                    // Связь ассоциация, добавим ее в обратную сторону
+                    double weight = edge.getWeight();
+                    list.add(new TMP(to, from, weight, edge.getRelationType()));
+                }
+            }
+        }
+        for (TMP tmp : list) {
+            this.addPair(tmp.from, tmp.to, tmp.weight, tmp.relationType);
         }
     }
 
@@ -575,9 +613,9 @@ public class DictBase {
     /**
      * Поиск пути с максимальным весом
      *
-     * @param first вершина от который ищем путь
-     * @param last  вершина до которой ищем путь
-     * @param radius     максимальный размер пути
+     * @param first  вершина от который ищем путь
+     * @param last   вершина до которой ищем путь
+     * @param radius максимальный размер пути
      * @return наилучший путь между двумя вершинами, с максимальным весом
      */
     public Way findMaxWay(Vertex first, Vertex last, int radius) {
@@ -657,49 +695,90 @@ public class DictBase {
 
     private void correctVertexWeight(int radius, double gamma, Function<Double, Double> gammaFunction) {
         System.out.print("correctVertexWeight...");
-
-        Map<Vertex, Double> tmpWeight = new HashMap<>();
         double weightAdd = 0;
-        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
-            Vertex v = vertexEdgeMapEntry.getKey();
-            weightAdd = v.getWeight();
-            funWeight(v, weightAdd, radius, gamma, gammaFunction, tmpWeight);
-        }
-        List<Pair<Vertex, Double>> collect = tmpWeight.entrySet().stream()
-                .map(v -> new Pair<>(v.getKey(), v.getValue()))
-                .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
-                .collect(Collectors.toList());
-        collect.forEach(v -> {
-            System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
-        });
-        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
-            Vertex v = vertexEdgeMapEntry.getKey();
-            Double aDouble = tmpWeight.get(v);
-            if (aDouble == null)
-                aDouble = 0.0;
-            try {
-                v.setWeight(v.getWeight() + aDouble);
-            } catch (NullPointerException e) {
-                System.out.println("throw  e;");
+        int counter = 0;
+
+        class Th {
+            int from;
+            int to;
+            List<Vertex> cycle = new ArrayList<>();            // Список для отслеживания циклов в распространении весов вершин
+            Map<Vertex, Double> tmpWeight = new HashMap<>();
+            Thread thread;
+
+            public Th(int from, int to) {
+                this.from = from;
+                this.to = to;
             }
         }
-        System.out.println("\t\t\tdone");
+        List<Th> threads = new ArrayList<>();
+
+        int countTask = invertMap.size();
+        int tmpCountFrom = 0;
+        int tmpCountTo = countTask / 4;
+        for (int i = 0; i < 4; i++) {
+            Th th = new Th(tmpCountFrom, tmpCountTo);
+            tmpCountFrom = tmpCountTo;
+            tmpCountTo = tmpCountTo + countTask / 4;
+            th.thread = new Thread(() -> {
+                for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+                    Vertex v = vertexEdgeMapEntry.getKey();
+                    weightAdd = v.getWeight();
+                    cycle.add(v);
+                    funWeight(v, weightAdd, radius, gamma, gammaFunction, tmpWeight, cycle);
+                    cycle.remove(v);
+                    System.out.println((++counter) + "/" + invertMap.size());
+                }
+            });
+            threads.add(th);
+        }
+        threads.get(threads.size() - 1).to = invertMap.size();
+
+        System.out.println();
+
+
+//        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+//            Vertex v = vertexEdgeMapEntry.getKey();
+//            weightAdd = v.getWeight();
+//            cycle.add(v);
+//            funWeight(v, weightAdd, radius, gamma, gammaFunction, tmpWeight, cycle);
+//            cycle.remove(v);
+//            System.out.println((++counter) + "/" + invertMap.size());
+//        }
+
+//        List<Pair<Vertex, Double>> collect = tmpWeight.entrySet().stream()
+//                .map(v -> new Pair<>(v.getKey(), v.getValue()))
+//                .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
+//                .collect(Collectors.toList());
+//        collect.forEach(v -> {
+//            System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
+//        });
+//        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+//            Vertex v = vertexEdgeMapEntry.getKey();
+//            Double aDouble = tmpWeight.get(v);
+//            if (aDouble == null)
+//                aDouble = 0.0;
+//            try {
+//                v.setWeight(v.getWeight() + aDouble);
+//            } catch (NullPointerException e) {
+//                System.out.println("throw  e;");
+//            }
+//        }
+//        System.out.println("\t\t\tdone");
     }
 
     private void funWeight(Vertex vertex, double weightAdd, int radius, double gamma, Function<Double, Double> gammaFunction,
-                           Map<Vertex, Double> tmpWeight) {
+                           Map<Vertex, Double> tmpWeight, List<Vertex> cycle) {
         if (radius < 0)
             return;
         if (weightAdd <= 0)
             return;
-
         // добавляем вершине вес (пока что в массиве тмп, иначе будет лавинообразное добавление)
         Double tmpW = tmpWeight.get(vertex);
         if (tmpW == null)
             tmpW = 0.0;
         tmpWeight.put(vertex, tmpW + weightAdd);
 
-
+        // Все соседи текущей вершины
         EdgeMap edgeMap = map.get(vertex);
         if (edgeMap == null)
             return;
@@ -707,9 +786,13 @@ public class DictBase {
         for (Map.Entry<Vertex, Edge> vertexEdgeEntry : edgeMap.getEdgeMap().entrySet()) {
             Vertex sosed = vertexEdgeEntry.getKey();
             Edge edge = vertexEdgeEntry.getValue();
-            funWeight(sosed, weightAdd * gamma * edge.getWeight(), radius - 1,
-                    gammaFunction.apply(gamma), gammaFunction, tmpWeight
-            );
+            if (!cycle.contains(sosed)) {
+                cycle.add(sosed);
+                funWeight(sosed, weightAdd * gamma * edge.getWeight(), radius - 1,
+                        gammaFunction.apply(gamma), gammaFunction, tmpWeight, cycle
+                );
+                cycle.remove(sosed);
+            }
         }
     }
 

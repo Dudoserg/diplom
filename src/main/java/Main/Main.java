@@ -88,6 +88,7 @@ public class Main {
         System.out.print("build dict train...");
 
         DictBase dictBase = CSV_DICT.loadFullDict();
+        dictBase.bidirectional(RelationType.ASS);///////////////////////////////////////////////////////////////////////
         dictBase.removeStopWords();
 
         DictBase dictTrain = new DictBase();
@@ -116,7 +117,6 @@ public class Main {
 //        }
 
         DictBase.removeUnusedVertex(dictBase, dictTrain,  settings.get_R_());
-
 
 
         dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
