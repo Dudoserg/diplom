@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class MyStem {
-    private static final String MYSTEM_exe = "mystem" + File.separator + "mystem.exe";
+    private static final String MYSTEM_exe = "mystem" + File.separator  + "exe" + File.separator + "mystem.exe";
     private static final String MYSTEM_RESULT_json = "mystem" + File.separator + "mystemResult.json";
-    public static final String FULL_TEXT = "-" + File.separator + "full_text.txt";
+    public static final String FULL_TEXT = "mystem" + File.separator + "full_text.txt";
     public static final String TEXT_WITHOUT_STOPWORDS_txt = "mystem" + File.separator + "text_withoutStopWord.txt";
 
     private String id;

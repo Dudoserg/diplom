@@ -22,6 +22,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static guru.nidi.graphviz.attribute.Rank.RankDir.LEFT_TO_RIGHT;
@@ -164,18 +165,18 @@ public class DictBase {
      * Получить подСловарь
      *
      * @param w вершина словаря
-     * @param r радиус
+     * @param radius радиус
      * @return подсловарь
      */
-    public DictBase getSubDict(Vertex w, int r) {
+    public DictBase getSubDict(Vertex w, int radius) {
         DictBase dictBase = new DictBase();
-        this.getSubDict_aroundVertex(w, r, dictBase);
+        this.getSubDict_aroundVertex(w, radius, dictBase);
         return dictBase;
     }
 
-    public DictBase getInvertSubDict(Vertex w, int r) {
+    public DictBase getInvertSubDict(Vertex w, int radius) {
         DictBase dictBase = new DictBase();
-        this.getInvertSubDict_aroundVertex(w, r, dictBase);
+        this.getInvertSubDict_aroundVertex(w, radius, dictBase);
         return dictBase;
     }
 
@@ -183,11 +184,11 @@ public class DictBase {
      * Получить подсловарь
      *
      * @param w        центр словаря
-     * @param r        радиус словаря (количество дуг)
+     * @param radius        радиус словаря (количество дуг)
      * @param dictBase (пустой словарь в котором будет результат)
      */
-    private void getSubDict_aroundVertex(Vertex w, int r, DictBase dictBase) {
-        if (r < 0)
+    private void getSubDict_aroundVertex(Vertex w, int radius, DictBase dictBase) {
+        if (radius < 0)
             return;
 
         EdgeMap edgeMap = map.get(w);
@@ -197,12 +198,12 @@ public class DictBase {
         for (Vertex s : edgeMap.getEdgeMap().keySet()) {
             Edge edge = edgeMap.getEdgeMap().get(s);
             dictBase.addPair(w, s, edge);
-            getSubDict_aroundVertex(s, r - 1, dictBase);
+            getSubDict_aroundVertex(s, radius - 1, dictBase);
         }
     }
 
-    private void getInvertSubDict_aroundVertex(Vertex w, int r, DictBase dictBase) {
-        if (r < 0)
+    private void getInvertSubDict_aroundVertex(Vertex w, int radius, DictBase dictBase) {
+        if (radius < 0)
             return;
 
         EdgeMap edgeMap = invertMap.get(w);
@@ -212,13 +213,13 @@ public class DictBase {
         for (Vertex s : edgeMap.getEdgeMap().keySet()) {
             Edge edge = edgeMap.getEdgeMap().get(s);
             dictBase.addPair(s, w, edge);
-            getInvertSubDict_aroundVertex(s, r - 1, dictBase);
+            getInvertSubDict_aroundVertex(s, radius - 1, dictBase);
         }
     }
 /*
     @Deprecated
-    public DictBase getSubDict(DictBase result, Vertex w, int r, Map<Vertex, Integer> used) {
-        this.getSubDict_aroundVertex(w, r, result, used);
+    public DictBase getSubDict(DictBase result, Vertex w, int radius, Map<Vertex, Integer> used) {
+        this.getSubDict_aroundVertex(w, radius, result, used);
         return result;
     }*/
 
@@ -231,7 +232,7 @@ public class DictBase {
      * @param used (пустой словарь в котором будет результат)
      */
     /*@Deprecated
-    private void getSubDict_aroundVertex(Vertex w, int r, DictBase result, Map<Vertex, Integer> used) {
+    private void getSubDict_aroundVertex(Vertex w, int radius, DictBase result, Map<Vertex, Integer> used) {
         if (r < 0)
             return;
 
@@ -311,13 +312,22 @@ public class DictBase {
                 tmp.stream().mapToInt(vertex -> decimalFormat.format(vertex.getWeight()).length())
                         .max().orElseThrow(NoSuchElementException::new);
 
+//        for (Edge edge : tmp) {
+//            writer.write(edge.getFrom().getWord().getStr() + "          " +
+//                    edge.getTo().getWord().getStr() +
+//                    new String(new char[maxLenght - edge.getFrom().getWord().getStr().length() -
+//                            edge.getTo().getWord().getStr().length() + 10 +
+//                            (maxWeightLenght - decimalFormat.format(edge.getWeight()).length())])
+//                            .replace('\0', ' ') +
+//                    decimalFormat.format(edge.getWeight()) + "\n");
+//        }
         for (Edge edge : tmp) {
-            writer.write(edge.getFrom().getWord().getStr() + "          " +
-                    edge.getTo().getWord().getStr() +
-                    new String(new char[maxLenght - edge.getFrom().getWord().getStr().length() -
-                            edge.getTo().getWord().getStr().length() + 10 +
-                            (maxWeightLenght - decimalFormat.format(edge.getWeight()).length())])
-                            .replace('\0', ' ') +
+            writer.write(edge.getFrom().getWord().getStr() + "\t" +
+                    edge.getTo().getWord().getStr() + "\t" +
+//                    new String(new char[maxLenght - edge.getFrom().getWord().getStr().length() -
+//                            edge.getTo().getWord().getStr().length() + 10 +
+//                            (maxWeightLenght - decimalFormat.format(edge.getWeight()).length())])
+//                            .replace('\0', ' ') +
                     decimalFormat.format(edge.getWeight()) + "\n");
         }
         writer.close();
@@ -342,14 +352,49 @@ public class DictBase {
                         .max().orElseThrow(NoSuchElementException::new);
 
         for (Vertex vertex : tmp) {
-            writer.write(vertex.getWord().getStr() +
-                    new String(new char[maxLenght - vertex.getWord().getStr().length() + 10 +
-                            (maxWeightLenght - decimalFormat.format(vertex.getWeight()).length())])
-                            .replace('\0', ' ') +
+            writer.write(vertex.getWord().getPartOfSpeech() + "\t" + vertex.getWord().getStr() + "\t" +
+                    //new String(new char[maxLenght - vertex.getWord().getStr().length() + 10 +
+                            //(maxWeightLenght - decimalFormat.format(vertex.getWeight()).length())])
+                            //.replace('\0', ' ') +
                     decimalFormat.format(vertex.getWeight()) + "\n");
         }
         writer.close();
     }
+
+    public void printSortedVertex(String path, PartOfSpeech partOfSpeech, int topX) throws IOException {
+        List<Vertex> tmp = new ArrayList<>();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
+            tmp.add(vertexEdgeMapEntry.getKey());
+        }
+        tmp = tmp.stream().sorted((o1, o2) -> -Double.compare(o1.getWeight(), o2.getWeight()))
+                .collect(Collectors.toList());
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        DecimalFormat decimalFormat = new DecimalFormat("#0.00");
+
+        int maxLenght =
+                tmp.stream().mapToInt(vertex -> vertex.getWord().getStr().length()).max().orElseThrow(NoSuchElementException::new);
+
+        int maxWeightLenght =
+                tmp.stream().mapToInt(vertex -> decimalFormat.format(vertex.getWeight()).length())
+                        .max().orElseThrow(NoSuchElementException::new);
+
+        int count = 0;
+        for (Vertex vertex : tmp) {
+            if(PartOfSpeech.NOUN == vertex.getWord().getPartOfSpeech()){
+                writer.write(vertex.getWord().getPartOfSpeech() + "\t" + vertex.getWord().getStr() + "\t" +
+                        //new String(new char[maxLenght - vertex.getWord().getStr().length() + 10 +
+                        //        (maxWeightLenght - decimalFormat.format(vertex.getWeight()).length())])
+                        //        .replace('\0', ' ') +
+                        decimalFormat.format(vertex.getWeight()) + "\n");
+            }
+            count++;
+            if(count > topX)
+                break;
+        }
+        writer.close();
+    }
+
 
     public void removeStopWords() throws DictException {
         StopWords stopWords = StopWords.getInstance();
@@ -364,7 +409,7 @@ public class DictBase {
         }
     }
 
-    public class FindPathHelper {
+    public static class FindPathHelper {
         Vertex vertex;
         Edge edge;
         int prev;
@@ -446,7 +491,7 @@ public class DictBase {
                 result.add(currentPath);
 
                 List<Edge> currentPath_edge = new ArrayList<>(Collections.singletonList(f.edge));
-                Double wayWeight = f.edge.getWeight();
+                double wayWeight = f.edge.getWeight();
 
                 FindPathHelper tmp = f;
                 while (tmp.prev != -1) {
@@ -532,11 +577,11 @@ public class DictBase {
      *
      * @param first вершина от который ищем путь
      * @param last  вершина до которой ищем путь
-     * @param R     максимальный размер пути
+     * @param radius     максимальный размер пути
      * @return наилучший путь между двумя вершинами, с максимальным весом
      */
-    public Way findMaxWay(Vertex first, Vertex last, int R) {
-        List<Way> ways = this.findWays(first, last, R);
+    public Way findMaxWay(Vertex first, Vertex last, int radius) {
+        List<Way> ways = this.findWays(first, last, radius);
 
         Way bestWay = null;
         double bestWayWeight = 0.0;
@@ -582,14 +627,35 @@ public class DictBase {
 
     }
 
-    /**
-     * распространение веса вершины на ее соседей в радиусе R
+    /* распространение веса вершины на ее соседей в радиусе R
      * 0,95	0,9025	0,857375	0,81450625	0,773780938
      *
-     * @param r     радиус
+     * @param radius     радиус
      * @param gamma коэффициент затухания
+     * @param gamma_degree  [1,3]
      */
-    public void correctVertexWeight(int r, double gamma) {
+    public void correctVertexWeight(int radius, double gamma, int gamma_degree) throws DictException {
+        switch (gamma_degree) {
+            case 1: {
+                this.correctVertexWeight(radius, gamma, aDouble -> aDouble);
+                break;
+            }
+            case 2: {
+                this.correctVertexWeight(radius, gamma, aDouble -> aDouble * aDouble);
+                break;
+            }
+            case 3: {
+                this.correctVertexWeight(radius, gamma, aDouble -> aDouble * aDouble * aDouble);
+                break;
+            }
+            default: {
+                throw new DictException("the passed parameter 'gamma_degree = " + gamma_degree +
+                        "' is out of bounds of allowed values [1,3]");
+            }
+        }
+    }
+
+    private void correctVertexWeight(int radius, double gamma, Function<Double, Double> gammaFunction) {
         System.out.print("correctVertexWeight...");
 
         Map<Vertex, Double> tmpWeight = new HashMap<>();
@@ -597,7 +663,7 @@ public class DictBase {
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
             Vertex v = vertexEdgeMapEntry.getKey();
             weightAdd = v.getWeight();
-            funWeight(v, weightAdd, r, gamma, tmpWeight);
+            funWeight(v, weightAdd, radius, gamma, gammaFunction, tmpWeight);
         }
         List<Pair<Vertex, Double>> collect = tmpWeight.entrySet().stream()
                 .map(v -> new Pair<>(v.getKey(), v.getValue()))
@@ -620,8 +686,9 @@ public class DictBase {
         System.out.println("\t\t\tdone");
     }
 
-    private void funWeight(Vertex vertex, double weightAdd, int r, double gamma, Map<Vertex, Double> tmpWeight) {
-        if (r < 0)
+    private void funWeight(Vertex vertex, double weightAdd, int radius, double gamma, Function<Double, Double> gammaFunction,
+                           Map<Vertex, Double> tmpWeight) {
+        if (radius < 0)
             return;
         if (weightAdd <= 0)
             return;
@@ -640,7 +707,9 @@ public class DictBase {
         for (Map.Entry<Vertex, Edge> vertexEdgeEntry : edgeMap.getEdgeMap().entrySet()) {
             Vertex sosed = vertexEdgeEntry.getKey();
             Edge edge = vertexEdgeEntry.getValue();
-            funWeight(sosed, weightAdd * gamma * edge.getWeight(), r - 1, gamma * gamma, tmpWeight);
+            funWeight(sosed, weightAdd * gamma * edge.getWeight(), radius - 1,
+                    gammaFunction.apply(gamma), gammaFunction, tmpWeight
+            );
         }
     }
 
@@ -655,13 +724,13 @@ public class DictBase {
      * @param second вторая часть биграммы
      * @param betta  коэффициент усилиния веса > 1
      */
-    private void funcEdgeWeightCorrection(Vertex first, Vertex second, int r, double betta) throws DictException {
+    private void funcEdgeWeightCorrection(Vertex first, Vertex second, int radius, double betta) throws DictException {
         if (betta < 1) {
             throw new DictException(" betta should be more than 1.0 ");
         }
         final double eps = 0.05;        // минимально рассматриваемый вес пути
         final double maxLink = 0.95;    // максимально допустимый вес дуги
-        Way way = findMaxWay(first, second, r);
+        Way way = findMaxWay(first, second, radius);
         try {
             if (way != null && !way.isEmpty() && way.getWeight() > eps) {
                 for (Edge edge : way.getWay()) {
@@ -809,29 +878,29 @@ public class DictBase {
             Vertex vertex = elem.getKey();
 
             // Смотрим все исходящие вершины
-//            EdgeMap outPutEdgeMap = map.get(vertex);
-//            if (outPutEdgeMap != null) {
-//                for (Map.Entry<Vertex, Edge> outPutElem : outPutEdgeMap.getEdgeMap().entrySet()) {
-//                    Vertex vertex_2 = outPutElem.getKey();
-//                    Edge edge = outPutElem.getValue();
-//
-//                    double mov = vertex_2.getWeight() * edge.getWeight();
-//                    tmpMap.put(vertex, tmpMap.get(vertex) == null ? mov : mov + tmpMap.get(vertex));
-//                }
-//                tmpMap.put(vertex, tmpMap.get(vertex) == null ? 0.0 : tmpMap.get(vertex) / outPutEdgeMap.getEdgeMap().entrySet().size());
-//            }
-            // Смотрим все входящие вершины
-            EdgeMap outPutEdgeMap = invertMap.get(vertex);
+            EdgeMap outPutEdgeMap = map.get(vertex);
             if (outPutEdgeMap != null) {
                 for (Map.Entry<Vertex, Edge> outPutElem : outPutEdgeMap.getEdgeMap().entrySet()) {
                     Vertex vertex_2 = outPutElem.getKey();
                     Edge edge = outPutElem.getValue();
 
-                    double mov = vertex_2.getWeight() * edge.getWeight();
+                    double mov = vertex_2.getWeight();
                     tmpMap.put(vertex, tmpMap.get(vertex) == null ? mov : mov + tmpMap.get(vertex));
                 }
                 //tmpMap.put(vertex, tmpMap.get(vertex) == null ? 0.0 : tmpMap.get(vertex) / outPutEdgeMap.getEdgeMap().entrySet().size());
             }
+            // Смотрим все входящие вершины
+           /* EdgeMap outPutEdgeMap = invertMap.get(vertex);
+            if (outPutEdgeMap != null) {
+                for (Map.Entry<Vertex, Edge> outPutElem : outPutEdgeMap.getEdgeMap().entrySet()) {
+                    Vertex vertex_2 = outPutElem.getKey();
+                    Edge edge = outPutElem.getValue();
+
+                    double mov = vertex_2.getWeight();
+                    tmpMap.put(vertex, tmpMap.get(vertex) == null ? mov : mov + tmpMap.get(vertex));
+                }
+                //tmpMap.put(vertex, tmpMap.get(vertex) == null ? 0.0 : tmpMap.get(vertex) / outPutEdgeMap.getEdgeMap().entrySet().size());
+            }*/
         }
         return tmpMap.entrySet().stream()
                 .map(v -> new Pair<Vertex, Double>(v.getKey(), v.getValue()))
@@ -915,6 +984,7 @@ public class DictBase {
                 );
         Graphviz.fromGraph(g).totalMemory(1000000000).height(3000).render(Format.PNG).toFile(new File(fileName));
     }
+
     public static void graphviz_drawHight(List<Node> graphViz, String fileName) throws IOException {
         Graph g = graph("example1").directed()
                 .graphAttr().with(Rank.dir(LEFT_TO_RIGHT))
@@ -925,6 +995,7 @@ public class DictBase {
                 );
         Graphviz.fromGraph(g).totalMemory(1000000000).height(22000).render(Format.PNG).toFile(new File(fileName));
     }
+
     public static void graphviz_graphSaveToFile(List<Node> graphViz, String fileName, Format format) throws IOException {
         Graph g = graph("example1").directed()
                 .graphAttr().with(Rank.dir(LEFT_TO_RIGHT))

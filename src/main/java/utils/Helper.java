@@ -64,8 +64,8 @@ public class Helper {
                 .sorted((o1, o2) -> -Integer.compare(o1, o2))
                 .findFirst().orElse(0);
         for (Unigram unigram : unigramList) {
-            writer.write("[" + unigram.getFirst() + "]" +
-                    new String(new char[integer - unigram.getFirst().length() + 10]).replace('\0', ' ') +
+            writer.write("[" + unigram.getFirst() + "]" + "\t" +
+//                    new String(new char[integer - unigram.getFirst().length() + 10]).replace('\0', ' ') +
                     unigram.getFrequency() + "\n");
 
         }
@@ -92,8 +92,8 @@ public class Helper {
 
         for (Bigram bigram : bigramList) {
             writer.write("[" + bigram.getFirst() + "]" +
-                    "[" + bigram.getSecond() + "]" +
-                    new String(new char[integer - bigram.getFirst().length() - bigram.getSecond().length() + 10]).replace('\0', ' ') +
+                    "[" + bigram.getSecond() + "]" + "\t" +
+//                    new String(new char[integer - bigram.getFirst().length() - bigram.getSecond().length() + 10]).replace('\0', ' ') +
                     bigram.getFrequency() + "\n");
 
         }

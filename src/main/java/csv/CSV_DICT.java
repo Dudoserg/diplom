@@ -1,5 +1,6 @@
 package csv;
 
+import Main.Main;
 import com.opencsv.bean.CsvToBeanBuilder;
 import dict.*;
 import mystem.MyStem;
@@ -8,11 +9,12 @@ import mystem.MyStemItem;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class CSV_DICT {
-    public static DictBase loadFullDict() throws DictException, FileNotFoundException {
+    public static DictBase loadFullDict() throws DictException, IOException {
         System.out.print("loadFullDict...");
 
         String words_fileName = "data" + File.separator + "words.csv";
@@ -41,15 +43,15 @@ public class CSV_DICT {
 
             if(con.getDefWeight() > 0){
                 weight = con.getDefWeight();
-                weight = 0.2;
+                weight = Main.settings.get_DEF_WEIGHT_();
                 relationType = RelationType.DEF;
             }else if(con.getAssWeight() > 0){
                 weight = con.getAssWeight();
-                weight = 0.6;
+                weight = Main.settings.get_ASS_WEIGHT_();
                 relationType = RelationType.ASS;
             }else if(con.getSynWeight() > 0){
                 weight = con.getSynWeight();
-                weight = 0.3;
+                weight = Main.settings.get_SYN_WEIGHT_();
                 relationType = RelationType.SYN;
             }else {
                 throw new DictException("weight of edge equals 0.0 [id=" + con.getId() + "]");
@@ -66,7 +68,7 @@ public class CSV_DICT {
 
 
 
-        ////// Вычисляем часть речи каждого из слов
+        ////// ГЛОБАЛЬНО Вычисляем часть речи каждого из слов словаря
         List<String> listOfWords = new ArrayList<>();
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dict.getInvertMap().entrySet()) {
             Vertex key = vertexEdgeMapEntry.getKey();
@@ -74,12 +76,16 @@ public class CSV_DICT {
         }
 
         MyStem myStem = new MyStem(listOfWords, "dd_");
+        myStem.saveToFile(MyStem.TEXT_WITHOUT_STOPWORDS_txt);
         myStem.lemmatization();
 
 
         for (MyStemItem myStemItem : myStem.getMyStemResult().getItemList()) {
             myStemItem.calcPartOfSpeech();
             PartOfSpeech partOfSpeech = myStemItem.getPartOfSpeech();
+            Vertex vertex = Vertex.getVertex(myStemItem.getText());
+            vertex.getWord().setPartOfSpeech(partOfSpeech);
+            System.out.print("");
         }
 
         return dict;

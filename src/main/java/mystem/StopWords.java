@@ -23,7 +23,7 @@ public class StopWords {
 
     public static StopWords getInstance() {
         if (instance == null) {
-            instance = new StopWords(Helper.readFileLineByLine("mystem" + File.separator + "stop_words2.txt"));
+            instance = new StopWords(Helper.readFileLineByLine("mystem" + File.separator + "stopWords" + File.separator + "stop_words2.txt"));
         }
         return instance;
     }
