@@ -24,13 +24,13 @@ public class CSV_TEST {
         Map<Integer, CSV_words> words_map = words.stream()
                 .collect(Collectors.toMap(CSV_words::getId, csv_words -> csv_words));
 
-        List<CSV_connections> connections = new CsvToBeanBuilder(new FileReader(connections_fileName)).withSeparator(';')
-                .withType(CSV_connections.class)
+        List<CSV_connections_old> connections = new CsvToBeanBuilder(new FileReader(connections_fileName)).withSeparator(';')
+                .withType(CSV_connections_old.class)
                 .build()
                 .parse();
 
         DictBase dict = new DictBase();
-        for (CSV_connections con : connections) {
+        for (CSV_connections_old con : connections) {
             CSV_words wordFrom = words_map.get(con.getWordFrom());
             CSV_words wordTo = words_map.get(con.getWordTo());
 

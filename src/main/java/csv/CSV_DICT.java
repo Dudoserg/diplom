@@ -11,18 +11,16 @@ import dict.*;
 import mystem.MyStem;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
+import settings.Settings;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class CSV_DICT {
-    public static DictBase loadFullDict() throws DictException, IOException {
+    public static DictBase loadFullDict_old() throws DictException, IOException {
         System.out.print("loadFullDict...");
 
         String words_fileName = "data" + File.separator + "words2.csv";
@@ -33,19 +31,22 @@ public class CSV_DICT {
                 .build()
                 .parse();
 
-        create_Words2_список_слов_с_типомДанных(words);
 
         Map<Integer, CSV_words> words_map = words.stream()
                 .collect(Collectors.toMap(CSV_words::getId, csv_words -> csv_words));
 
-        List<CSV_connections> connections = new CsvToBeanBuilder(new FileReader(connections_fileName)).withSeparator(';')
-                .withType(CSV_connections.class)
+        List<CSV_connections_old> connections = new CsvToBeanBuilder(new FileReader(connections_fileName)).withSeparator(';')
+                .withType(CSV_connections_old.class)
                 .build()
                 .parse();
 
+
+        //create_Words2_список_слов_с_типомДанных(words);
+        //createConnections(connections, words_map);
+
         DictBase dict = new DictBase();
         CSV_DICT_FULL csv_dict_full = new CSV_DICT_FULL();
-        for (CSV_connections con : connections) {
+        for (CSV_connections_old con : connections) {
             CSV_words wordFrom = words_map.get(con.getWordFrom());
             CSV_words wordTo = words_map.get(con.getWordTo());
 
@@ -91,10 +92,41 @@ public class CSV_DICT {
 
         ////// ГЛОБАЛЬНО Вычисляем часть речи каждого из слов словаря
 
-        //dict = calculatePartOfSpeech(dict);
+        dict = calculatePartOfSpeech(dict);
 
         return dict;
 
+    }
+
+    public static DictBase loadFullDict() throws FileNotFoundException, DictException {
+
+        String connections_fileName = "data" + File.separator + "connections2.csv";
+
+        List<CSV_CONNECTIONS> connections = new CsvToBeanBuilder(new FileReader(connections_fileName))
+                .withSeparator(';')
+                .withType(CSV_CONNECTIONS.class)
+                .build()
+                .parse();
+
+        DictBase dictBase = new DictBase();
+        for (CSV_CONNECTIONS con : connections) {
+            Vertex vertexFrom = Vertex.getVertex(con.getWordFrom());
+            vertexFrom.getWord().setPartOfSpeech(con.getPartOfSpeechFrom());
+
+            Vertex vertexTo = Vertex.getVertex(con.getWordFrom());
+            vertexTo.getWord().setPartOfSpeech(con.getPartOfSpeechTo());
+
+            dictBase.addPair(
+                    vertexFrom,
+                    vertexTo,
+                    Main.settings.getWeight(con.getRelationType()),
+                    con.getRelationType()
+            );
+
+        }
+
+        System.out.println();
+        return  dictBase;
     }
 
     private static DictBase calculatePartOfSpeech(DictBase dict) throws IOException {
@@ -121,8 +153,47 @@ public class CSV_DICT {
     }
 
 
-    private static void createConnections(){
+    private static void createConnections(List<CSV_connections_old> connections, Map<Integer, CSV_words> words_map) throws DictException {
+        List<CSV_CONNECTIONS> result = new ArrayList<>();
+        for (CSV_connections_old connection : connections) {
 
+            CSV_words wordFrom = words_map.get(connection.getWordFrom());
+            CSV_words wordTo = words_map.get(connection.getWordTo());
+
+
+            RelationType relationType = null;
+            if (connection.getDefWeight() > 0) {
+                relationType = RelationType.DEF;
+            } else if (connection.getAssWeight() > 0) {
+                relationType = RelationType.ASS;
+            } else if (connection.getSynWeight() > 0) {
+                relationType = RelationType.SYN;
+            } else {
+                throw new DictException("weight of edge equals 0.0 [id=" + connection.getId() + "]");
+            }
+
+            CSV_CONNECTIONS csv_connections =  CSV_CONNECTIONS.create(
+                    connection.getId(),
+                    wordFrom.getSpelling(),
+                    PartOfSpeech.getPart(wordFrom.getPartOfSpeech()),
+                    wordTo.getSpelling(),
+                    PartOfSpeech.getPart(wordTo.getPartOfSpeech()),
+                    relationType
+            );
+            result.add(csv_connections);
+        }
+
+        try (
+                Writer writer = Files.newBufferedWriter(Paths.get("data" + File.separator + "connections2.csv"));
+        ) {
+            StatefulBeanToCsv<CSV_CONNECTIONS> beanToCsv = new StatefulBeanToCsvBuilder(writer)
+                    .withSeparator(';')
+                    .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
+                    .build();
+            beanToCsv.write(result);
+        } catch (CsvRequiredFieldEmptyException | CsvDataTypeMismatchException | IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

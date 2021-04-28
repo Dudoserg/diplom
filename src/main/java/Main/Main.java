@@ -4,7 +4,6 @@ import csv.CSV_DICT;
 import data.Reviews;
 import dict.*;
 import dict.Edge.Edge;
-import javafx.util.Pair;
 import mystem.MyStem;
 import settings.Settings;
 import utils.Bigram;
@@ -13,7 +12,6 @@ import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -88,7 +86,9 @@ public class Main {
 
         System.out.print("build dict train...");
 
-        DictBase dictBase = CSV_DICT.loadFullDict();
+        Long t = System.currentTimeMillis();
+        DictBase dictBase = CSV_DICT.loadFullDict_old();
+        System.out.println((System.currentTimeMillis() - t));
         //dictBase.bidirectional(RelationType.ASS);///////////////////////////////////////////////////////////////////////
         dictBase.removeStopWords();
 
@@ -138,7 +138,7 @@ public class Main {
         //DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
 
         dictBase.calculateWeightOfOutgoingVertex();
-        List<ClusterHelper> clastering = dictBase.clastering(10, 5);
+        List<ClusterHelper> clastering = dictBase.clastering(10, 2);
         System.out.println("==============================================================================");
 
         int tmpIndex = 0;

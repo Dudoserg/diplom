@@ -1,5 +1,7 @@
 package settings;
 
+import dict.DictException;
+import dict.RelationType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,5 +23,23 @@ public class Settings {
         this._R_ = _R_;
         this._GAMMA_ = _GAMMA_;
         this._GAMMA_ATTENUATION_RATE_ = _GAMMA_ATTENUATION_RATE_;
+    }
+
+    public double getWeight(RelationType relationType) throws DictException {
+        switch (relationType){
+            case ASS:{
+                return this._ASS_WEIGHT_;
+            }
+            case DEF:{
+                return this._DEF_WEIGHT_;
+            }
+            case SYN:{
+                return this._SYN_WEIGHT_;
+            }
+            case UNKNOWN:
+            default:{
+                throw  new DictException("unknown type of relationtype!");
+            }
+        }
     }
 }
