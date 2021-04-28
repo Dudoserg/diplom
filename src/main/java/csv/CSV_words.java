@@ -2,6 +2,7 @@ package csv;
 
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvBindByPosition;
+import dict.PartOfSpeech;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,4 +22,6 @@ public class CSV_words {
     //@CsvBindByPosition(position = 2)
     private int posId;
 
+    @CsvBindByName(column = "partOfSpeech")
+    private String partOfSpeech;
 }
