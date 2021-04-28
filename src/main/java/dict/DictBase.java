@@ -13,6 +13,8 @@ import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
 import mystem.StopWords;
+import threads.Th;
+import threads.ThRun;
 import utils.Bigram;
 import utils.Unigram;
 
@@ -672,18 +674,28 @@ public class DictBase {
      * @param gamma коэффициент затухания
      * @param gamma_degree  [1,3]
      */
-    public void correctVertexWeight(int radius, double gamma, int gamma_degree) throws DictException {
+    public void correctVertexWeight(int radius, double gamma, int gamma_degree, boolean thread) throws DictException, InterruptedException {
         switch (gamma_degree) {
             case 1: {
-                this.correctVertexWeight(radius, gamma, aDouble -> aDouble);
+                if (thread)
+                    this.correctVertexWeightThread(radius, gamma, aDouble -> aDouble);
+                else
+                    this.correctVertexWeight(radius, gamma, aDouble -> aDouble);
                 break;
             }
             case 2: {
-                this.correctVertexWeight(radius, gamma, aDouble -> aDouble * aDouble);
+                if (thread)
+                    this.correctVertexWeightThread(radius, gamma, aDouble -> aDouble * aDouble);
+                else
+                    this.correctVertexWeight(radius, gamma, aDouble -> aDouble * aDouble);
+
                 break;
             }
             case 3: {
-                this.correctVertexWeight(radius, gamma, aDouble -> aDouble * aDouble * aDouble);
+                if (thread)
+                    this.correctVertexWeightThread(radius, gamma, aDouble -> aDouble * aDouble * aDouble);
+                else
+                    this.correctVertexWeight(radius, gamma, aDouble -> aDouble * aDouble * aDouble);
                 break;
             }
             default: {
@@ -693,45 +705,81 @@ public class DictBase {
         }
     }
 
-    private void correctVertexWeight(int radius, double gamma, Function<Double, Double> gammaFunction) {
+    private void correctVertexWeight(int radius, double gamma, Function<Double, Double> gammaFunction) throws InterruptedException {
+        System.out.print("correctVertexWeight...");
+        double weightAdd = 0;
+        int counter = 0;
+        List<Vertex> cycle = new ArrayList<>();            // Список для отслеживания циклов в распространении весов вершин
+        Map<Vertex, Double> tmpWeight = new HashMap<>();
+
+
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+            Vertex v = vertexEdgeMapEntry.getKey();
+            weightAdd = v.getWeight();
+            cycle.add(v);
+            funWeight(v, weightAdd, radius, gamma, gammaFunction, tmpWeight, cycle);
+            cycle.remove(v);
+            System.out.println((++counter) + "/" + invertMap.size());
+        }
+
+        List<Pair<Vertex, Double>> collect = tmpWeight.entrySet().stream()
+                .map(v -> new Pair<>(v.getKey(), v.getValue()))
+                .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
+                .collect(Collectors.toList());
+        collect.forEach(v -> {
+            System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
+        });
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+            Vertex v = vertexEdgeMapEntry.getKey();
+            Double aDouble = tmpWeight.get(v);
+            if (aDouble == null)
+                aDouble = 0.0;
+            try {
+                v.setWeight(v.getWeight() + aDouble);
+            } catch (NullPointerException e) {
+                System.out.println("throw  e;");
+            }
+        }
+        System.out.println("\t\t\tdone");
+    }
+
+    private void correctVertexWeightThread(int radius, double gamma, Function<Double, Double> gammaFunction) throws InterruptedException {
         System.out.print("correctVertexWeight...");
         double weightAdd = 0;
         int counter = 0;
 
-        class Th {
-            int from;
-            int to;
-            List<Vertex> cycle = new ArrayList<>();            // Список для отслеживания циклов в распространении весов вершин
-            Map<Vertex, Double> tmpWeight = new HashMap<>();
-            Thread thread;
-
-            public Th(int from, int to) {
-                this.from = from;
-                this.to = to;
-            }
-        }
         List<Th> threads = new ArrayList<>();
-
-        int countTask = invertMap.size();
-        int tmpCountFrom = 0;
-        int tmpCountTo = countTask / 4;
-        for (int i = 0; i < 4; i++) {
-            Th th = new Th(tmpCountFrom, tmpCountTo);
-            tmpCountFrom = tmpCountTo;
-            tmpCountTo = tmpCountTo + countTask / 4;
-            th.thread = new Thread(() -> {
-                for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
-                    Vertex v = vertexEdgeMapEntry.getKey();
-                    weightAdd = v.getWeight();
-                    cycle.add(v);
-                    funWeight(v, weightAdd, radius, gamma, gammaFunction, tmpWeight, cycle);
-                    cycle.remove(v);
-                    System.out.println((++counter) + "/" + invertMap.size());
-                }
-            });
+        int countThreads = 4;
+        int numThread = 0;
+        // создаем треды
+        for (int i = 0; i < countThreads; i++) {
+            Th th = new Th();
+            th.thread = new Thread(new ThRun(th, this, radius, gamma, gammaFunction));
             threads.add(th);
         }
-        threads.get(threads.size() - 1).to = invertMap.size();
+        // помещаем в них обрабатываемые вершины
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+            threads.get(numThread).vertexList.add(vertexEdgeMapEntry.getKey());
+            numThread++;
+            if (numThread == countThreads)
+                numThread = 0;
+        }
+
+        for (Th thread : threads) {
+            thread.thread.start();
+        }
+        for (Th thread : threads) {
+            thread.thread.join();
+        }
+
+        Map<Vertex, Double> tmpWeight = new HashMap<>();
+        for (Th th : threads) {
+            for (Map.Entry<Vertex, Double> vertexDoubleEntry : th.tmpWeight.entrySet()) {
+                Vertex v = vertexDoubleEntry.getKey();
+                Double w = vertexDoubleEntry.getValue();
+                tmpWeight.put(v, tmpWeight.get(v) == null ? w : tmpWeight.get(v) + w);
+            }
+        }
 
         System.out.println();
 
@@ -745,29 +793,29 @@ public class DictBase {
 //            System.out.println((++counter) + "/" + invertMap.size());
 //        }
 
-//        List<Pair<Vertex, Double>> collect = tmpWeight.entrySet().stream()
-//                .map(v -> new Pair<>(v.getKey(), v.getValue()))
-//                .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
-//                .collect(Collectors.toList());
-//        collect.forEach(v -> {
-//            System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
-//        });
-//        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
-//            Vertex v = vertexEdgeMapEntry.getKey();
-//            Double aDouble = tmpWeight.get(v);
-//            if (aDouble == null)
-//                aDouble = 0.0;
-//            try {
-//                v.setWeight(v.getWeight() + aDouble);
-//            } catch (NullPointerException e) {
-//                System.out.println("throw  e;");
-//            }
-//        }
-//        System.out.println("\t\t\tdone");
+        List<Pair<Vertex, Double>> collect = tmpWeight.entrySet().stream()
+                .map(v -> new Pair<>(v.getKey(), v.getValue()))
+                .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
+                .collect(Collectors.toList());
+        collect.forEach(v -> {
+            System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
+        });
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
+            Vertex v = vertexEdgeMapEntry.getKey();
+            Double aDouble = tmpWeight.get(v);
+            if (aDouble == null)
+                aDouble = 0.0;
+            try {
+                v.setWeight(v.getWeight() + aDouble);
+            } catch (NullPointerException e) {
+                System.out.println("throw  e;");
+            }
+        }
+        System.out.println("\t\t\tdone");
     }
 
-    private void funWeight(Vertex vertex, double weightAdd, int radius, double gamma, Function<Double, Double> gammaFunction,
-                           Map<Vertex, Double> tmpWeight, List<Vertex> cycle) {
+    public void funWeight(Vertex vertex, double weightAdd, int radius, double gamma, Function<Double, Double> gammaFunction,
+                          Map<Vertex, Double> tmpWeight, List<Vertex> cycle) {
         if (radius < 0)
             return;
         if (weightAdd <= 0)
@@ -955,7 +1003,7 @@ public class DictBase {
     }
 
 
-    public List<Pair<Vertex, Double>> clastering() {
+    public List<Pair<Vertex, Double>> clastering(double A, double B) {
         Map<Vertex, Double> tmpMap = new HashMap<>();
         for (Map.Entry<Vertex, EdgeMap> elem : this.getAllVertex()) {
             Vertex vertex = elem.getKey();
@@ -963,12 +1011,16 @@ public class DictBase {
             // Смотрим все исходящие вершины
             EdgeMap outPutEdgeMap = map.get(vertex);
             if (outPutEdgeMap != null) {
+                //double w = vertex.getWeight() * A;
+                //tmpMap.put(vertex, tmpMap.get(vertex) == null ? w : w + tmpMap.get(vertex));
+
                 for (Map.Entry<Vertex, Edge> outPutElem : outPutEdgeMap.getEdgeMap().entrySet()) {
                     Vertex vertex_2 = outPutElem.getKey();
                     Edge edge = outPutElem.getValue();
 
                     double mov = vertex_2.getWeight();
                     tmpMap.put(vertex, tmpMap.get(vertex) == null ? mov : mov + tmpMap.get(vertex));
+                    vertex.setWeightOutgoingVertex(vertex.getWeightOutgoingVertex() + vertex_2.getWeight());
                 }
                 //tmpMap.put(vertex, tmpMap.get(vertex) == null ? 0.0 : tmpMap.get(vertex) / outPutEdgeMap.getEdgeMap().entrySet().size());
             }

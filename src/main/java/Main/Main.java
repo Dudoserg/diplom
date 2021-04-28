@@ -55,7 +55,7 @@ public class Main {
 
     public static Settings settings;
 
-    public static void mystemTest() throws IOException, DictException {
+    public static void mystemTest() throws IOException, DictException, InterruptedException {
 
         settings = new Settings(
                 0.6, 0.3, 0.2, 3, 0.7, 3
@@ -88,7 +88,7 @@ public class Main {
         System.out.print("build dict train...");
 
         DictBase dictBase = CSV_DICT.loadFullDict();
-        dictBase.bidirectional(RelationType.ASS);///////////////////////////////////////////////////////////////////////
+        //dictBase.bidirectional(RelationType.ASS);///////////////////////////////////////////////////////////////////////
         dictBase.removeStopWords();
 
         DictBase dictTrain = new DictBase();
@@ -116,7 +116,7 @@ public class Main {
 //            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(both), "-"  + File.separator + "both.jpg");
 //        }
 
-        DictBase.removeUnusedVertex(dictBase, dictTrain,  settings.get_R_());
+        DictBase.removeUnusedVertex(dictBase, dictTrain, settings.get_R_());
 
 
         dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
@@ -127,7 +127,7 @@ public class Main {
         dictBase.setVertexWeight(unigramFrequensy);
         dictBase.printSortedVertex("-" + File.separator + "_4_dictionary_base after setVertexWeight.txt");
 
-        dictBase.correctVertexWeight(settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_());
+        dictBase.correctVertexWeight(settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true);
 
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
                 settings.get_R_() + ",gamma=" + settings.get_GAMMA_() + " 3 затухание).txt");
@@ -136,10 +136,27 @@ public class Main {
 
         //DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
 
-        List<Pair<Vertex, Double>> clastering = dictBase.clastering();
         System.out.println("==============================================================================");
-        for(int i = 0 ; i < 20; i++){
-            System.out.println(clastering.get(i).getKey().getWord().getStr() + "\t" + clastering.get(i).getValue());
+        List<Pair<Vertex, Double>> clastering = dictBase.clastering(10, 2);
+
+        for (Pair<Vertex, Double> vertexDoublePair : clastering) {
+            Vertex vertex = vertexDoublePair.getKey();
+            Double value = vertexDoublePair.getValue();
+            System.out.print(vertex.getWord().getStr() + "\t" + vertex.getWeight() + "\t" + value + "\t" + vertex.getWeightOutgoingVertex());
+            System.out.println();
+        }
+
+        System.out.println("==============================================================================");
+        int count = 0;
+        for (int i = 0; i < 200; i++) {
+            if (PartOfSpeech.NOUN.equals(clastering.get(i).getKey().getWord().getPartOfSpeech())) {
+                if(clastering.get(i).getKey().getWeight() > 100){
+                    count++;
+                    System.out.println(clastering.get(i).getKey().getWord().getStr() + "\t" + clastering.get(i).getValue());
+                }
+            }
+            if (count > 30)
+                break;
         }
         System.out.println();
 
