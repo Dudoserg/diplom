@@ -33,7 +33,7 @@ public class CSV_DICT {
                 .build()
                 .parse();
 
-        create_список_слов_с_типомДанных(words);
+        create_Words2_список_слов_с_типомДанных(words);
 
         Map<Integer, CSV_words> words_map = words.stream()
                 .collect(Collectors.toMap(CSV_words::getId, csv_words -> csv_words));
@@ -120,7 +120,13 @@ public class CSV_DICT {
 
     }
 
-    private static void create_список_слов_с_типомДанных(List<CSV_words> words) throws IOException {
+
+    private static void createConnections(){
+
+
+    }
+
+    private static void create_Words2_список_слов_с_типомДанных(List<CSV_words> words) throws IOException {
         // извлекаем все слова из словаря
         List<String> unique = new ArrayList<>();
         for (CSV_words word : words) {
@@ -173,4 +179,6 @@ public class CSV_DICT {
         }
 
     }
+
+
 }
