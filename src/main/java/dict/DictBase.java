@@ -782,7 +782,7 @@ public class DictBase {
             }
         }
 
-        System.out.println();
+        System.out.print("");
 
 
 //        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
@@ -964,7 +964,7 @@ public class DictBase {
             return false;
         EdgeMap edgeMap = dictBase.invertMap.get(vertex);
         if (edgeMap == null)
-            System.out.println();
+            System.out.println("edgeMap == null");
         // Все вершины входящие в текущую
         boolean result = false;
         for (Map.Entry<Vertex, Edge> vertexEdgeEntry : edgeMap.getEdgeMap().entrySet()) {
@@ -972,7 +972,7 @@ public class DictBase {
             if (vertex.isFlag_train())
                 return true;
             if (v == null)
-                System.out.println();
+                System.out.println("v == null");
             result = findTrainInRadius(dictBase, v, R - 1);
             if (result)
                 return true;
@@ -985,7 +985,7 @@ public class DictBase {
             return false;
         EdgeMap edgeMap = dictBase.map.get(vertex);
         if (edgeMap == null) {
-            System.out.println();
+            System.out.println("edgeMap == null");
             return false;
         }
         // Все вершины входящие в текущую
@@ -995,7 +995,7 @@ public class DictBase {
             if (vertex.isFlag_train())
                 return true;
             if (v == null)
-                System.out.println();
+                System.out.println("v == null");
             result = findTrainInInvertRadius(dictBase, v, R - 1);
             if (result)
                 return true;

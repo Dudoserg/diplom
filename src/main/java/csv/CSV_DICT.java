@@ -8,6 +8,7 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import dict.*;
+import javafx.util.Pair;
 import mystem.MyStem;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
@@ -98,7 +99,11 @@ public class CSV_DICT {
 
     }
 
+
     public static DictBase loadFullDict() throws FileNotFoundException, DictException {
+        System.out.print("read Dictionary from file...\t\t");
+        Long t = System.currentTimeMillis();
+
 
         String connections_fileName = "data" + File.separator + "connections2.csv";
 
@@ -133,9 +138,78 @@ public class CSV_DICT {
             j++;
         }
 
-        System.out.println();
+        System.out.println("done for " + (System.currentTimeMillis() - t) + " ms.");
         return dictBase;
     }
+
+
+    public static DictBase loadFullDictTestThreads() throws FileNotFoundException, DictException, InterruptedException {
+
+        List<Pair<DictBase, String>> names = new ArrayList<>();
+        names.add(new Pair<>(new DictBase(), "data" + File.separator + "test1.csv"));
+        names.add(new Pair<>(new DictBase(), "data" + File.separator + "test2.csv"));
+        names.add(new Pair<>(new DictBase(), "data" + File.separator + "test3.csv"));
+        names.add(new Pair<>(new DictBase(), "data" + File.separator + "test4.csv"));
+
+
+        List<Thread> threadList = new ArrayList<>();
+
+        for (Pair<DictBase, String> row : names) {
+            threadList.add(new Thread(()->{
+                List<CSV_CONNECTIONS> connections = null;
+                try {
+                    connections = new CsvToBeanBuilder(new FileReader(row.getValue()))
+                            .withSeparator(';')
+                            .withType(CSV_CONNECTIONS.class)
+                            .build()
+                            .parse();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                DictBase dictBase = row.getKey();
+                int j = 2;
+                for (CSV_CONNECTIONS con : connections) {
+
+                    Vertex vertexFrom = Vertex.getVertex(con.getWordFrom());
+                    vertexFrom.getWord().setPartOfSpeech(con.getPartOfSpeechFrom());
+
+                    Vertex vertexTo = Vertex.getVertex(con.getWordTo());
+                    vertexTo.getWord().setPartOfSpeech(con.getPartOfSpeechTo());
+                    if (j == 4907)
+                        System.out.print("");
+                    if ("ресторан".equals(vertexFrom.getWord().getStr()))
+                        System.out.print("");
+                    if ("ресторан".equals(vertexTo.getWord().getStr()))
+                        System.out.print("");
+
+                    try {
+                        dictBase.addPair(
+                                vertexFrom,
+                                vertexTo,
+                                Main.settings.getWeight(con.getRelationType()),
+                                con.getRelationType()
+                        );
+                    } catch (DictException e) {
+                        e.printStackTrace();
+                    }
+                    j++;
+                }
+            }));
+        }
+
+
+        for (Thread thread : threadList) {
+            thread.start();
+        }
+        for (Thread thread : threadList) {
+            thread.join();
+        }
+
+        System.out.print("");
+        return null;
+    }
+
 
     private static DictBase calculatePartOfSpeech(DictBase dict) throws IOException {
         List<String> listOfWords = new ArrayList<>();
@@ -146,7 +220,11 @@ public class CSV_DICT {
 
         MyStem myStem = new MyStem(listOfWords, "dd_");
         myStem.saveToFile(MyStem.TEXT_WITHOUT_STOPWORDS_txt);
-        myStem.lemmatization();
+        try {
+            myStem.lemmatization();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
 
         for (MyStemItem myStemItem : myStem.getMyStemResult().getItemList()) {
@@ -205,6 +283,7 @@ public class CSV_DICT {
 
     }
 
+
     private static void create_Words2_список_слов_с_типомДанных(List<CSV_words> words) throws IOException {
         // извлекаем все слова из словаря
         List<String> unique = new ArrayList<>();
@@ -217,7 +296,11 @@ public class CSV_DICT {
         // определяем части речи данных слов
         MyStem myStem = new MyStem(collect, "qwe");
         myStem.saveToFile(MyStem.TEXT_WITHOUT_STOPWORDS_txt);
-        myStem.lemmatization();
+        try {
+            myStem.lemmatization();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         MyStemResult myStemResult = myStem.getMyStemResult();
 
         // создаем хешмап с ключом - слово , значение - часть речи

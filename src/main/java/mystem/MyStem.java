@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class MyStem {
-    private static final String MYSTEM_exe = "mystem" + File.separator  + "exe" + File.separator + "mystem.exe";
+    private static final String MYSTEM_exe = "mystem" + File.separator + "exe" + File.separator + "mystem.exe";
     private static final String MYSTEM_RESULT_json = "mystem" + File.separator + "mystemResult.json";
     public static final String FULL_TEXT = "mystem" + File.separator + "full_text.txt";
     public static final String TEXT_WITHOUT_STOPWORDS_txt = "mystem" + File.separator + "text_withoutStopWord.txt";
@@ -28,6 +28,10 @@ public class MyStem {
         this.id = id;
         this.words = words;
         this.text = words.stream().collect(Collectors.joining(" ")).trim();
+
+        if (stopWords == null) {
+            stopWords = StopWords.getInstance();
+        }
     }
 
     public MyStem(String text, String id) throws IOException {
@@ -42,6 +46,10 @@ public class MyStem {
         this.words = Arrays.stream(this.text.split(" "))
                 .filter(s -> !s.equals(" "))
                 .collect(Collectors.toList());
+
+        if (stopWords == null) {
+            stopWords = StopWords.getInstance();
+        }
     }
 
 
@@ -75,8 +83,9 @@ public class MyStem {
     }
 
 
-    public void lemmatization() {
-        System.out.print("myStemPath execution...");
+    public void lemmatization() throws IOException, InterruptedException {
+        System.out.print("myStemPath execution...\t\t");
+        Long startTime = System.currentTimeMillis();
         try {
             String command = MYSTEM_exe + " " + addId(TEXT_WITHOUT_STOPWORDS_txt) + " " + addId(MYSTEM_RESULT_json) + " " +
                     "--format json -c -l -s -i ";
@@ -102,16 +111,20 @@ public class MyStem {
                     continue;
 
                 for (MyStemAnalysis myStemAnalysis : myStemItem.getAnalysisList()) {
-                    if (stopWords.contains(myStemAnalysis.getLex())) {
-                        myStemAnalysis.setStopWord(true);
+                    try {
+                        if (stopWords.contains(myStemAnalysis.getLex())) {
+                            myStemAnalysis.setStopWord(true);
+                        }
+                    } catch (NullPointerException e) {
+                        throw e;
                     }
                 }
-
             }
         } catch (Exception ex) {
             System.out.println("exception is:" + ex);
+            throw ex;
         }
-        System.out.println("\t\t\tdone");
+        System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
     }
 
     public void removeStopWordsFromLemmatization() {
@@ -127,10 +140,10 @@ public class MyStem {
     }
 
 
-    public String addId(String str){
+    public String addId(String str) {
         String[] split = str.split("\\" + File.separator);
         String result = "";
-        for(int i = 0 ; i < split.length - 1; i++){
+        for (int i = 0; i < split.length - 1; i++) {
             result = result + split[i] + File.separator;
         }
         result += id + "_" + split[split.length - 1];

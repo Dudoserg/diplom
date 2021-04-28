@@ -24,7 +24,7 @@ public class Main {
             System.out.print(decimalFormat.format(x) + "  ");
             x = x * x;
         }
-        System.out.println();
+        System.out.print("");
 
         x = 0.95;
         for(int i = 0 ; i < 5 ; i++){
@@ -60,11 +60,9 @@ public class Main {
                 0.6, 0.3, 0.2, 3, 0.7, 3
         );
 
-        String data = "";
-        //data = Helper.readFile("mystem" + File.separator + "data.txt");
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
-//        reviews.setReview(reviews.getReview().subList(0, 50));
-        data = String.join(" ", reviews.getTexts());
+        String data  = String.join(" ", reviews.getTexts());
+
         MyStem myStemText = new MyStem(data, "tt_");
 
         myStemText.saveToFile(MyStem.FULL_TEXT);
@@ -84,11 +82,8 @@ public class Main {
         Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
 
-        System.out.print("build dict train...");
 
-        Long t = System.currentTimeMillis();
         DictBase dictBase = CSV_DICT.loadFullDict();
-        System.out.println((System.currentTimeMillis() - t));
 
         //dictBase.bidirectional(RelationType.ASS);///////////////////////////////////////////////////////////////////////
 
@@ -120,18 +115,18 @@ public class Main {
 //        }
 
         DictBase.removeUnusedVertex(dictBase, dictTrain, settings.get_R_());
-
-
         dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
+
 
         dictBase.correctEdgeWeight(bigramFrequensy, 10, settings.get_R_());
         dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
+
         dictBase.setVertexWeight(unigramFrequensy);
         dictBase.printSortedVertex("-" + File.separator + "_4_dictionary_base after setVertexWeight.txt");
 
-        dictBase.correctVertexWeight(settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true);
 
+        dictBase.correctVertexWeight(settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true);
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
                 settings.get_R_() + ",gamma=" + settings.get_GAMMA_() + " 3 затухание).txt");
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base NOUN after correctVertexWeight(r=" +
@@ -139,24 +134,27 @@ public class Main {
 
         //DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
 
+
         dictBase.calculateWeightOfOutgoingVertex();
         List<ClusterHelper> clastering = dictBase.clastering(10, 2);
+
         System.out.println("==============================================================================");
 
         int tmpIndex = 0;
         for (ClusterHelper claster : clastering) {
             if (claster.getVertex().isNoun())
-                System.out.println((tmpIndex++) + ") " + claster.getVertex().getWord().getStr() + "\t" + "w=" + claster.getVertex().getWeight() + "\t"
-                        + "wO=" + claster.getVertex().getWeightOutgoingVertex() + "\t" + "wC=" + claster.getClusterWeight());
+                System.out.println((tmpIndex++) + ") " + claster.getVertex().getWord().getStr() + "\t" + "w=" +
+                        claster.getVertex().getWeight() + "\t" + "wO=" + claster.getVertex().getWeightOutgoingVertex() +
+                        "\t" + "wC=" + claster.getClusterWeight());
         }
 
-        System.out.println();
+        System.out.print("");
 
 //        for (Pair<Vertex, Double> vertexDoublePair : clastering) {
 //            Vertex vertex = vertexDoublePair.getKey();
 //            Double value = vertexDoublePair.getValue();
 //            System.out.print(vertex.getWord().getStr() + "\t" + vertex.getWeight() + "\t" + value + "\t" + vertex.getWeightOutgoingVertex());
-//            System.out.println();
+//            System.out.print("");
 //        }
 //
 //
@@ -173,7 +171,7 @@ public class Main {
 //            if (count > 30)
 //                break;
 //        }
-//        System.out.println();
+//        System.out.print("");
 
     }
 }

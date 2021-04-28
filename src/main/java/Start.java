@@ -38,18 +38,18 @@ public class Start {
         List<Vertex> anyWay = dictBase.findAnyWay(Vertex.getVertex("0"), Vertex.getVertex("8"), 10);
         System.out.println(anyWay.stream().map(vertex -> vertex.getWord().getStr()).collect(Collectors.joining("  ")));
 
-        System.out.println();
+        System.out.print("");
 
 
         List<Way> ways = dictBase.findWays(Vertex.getVertex("0"), Vertex.getVertex("8"), 10);
         for (Way way : ways)
             System.out.println(way.print());
-        System.out.println();
+        System.out.print("");
 
 
         Way maxWay = dictBase.findMaxWay(Vertex.getVertex("0"), Vertex.getVertex("8"), 10);
         System.out.println(maxWay.print());
-        System.out.println();
+        System.out.print("");
 
 
         DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(dictBase), "example" + File.separator + "dictBaseGraph.jpg");
