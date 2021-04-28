@@ -1,5 +1,6 @@
 package dict;
 
+import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -49,6 +50,11 @@ public class Vertex {
     @Override
     public int hashCode() {
         return word.hashCode();
+    }
+
+
+    public boolean isNoun(){
+        return this.word.isNoun();
     }
 
 }

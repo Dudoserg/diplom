@@ -69,4 +69,9 @@ public class Word {
         //int x = (int) (hash % HSIZE); //return Objects.hash(word);
         return (int) hash;
     }
+
+
+    public boolean isNoun(){
+        return PartOfSpeech.NOUN.equals(this.partOfSpeech);
+    }
 }

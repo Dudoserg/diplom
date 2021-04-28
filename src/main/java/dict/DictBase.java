@@ -24,6 +24,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -1003,7 +1004,7 @@ public class DictBase {
     }
 
 
-    public List<Pair<Vertex, Double>> clastering(double A, double B) {
+    public List<Pair<Vertex, Double>> calculateWeightOfOutgoingVertex() {
         Map<Vertex, Double> tmpMap = new HashMap<>();
         for (Map.Entry<Vertex, EdgeMap> elem : this.getAllVertex()) {
             Vertex vertex = elem.getKey();
@@ -1023,6 +1024,7 @@ public class DictBase {
                     vertex.setWeightOutgoingVertex(vertex.getWeightOutgoingVertex() + vertex_2.getWeight());
                 }
                 //tmpMap.put(vertex, tmpMap.get(vertex) == null ? 0.0 : tmpMap.get(vertex) / outPutEdgeMap.getEdgeMap().entrySet().size());
+                //vertex.setWeightOutgoingVertex(tmpMap.get(vertex));
             }
             // Смотрим все входящие вершины
            /* EdgeMap outPutEdgeMap = invertMap.get(vertex);
@@ -1041,6 +1043,74 @@ public class DictBase {
                 .map(v -> new Pair<Vertex, Double>(v.getKey(), v.getValue()))
                 .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
                 .collect(Collectors.toList());
+    }
+
+
+    /**
+     * Сортируем вершины по их весам в порядке убывания
+     *
+     * @return список вершин, начиная с вершины с наибольшим весом
+     */
+    private List<ClusterHelper> getSortedWeight() {
+        List<ClusterHelper> list = new ArrayList<>();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
+            Vertex key = vertexEdgeMapEntry.getKey();
+            list.add(new ClusterHelper(key));
+        }
+        AtomicInteger num = new AtomicInteger();
+        List<ClusterHelper> list_weightSorted = list.stream()
+                .sorted((o1, o2) -> -Double.compare(o1.getVertex().getWeight(), o2.getVertex().getWeight()))
+                .collect(Collectors.toList());
+
+        list_weightSorted.forEach(clusterHelper -> clusterHelper.setPlace_weight(num.getAndIncrement()));
+        return list_weightSorted;
+    }
+
+    /**
+     * Сортируем вершины по сумме весов их соседей в порядке убывания
+     *
+     * @return список вершин, начиная с вершины с наибольшей суммой весов соседних вершин
+     */
+    private List<ClusterHelper> getSortedWeightOutgoing() {
+        List<ClusterHelper> list = new ArrayList<>();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
+            Vertex key = vertexEdgeMapEntry.getKey();
+            list.add(new ClusterHelper(key));
+        }
+        AtomicInteger num = new AtomicInteger();
+        List<ClusterHelper> list_weightOutgoingSorted = list.stream()
+                .sorted((o1, o2) -> -Double.compare(o1.getVertex().getWeightOutgoingVertex(), o2.getVertex().getWeightOutgoingVertex()))
+                .collect(Collectors.toList());
+        list_weightOutgoingSorted.forEach(clusterHelper -> clusterHelper.setPlace_weight(num.getAndIncrement()));
+        System.out.print("");
+
+        return list_weightOutgoingSorted;
+    }
+
+    public List<ClusterHelper> clastering(double A, double B) {
+        List<ClusterHelper> sortedWeight = this.getSortedWeight();
+        //Map<Vertex, ClusterHelper> mapWeight = new HashMap<>();
+        //sortedWeight.forEach(cl -> mapWeight.put(cl.getVertex(), cl));
+
+        List<ClusterHelper> sortedWeightOutgoing = this.getSortedWeightOutgoing();
+        //Map<Vertex, ClusterHelper> mapWeightOutgoing = new HashMap<>();
+        //sortedWeightOutgoing.forEach(cl -> mapWeightOutgoing.put(cl.getVertex(), cl));
+
+        double topWeight = sortedWeight.get(150).getVertex().getWeight();
+        double topWeightOutgoing = sortedWeightOutgoing.get(150).getVertex().getWeightOutgoingVertex();
+
+        List<ClusterHelper> result = new ArrayList<>();
+        for (ClusterHelper clusterHelper : sortedWeight) {
+            Vertex vertex = clusterHelper.getVertex();
+            if("интерьер".equals(vertex.getWord().getStr()))
+                System.out.print("");
+            if (topWeight > vertex.getWeight())
+                continue;
+            result.add(clusterHelper);
+            clusterHelper.setClusterWeight(vertex.getWeight() * A + vertex.getWeightOutgoingVertex() * B);
+        }
+        result.sort((o1, o2) -> -Double.compare(o1.getClusterWeight(), o2.getClusterWeight()));
+        return result;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

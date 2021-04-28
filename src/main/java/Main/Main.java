@@ -13,6 +13,7 @@ import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -136,29 +137,41 @@ public class Main {
 
         //DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
 
+        dictBase.calculateWeightOfOutgoingVertex();
+        List<ClusterHelper> clastering = dictBase.clastering(10, 5);
         System.out.println("==============================================================================");
-        List<Pair<Vertex, Double>> clastering = dictBase.clastering(10, 2);
 
-        for (Pair<Vertex, Double> vertexDoublePair : clastering) {
-            Vertex vertex = vertexDoublePair.getKey();
-            Double value = vertexDoublePair.getValue();
-            System.out.print(vertex.getWord().getStr() + "\t" + vertex.getWeight() + "\t" + value + "\t" + vertex.getWeightOutgoingVertex());
-            System.out.println();
+        int tmpIndex = 0;
+        for (ClusterHelper claster : clastering) {
+            if (claster.getVertex().isNoun())
+                System.out.println((tmpIndex++) + ") " + claster.getVertex().getWord().getStr() + "\t" + "w=" + claster.getVertex().getWeight() + "\t"
+                        + "wO=" + claster.getVertex().getWeightOutgoingVertex() + "\t" + "wC=" + claster.getClusterWeight());
         }
 
-        System.out.println("==============================================================================");
-        int count = 0;
-        for (int i = 0; i < 200; i++) {
-            if (PartOfSpeech.NOUN.equals(clastering.get(i).getKey().getWord().getPartOfSpeech())) {
-                if(clastering.get(i).getKey().getWeight() > 100){
-                    count++;
-                    System.out.println(clastering.get(i).getKey().getWord().getStr() + "\t" + clastering.get(i).getValue());
-                }
-            }
-            if (count > 30)
-                break;
-        }
         System.out.println();
+
+//        for (Pair<Vertex, Double> vertexDoublePair : clastering) {
+//            Vertex vertex = vertexDoublePair.getKey();
+//            Double value = vertexDoublePair.getValue();
+//            System.out.print(vertex.getWord().getStr() + "\t" + vertex.getWeight() + "\t" + value + "\t" + vertex.getWeightOutgoingVertex());
+//            System.out.println();
+//        }
+//
+//
+//
+//        System.out.println("==============================================================================");
+//        int count = 0;
+//        for (int i = 0; i < 200; i++) {
+//            if (PartOfSpeech.NOUN.equals(clastering.get(i).getKey().getWord().getPartOfSpeech())) {
+//                if(clastering.get(i).getKey().getWeight() > 100){
+//                    count++;
+//                    System.out.println(clastering.get(i).getKey().getWord().getStr() + "\t" + clastering.get(i).getValue());
+//                }
+//            }
+//            if (count > 30)
+//                break;
+//        }
+//        System.out.println();
 
     }
 }
