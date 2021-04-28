@@ -41,8 +41,8 @@ public class CSV_DICT {
                 .parse();
 
 
-        //create_Words2_список_слов_с_типомДанных(words);
-        //createConnections(connections, words_map);
+        create_Words2_список_слов_с_типомДанных(words);
+        createConnections(connections, words_map);
 
         DictBase dict = new DictBase();
         CSV_DICT_FULL csv_dict_full = new CSV_DICT_FULL();
@@ -109,12 +109,20 @@ public class CSV_DICT {
                 .parse();
 
         DictBase dictBase = new DictBase();
+        int j = 2;
         for (CSV_CONNECTIONS con : connections) {
+
             Vertex vertexFrom = Vertex.getVertex(con.getWordFrom());
             vertexFrom.getWord().setPartOfSpeech(con.getPartOfSpeechFrom());
 
-            Vertex vertexTo = Vertex.getVertex(con.getWordFrom());
+            Vertex vertexTo = Vertex.getVertex(con.getWordTo());
             vertexTo.getWord().setPartOfSpeech(con.getPartOfSpeechTo());
+            if (j == 4907)
+                System.out.print("");
+            if ("ресторан".equals(vertexFrom.getWord().getStr()))
+                System.out.print("");
+            if ("ресторан".equals(vertexTo.getWord().getStr()))
+                System.out.print("");
 
             dictBase.addPair(
                     vertexFrom,
@@ -122,11 +130,11 @@ public class CSV_DICT {
                     Main.settings.getWeight(con.getRelationType()),
                     con.getRelationType()
             );
-
+            j++;
         }
 
         System.out.println();
-        return  dictBase;
+        return dictBase;
     }
 
     private static DictBase calculatePartOfSpeech(DictBase dict) throws IOException {
@@ -172,11 +180,11 @@ public class CSV_DICT {
                 throw new DictException("weight of edge equals 0.0 [id=" + connection.getId() + "]");
             }
 
-            CSV_CONNECTIONS csv_connections =  CSV_CONNECTIONS.create(
+            CSV_CONNECTIONS csv_connections = CSV_CONNECTIONS.create(
                     connection.getId(),
-                    wordFrom.getSpelling(),
+                    wordFrom.getSpelling().toLowerCase(),
                     PartOfSpeech.getPart(wordFrom.getPartOfSpeech()),
-                    wordTo.getSpelling(),
+                    wordTo.getSpelling().toLowerCase(),
                     PartOfSpeech.getPart(wordTo.getPartOfSpeech()),
                     relationType
             );
@@ -225,14 +233,12 @@ public class CSV_DICT {
         // создаем новый словарь, добавив в него часть речи
         for (CSV_words word : words) {
             PartOfSpeech partOfSpeech = map.get(word.getSpelling().toLowerCase());
-            if(partOfSpeech == null){
+            if (partOfSpeech == null) {
                 System.out.print("");
-            }else{
+            } else {
                 word.setPartOfSpeech(partOfSpeech.getStr());
             }
         }
-
-
 
 
         try (

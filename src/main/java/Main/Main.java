@@ -87,9 +87,11 @@ public class Main {
         System.out.print("build dict train...");
 
         Long t = System.currentTimeMillis();
-        DictBase dictBase = CSV_DICT.loadFullDict_old();
+        DictBase dictBase = CSV_DICT.loadFullDict();
         System.out.println((System.currentTimeMillis() - t));
+
         //dictBase.bidirectional(RelationType.ASS);///////////////////////////////////////////////////////////////////////
+
         dictBase.removeStopWords();
 
         DictBase dictTrain = new DictBase();
