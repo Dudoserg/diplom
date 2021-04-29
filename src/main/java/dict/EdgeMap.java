@@ -12,7 +12,6 @@ import java.util.Map;
 public class EdgeMap {
     private Map<Vertex, Edge> edgeMap = new HashMap<>();
 
-
     public void addEdge(Vertex vertex, Edge edge) {
         this.edgeMap.put(vertex, edge);
     }

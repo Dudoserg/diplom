@@ -26,7 +26,7 @@ public class Reviews {
 
 
     public static Reviews readFromFile(String path) throws IOException {
-        System.out.println("read train data from file...\t\t");
+        System.out.print("read train data from file...\t\t");
         Long startTime = System.currentTimeMillis();
         File file = new File(path);
         String xml = inputStreamToString(new FileInputStream(file));

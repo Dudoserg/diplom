@@ -1,5 +1,6 @@
 package Main;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import csv.CSV_DICT;
 import data.Reviews;
 import dict.*;
@@ -12,8 +13,10 @@ import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -56,12 +59,20 @@ public class Main {
 
     public static void mystemTest() throws IOException, DictException, InterruptedException {
 
+//        {
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            String str = Helper.readFile("result" + File.separator + "dict.json");
+//            DictBase ss = objectMapper.readValue(str, DictBase.class);
+//            System.out.println();
+//        }
+
+
         settings = new Settings(
-                0.6, 0.3, 0.2, 3, 0.7, 3
+                0.6 * 0.8, 0.3 * 0.8, 0.2 * 0.8, 3, 0.6, 3
         );
 
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
-        String data  = String.join(" ", reviews.getTexts());
+        String data = String.join(" ", reviews.getTexts());
 
         MyStem myStemText = new MyStem(data, "tt_");
 
@@ -136,7 +147,7 @@ public class Main {
 
 
         dictBase.calculateWeightOfOutgoingVertex();
-        List<ClusterHelper> clastering = dictBase.clastering(10, 2);
+        List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
 
         System.out.println("==============================================================================");
 
@@ -146,8 +157,23 @@ public class Main {
                 System.out.println((tmpIndex++) + ") " + claster.getVertex().getWord().getStr() + "\t" + "w=" +
                         claster.getVertex().getWeight() + "\t" + "wO=" + claster.getVertex().getWeightOutgoingVertex() +
                         "\t" + "wC=" + claster.getClusterWeight());
+            if (tmpIndex > 40)
+                break;
+        }
+        int notDel = 0;
+        Set<Vertex> fordel = new HashSet<>();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
+            notDel++;
+            if(notDel > 250){
+                fordel.add(vertexEdgeMapEntry.getKey());
+            }
+        }
+        for (Vertex vertex : fordel) {
+            dictBase.getInvertMap().remove(vertex);
         }
 
+//        dictBase.saveAs("C:" + File.separator + "_diplom" + File.separator + "dict.json");
+        dictBase.saveAs( "result" + File.separator + "dict.json");
         System.out.print("");
 
 //        for (Pair<Vertex, Double> vertexDoublePair : clastering) {

@@ -1,5 +1,7 @@
 package dict;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dict.Edge.Edge;
 import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Font;
@@ -36,6 +38,7 @@ import static guru.nidi.graphviz.model.Link.to;
 @Getter
 @Setter
 public class DictBase {
+    @JsonIgnore
     private Map<Vertex, EdgeMap> map;
 
     private Map<Vertex, EdgeMap> invertMap;
@@ -59,6 +62,7 @@ public class DictBase {
         return edge;
     }
 
+    @JsonIgnore
     public Set<Map.Entry<Vertex, EdgeMap>> getAllVertex() {
         return invertMap.entrySet();
     }
@@ -647,6 +651,7 @@ public class DictBase {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void setVertexWeight(Map<Unigram, Integer> unigramFrequensy) {
+        Long startTime = System.currentTimeMillis();
         System.out.print("setVertexWeight");
 
         Map<String, Integer> collect =
@@ -664,7 +669,7 @@ public class DictBase {
                 key.setWeight(0.0);
             }
         }
-        System.out.println("\t\t\tdone");
+        System.out.println("\t\t\tdone for " + (System.currentTimeMillis() - startTime) + " ms.");
 
     }
 
@@ -676,27 +681,18 @@ public class DictBase {
      * @param gamma_degree  [1,3]
      */
     public void correctVertexWeight(int radius, double gamma, int gamma_degree, boolean thread) throws DictException, InterruptedException {
+        Function<Double, Double> function = null;
         switch (gamma_degree) {
             case 1: {
-                if (thread)
-                    this.correctVertexWeightThread(radius, gamma, aDouble -> aDouble);
-                else
-                    this.correctVertexWeight(radius, gamma, aDouble -> aDouble);
+                function = aDouble -> aDouble;
                 break;
             }
             case 2: {
-                if (thread)
-                    this.correctVertexWeightThread(radius, gamma, aDouble -> aDouble * aDouble);
-                else
-                    this.correctVertexWeight(radius, gamma, aDouble -> aDouble * aDouble);
-
+                function = aDouble -> aDouble * aDouble;
                 break;
             }
             case 3: {
-                if (thread)
-                    this.correctVertexWeightThread(radius, gamma, aDouble -> aDouble * aDouble * aDouble);
-                else
-                    this.correctVertexWeight(radius, gamma, aDouble -> aDouble * aDouble * aDouble);
+                function = aDouble -> aDouble * aDouble * aDouble;
                 break;
             }
             default: {
@@ -704,10 +700,18 @@ public class DictBase {
                         "' is out of bounds of allowed values [1,3]");
             }
         }
+        long startTime = System.currentTimeMillis();
+        if (thread) {
+            System.out.print("correctVertexWeightThread ...\t\t");
+            correctVertexWeightThread(radius, gamma, function);
+        } else {
+            System.out.print("correctVertexWeight ...\t\t");
+            correctVertexWeight(radius, gamma, function);
+        }
+        System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
     }
 
     private void correctVertexWeight(int radius, double gamma, Function<Double, Double> gammaFunction) throws InterruptedException {
-        System.out.print("correctVertexWeight...");
         double weightAdd = 0;
         int counter = 0;
         List<Vertex> cycle = new ArrayList<>();            // Список для отслеживания циклов в распространении весов вершин
@@ -741,11 +745,9 @@ public class DictBase {
                 System.out.println("throw  e;");
             }
         }
-        System.out.println("\t\t\tdone");
     }
 
     private void correctVertexWeightThread(int radius, double gamma, Function<Double, Double> gammaFunction) throws InterruptedException {
-        System.out.print("correctVertexWeight...");
         double weightAdd = 0;
         int counter = 0;
 
@@ -798,9 +800,9 @@ public class DictBase {
                 .map(v -> new Pair<>(v.getKey(), v.getValue()))
                 .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
                 .collect(Collectors.toList());
-        collect.forEach(v -> {
-            System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
-        });
+//        collect.forEach(v -> {
+//            System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
+//        });
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
             Vertex v = vertexEdgeMapEntry.getKey();
             Double aDouble = tmpWeight.get(v);
@@ -812,7 +814,6 @@ public class DictBase {
                 System.out.println("throw  e;");
             }
         }
-        System.out.println("\t\t\tdone");
     }
 
     public void funWeight(Vertex vertex, double weightAdd, int radius, double gamma, Function<Double, Double> gammaFunction,
@@ -878,6 +879,7 @@ public class DictBase {
     }
 
     public void correctEdgeWeight(Map<Bigram, Integer> bigramFrequensy, int treshold, int radius) throws DictException {
+        Long startTime = System.currentTimeMillis();
         System.out.print("correctEdgeWeight...");
 
         Integer maxH = bigramFrequensy.entrySet().stream()
@@ -891,7 +893,7 @@ public class DictBase {
                 this.funcEdgeWeightCorrection(Vertex.getVertex(bigram.getFirst()), Vertex.getVertex(bigram.getSecond()), radius, betta);
             }
         }
-        System.out.println("\t\t\tdone");
+        System.out.println("\t\t\tdone for " + (System.currentTimeMillis() - startTime) + " ms.");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -936,11 +938,6 @@ public class DictBase {
 //            System.out.println(x++ + "/" + training.getMap().size());
 //        }
         System.out.println("\t\t\tdone");
-    }
-
-
-    public void removedVertexByStopWords() {
-
     }
 
     /**
@@ -1003,8 +1000,14 @@ public class DictBase {
         return false;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////  ПОДСЧЕТ СУММЫ СОСЕДНИХ ИСХОДЯЩИХ ИЗ ВЕРШИНЫ ВЕРШИН  ///////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public List<Pair<Vertex, Double>> calculateWeightOfOutgoingVertex() {
+    /**
+     * Для каждой вершины расчитываем сумму весов исходящих из нее вершин
+     */
+    public void calculateWeightOfOutgoingVertex() {
         Map<Vertex, Double> tmpMap = new HashMap<>();
         for (Map.Entry<Vertex, EdgeMap> elem : this.getAllVertex()) {
             Vertex vertex = elem.getKey();
@@ -1039,10 +1042,48 @@ public class DictBase {
                 //tmpMap.put(vertex, tmpMap.get(vertex) == null ? 0.0 : tmpMap.get(vertex) / outPutEdgeMap.getEdgeMap().entrySet().size());
             }*/
         }
-        return tmpMap.entrySet().stream()
+        List<Pair<Vertex, Double>> collect = tmpMap.entrySet().stream()
                 .map(v -> new Pair<Vertex, Double>(v.getKey(), v.getValue()))
                 .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
                 .collect(Collectors.toList());
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////  КЛАСТЕРИЗАЦИЯ  /////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /**
+     * Функция кластеризации
+     *
+     * @param A коэффициент веса вершины
+     * @param B коэффициент умножаемый на сумму весов соседних вершин
+     * @return список объектов, в которых указаны порядки сортировки по весу вершины, по сумме весов вершин
+     */
+    public List<ClusterHelper> clastering(double A, double B) {
+        List<ClusterHelper> sortedWeight = this.getSortedWeight();
+        //Map<Vertex, ClusterHelper> mapWeight = new HashMap<>();
+        //sortedWeight.forEach(cl -> mapWeight.put(cl.getVertex(), cl));
+
+        List<ClusterHelper> sortedWeightOutgoing = this.getSortedWeightOutgoing();
+        //Map<Vertex, ClusterHelper> mapWeightOutgoing = new HashMap<>();
+        //sortedWeightOutgoing.forEach(cl -> mapWeightOutgoing.put(cl.getVertex(), cl));
+
+        double topWeight = sortedWeight.get(150).getVertex().getWeight();
+        double topWeightOutgoing = sortedWeightOutgoing.get(150).getVertex().getWeightOutgoingVertex();
+
+        List<ClusterHelper> result = new ArrayList<>();
+        for (ClusterHelper clusterHelper : sortedWeight) {
+            Vertex vertex = clusterHelper.getVertex();
+            if ("интерьер".equals(vertex.getWord().getStr()))
+                System.out.print("");
+            if (topWeight > vertex.getWeight())
+                continue;
+            result.add(clusterHelper);
+            clusterHelper.setClusterWeight(vertex.getWeight() * A + vertex.getWeightOutgoingVertex() * B);
+        }
+        result.sort((o1, o2) -> -Double.compare(o1.getClusterWeight(), o2.getClusterWeight()));
+        return result;
     }
 
 
@@ -1087,34 +1128,18 @@ public class DictBase {
         return list_weightOutgoingSorted;
     }
 
-    public List<ClusterHelper> clastering(double A, double B) {
-        List<ClusterHelper> sortedWeight = this.getSortedWeight();
-        //Map<Vertex, ClusterHelper> mapWeight = new HashMap<>();
-        //sortedWeight.forEach(cl -> mapWeight.put(cl.getVertex(), cl));
 
-        List<ClusterHelper> sortedWeightOutgoing = this.getSortedWeightOutgoing();
-        //Map<Vertex, ClusterHelper> mapWeightOutgoing = new HashMap<>();
-        //sortedWeightOutgoing.forEach(cl -> mapWeightOutgoing.put(cl.getVertex(), cl));
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////  ЧТЕНИЕ\ЗАПИСЬ СЛОВАРЯ  ///////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        double topWeight = sortedWeight.get(150).getVertex().getWeight();
-        double topWeightOutgoing = sortedWeightOutgoing.get(150).getVertex().getWeightOutgoingVertex();
-
-        List<ClusterHelper> result = new ArrayList<>();
-        for (ClusterHelper clusterHelper : sortedWeight) {
-            Vertex vertex = clusterHelper.getVertex();
-            if("интерьер".equals(vertex.getWord().getStr()))
-                System.out.print("");
-            if (topWeight > vertex.getWeight())
-                continue;
-            result.add(clusterHelper);
-            clusterHelper.setClusterWeight(vertex.getWeight() * A + vertex.getWeightOutgoingVertex() * B);
-        }
-        result.sort((o1, o2) -> -Double.compare(o1.getClusterWeight(), o2.getClusterWeight()));
-        return result;
+    public void saveAs(String path) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writeValue(new File(path), this);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////  ОТРИСОВКА  ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
