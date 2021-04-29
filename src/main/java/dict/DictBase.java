@@ -36,10 +36,10 @@ import static guru.nidi.graphviz.model.Link.to;
 @Setter
 public class DictBase implements Serializable {
 
-    public static Map<Word, Vertex> vertex_cash;
-    static {
-        vertex_cash = new HashMap<>();
-    }
+    public Map<Word, Vertex> vertex_cash = new HashMap<>();
+//    static {
+//        vertex_cash = new HashMap<>();
+//    }
 
     private Map<Vertex, EdgeMap> map;
 
@@ -916,7 +916,7 @@ public class DictBase implements Serializable {
     public static void removeUnusedVertex(DictBase dictBase, DictBase training, int R) throws DictException {
         System.out.print("removeUnusedVertex...");
 
-        training.setFlagTrain();
+        dictBase.setFlagTrain(training);
 
         List<Vertex> deletingVertex = new ArrayList<>();
         for (Map.Entry<Vertex, EdgeMap> d : dictBase.invertMap.entrySet()) {
@@ -950,9 +950,16 @@ public class DictBase implements Serializable {
     /**
      * Помечаем все вершины как тренировочные
      */
-    public void setFlagTrain() {
+    public void setFlagTrain(DictBase train) {
+        Set<Vertex> trainVertexSet = new HashSet<>(train.invertMap.keySet());
+
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
-            vertexEdgeMapEntry.getKey().setFlag_train(true);
+            Vertex dictVertex = vertexEdgeMapEntry.getKey();
+            if (trainVertexSet.contains(dictVertex)) {
+                dictVertex.setFlag_train(true);
+            } else {
+                dictVertex.setFlag_train(false);
+            }
         }
     }
 
@@ -1141,8 +1148,28 @@ public class DictBase implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void saveAs(String path) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.writeValue(new File(path), this);
+        System.out.print("save dictionary to file (path='" + path + "') ... \t\t\t");
+        Long startTime = System.currentTimeMillis();
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("result\\person.dat"))) {
+            oos.writeObject(this);
+            System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
+        } catch (Exception ex) {
+            System.out.print("ERROR!");
+            throw ex;
+        }
+    }
+
+    public static DictBase readFrom(String path) throws IOException, ClassNotFoundException {
+        System.out.print("readFrom dictionary from file (path='" + path + "') ... \t\t\t");
+        Long startTime = System.currentTimeMillis();
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("result\\person.dat"))) {
+            DictBase dictBase = (DictBase) ois.readObject();
+            System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
+            return dictBase;
+        } catch (Exception ex) {
+            System.out.print("ERROR!");
+            throw ex;
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -136,6 +136,9 @@ public class Main {
         dictBase.printSortedVertex("-" + File.separator + "_4_dictionary_base after setVertexWeight.txt");
 
 
+        dictBase.saveAs("result" + File.separator + "restaurant.dat");
+
+
         dictBase.correctVertexWeight(settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true);
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
                 settings.get_R_() + ",gamma=" + settings.get_GAMMA_() + " 3 затухание).txt");
@@ -175,20 +178,7 @@ public class Main {
         //dictBase.saveAs("result" + File.separator + "dict.json");
         //System.out.print("");
 
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("result\\person.dat"))) {
-            oos.writeObject(dictBase);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
 
-        try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream("result\\person.dat")))
-        {
-            DictBase p=(DictBase) ois.readObject();
-            System.out.print("");
-        }
-        catch(Exception ex){
-            System.out.println(ex.getMessage());
-        }
 //        for (Pair<Vertex, Double> vertexDoublePair : clastering) {
 //            Vertex vertex = vertexDoublePair.getKey();
 //            Double value = vertexDoublePair.getValue();
