@@ -909,9 +909,10 @@ public class DictBase implements Serializable {
 
     /**
      * Из всего графа, выделяем только те слова, что находятся в обучающей выборке + слова в радиусе R
-     *
-     * @param training
-     * @return
+     * @param dictBase Основной словарь
+     * @param training Словарь построенный по тренировочной выборке
+     * @param R радиус
+     * @throws DictException ошибка при работе со словарем (удаление вершины)
      */
     public static void removeUnusedVertex(DictBase dictBase, DictBase training, int R) throws DictException {
         System.out.print("removeUnusedVertex...");
@@ -947,6 +948,7 @@ public class DictBase implements Serializable {
         System.out.println("\t\t\tdone");
     }
 
+
     /**
      * Помечаем все вершины как тренировочные
      */
@@ -955,17 +957,15 @@ public class DictBase implements Serializable {
 
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
             Vertex dictVertex = vertexEdgeMapEntry.getKey();
-            if (trainVertexSet.contains(dictVertex)) {
-                dictVertex.setFlag_train(true);
-            } else {
-                dictVertex.setFlag_train(false);
-            }
+            dictVertex.setFlag_train(trainVertexSet.contains(dictVertex));
         }
     }
 
+
     /**
-     * Проверяем, входит ли вершина в радиус тренировочной выборки
-     *
+     * Проверяем, входит ли вершина в радиус тренировочной выборки, исходящие из вершины вершины
+     * (тем самым учитываются исходящие вершины)
+     * @param dictBase словарь в котором ведется проверка
      * @param vertex вершина, которую проверяем, входит ли она в радиус Р тренировочной выборки
      * @param R      радиус
      * @return да\нет
@@ -978,6 +978,7 @@ public class DictBase implements Serializable {
             System.out.println("edgeMap == null");
         // Все вершины входящие в текущую
         boolean result = false;
+        assert edgeMap != null;
         for (Map.Entry<Vertex, Edge> vertexEdgeEntry : edgeMap.getEdgeMap().entrySet()) {
             Vertex v = vertexEdgeEntry.getKey();
             if (vertex.isFlag_train())
@@ -991,6 +992,15 @@ public class DictBase implements Serializable {
         return false;
     }
 
+
+    /**
+     * Проверяем, входит ли вершина в радиус тренировочной выборки, в инвертированном словаре
+     * (тем самым учитываются входящие вершины)
+     * @param dictBase словарь в котором ведется проверка
+     * @param vertex вершина, которую проверяем, входит ли она в радиус Р тренировочной выборки
+     * @param R      радиус
+     * @return да\нет
+     */
     private static Boolean findTrainInInvertRadius(DictBase dictBase, Vertex vertex, Integer R) {
         if (R == 0)
             return false;
@@ -1065,7 +1075,6 @@ public class DictBase implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////  КЛАСТЕРИЗАЦИЯ  /////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     /**
      * Функция кластеризации
@@ -1147,9 +1156,14 @@ public class DictBase implements Serializable {
     ////////////////////////////////////////  ЧТЕНИЕ\ЗАПИСЬ СЛОВАРЯ  ///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Сериализовать словарь в файл по заданному пути
+     * @param path путь сохранени
+     * @throws IOException ошибка при записи файла
+     */
     public void saveAs(String path) throws IOException {
         System.out.print("save dictionary to file (path='" + path + "') ... \t\t\t");
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("result\\person.dat"))) {
             oos.writeObject(this);
             System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
@@ -1159,9 +1173,16 @@ public class DictBase implements Serializable {
         }
     }
 
+    /**
+     * Десериализация словаря из файла по пути
+     * @param path путь
+     * @return словарь
+     * @throws IOException err
+     * @throws ClassNotFoundException err
+     */
     public static DictBase readFrom(String path) throws IOException, ClassNotFoundException {
         System.out.print("readFrom dictionary from file (path='" + path + "') ... \t\t\t");
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("result\\person.dat"))) {
             DictBase dictBase = (DictBase) ois.readObject();
             System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
