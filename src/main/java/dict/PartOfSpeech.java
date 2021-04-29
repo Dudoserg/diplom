@@ -1,8 +1,9 @@
 package dict;
 
 
+import java.io.Serializable;
 
-public enum PartOfSpeech {
+public enum PartOfSpeech implements Serializable {
     NOUN("S"),
     ADJECTIVE("A"),
     VERB("V"),

@@ -12,12 +12,14 @@ import javafx.util.Pair;
 import mystem.MyStem;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
-import settings.Settings;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CSV_DICT {
@@ -72,10 +74,10 @@ public class CSV_DICT {
             if (wordFrom.getSpelling().matches("[a-zA-Z]+") || wordTo.getSpelling().matches("[a-zA-Z]+")) {
                 continue;
             }
-            Vertex fromVertex = Vertex.getVertex(wordFrom.getSpelling());
+            Vertex fromVertex = Vertex.getVertex(dict, wordFrom.getSpelling());
             fromVertex.getWord().setPartOfSpeech(PartOfSpeech.getPart(wordFrom.getPartOfSpeech()));
 
-            Vertex toVertex = Vertex.getVertex(wordTo.getSpelling());
+            Vertex toVertex = Vertex.getVertex(dict, wordTo.getSpelling());
             toVertex.getWord().setPartOfSpeech(PartOfSpeech.getPart(wordTo.getPartOfSpeech()));
 
 
@@ -113,14 +115,14 @@ public class CSV_DICT {
                 .build()
                 .parse();
 
-        DictBase dictBase = new DictBase();
+        DictBase dict = new DictBase();
         int j = 2;
         for (CSV_CONNECTIONS con : connections) {
 
-            Vertex vertexFrom = Vertex.getVertex(con.getWordFrom());
+            Vertex vertexFrom = Vertex.getVertex(dict, con.getWordFrom());
             vertexFrom.getWord().setPartOfSpeech(con.getPartOfSpeechFrom());
 
-            Vertex vertexTo = Vertex.getVertex(con.getWordTo());
+            Vertex vertexTo = Vertex.getVertex(dict, con.getWordTo());
             vertexTo.getWord().setPartOfSpeech(con.getPartOfSpeechTo());
             if (j == 4907)
                 System.out.print("");
@@ -129,7 +131,7 @@ public class CSV_DICT {
             if ("ресторан".equals(vertexTo.getWord().getStr()))
                 System.out.print("");
 
-            dictBase.addPair(
+            dict.addPair(
                     vertexFrom,
                     vertexTo,
                     Main.settings.getWeight(con.getRelationType()),
@@ -139,7 +141,7 @@ public class CSV_DICT {
         }
 
         System.out.println("done for " + (System.currentTimeMillis() - t) + " ms.");
-        return dictBase;
+        return dict;
     }
 
 
@@ -155,7 +157,7 @@ public class CSV_DICT {
         List<Thread> threadList = new ArrayList<>();
 
         for (Pair<DictBase, String> row : names) {
-            threadList.add(new Thread(()->{
+            threadList.add(new Thread(() -> {
                 List<CSV_CONNECTIONS> connections = null;
                 try {
                     connections = new CsvToBeanBuilder(new FileReader(row.getValue()))
@@ -167,14 +169,14 @@ public class CSV_DICT {
                     e.printStackTrace();
                 }
 
-                DictBase dictBase = row.getKey();
+                DictBase dict = row.getKey();
                 int j = 2;
                 for (CSV_CONNECTIONS con : connections) {
 
-                    Vertex vertexFrom = Vertex.getVertex(con.getWordFrom());
+                    Vertex vertexFrom = Vertex.getVertex(dict, con.getWordFrom());
                     vertexFrom.getWord().setPartOfSpeech(con.getPartOfSpeechFrom());
 
-                    Vertex vertexTo = Vertex.getVertex(con.getWordTo());
+                    Vertex vertexTo = Vertex.getVertex(dict, con.getWordTo());
                     vertexTo.getWord().setPartOfSpeech(con.getPartOfSpeechTo());
                     if (j == 4907)
                         System.out.print("");
@@ -184,7 +186,7 @@ public class CSV_DICT {
                         System.out.print("");
 
                     try {
-                        dictBase.addPair(
+                        dict.addPair(
                                 vertexFrom,
                                 vertexTo,
                                 Main.settings.getWeight(con.getRelationType()),
@@ -230,7 +232,7 @@ public class CSV_DICT {
         for (MyStemItem myStemItem : myStem.getMyStemResult().getItemList()) {
             myStemItem.calcPartOfSpeech();
             PartOfSpeech partOfSpeech = myStemItem.getPartOfSpeech();
-            Vertex vertex = Vertex.getVertex(myStemItem.getText());
+            Vertex vertex = Vertex.getVertex(dict, myStemItem.getText());
             vertex.getWord().setPartOfSpeech(partOfSpeech);
             System.out.print("");
         }

@@ -2,7 +2,9 @@ package dict;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum RelationType {
+import java.io.Serializable;
+
+public enum RelationType implements Serializable {
     DEF("DEF"),
     SYN("SYN"),
     ASS("ASS"),

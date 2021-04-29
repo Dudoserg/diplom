@@ -3,11 +3,12 @@ package dict;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.*;
 
 @Getter
 @Setter
-public class Word {
+public class Word implements Serializable {
     static final int p = 31;
     static int HSIZE = 10;
     public static Map<String, Word> words_cash;

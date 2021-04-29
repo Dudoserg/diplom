@@ -4,12 +4,13 @@ import dict.Edge.Edge;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 @Getter
 @Setter
-public class EdgeMap {
+public class EdgeMap implements Serializable {
     private Map<Vertex, Edge> edgeMap = new HashMap<>();
 
     public void addEdge(Vertex vertex, Edge edge) {

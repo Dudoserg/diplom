@@ -10,6 +10,7 @@ import static guru.nidi.graphviz.model.Factory.node;
 
 public class Start {
     public Start() throws DictException, IOException {
+/*
 
 
         Reviews reviews = Reviews.readFromFile(System.getProperty("user.dir") + File.separator +
@@ -63,12 +64,13 @@ public class Start {
 //        for (int i = 1; i < 10; i++) {
 //            dict.DictBase.draw(dictBase.getSubDict(new dict.Vertex("афиша"), i).getGraphViz(), "example/subDict_" + i + ".png");
 //        }
+*/
 
     }
 
 
     public DictBase readDictFromFile() {
-        DictBase dictBase = new DictBase();
+      /*  DictBase dictBase = new DictBase();
         int countLine = 0;
         try {
             File file = new File("inputDict.txt");
@@ -115,7 +117,9 @@ public class Start {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return dictBase;
+        return dictBase;/*
+       */
+        return null;
     }
 
 

@@ -11,8 +11,7 @@ import utils.Bigram;
 import utils.Helper;
 import utils.Unigram;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +102,7 @@ public class Main {
         DictBase dictTrain = new DictBase();
         for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
             Bigram key = bigramIntegerEntry.getKey();
-            Edge edge = dictBase.getEdge(Vertex.getVertex(key.getFirst()), Vertex.getVertex(key.getSecond()));
+            Edge edge = dictBase.getEdge(Vertex.getVertex(dictBase, key.getFirst()), Vertex.getVertex(dictBase, key.getSecond()));
             if (edge != null)
                 dictTrain.addPair(key.getFirst(), key.getSecond(), edge.getWeight(), edge.getRelationType());
             else
@@ -160,22 +159,36 @@ public class Main {
             if (tmpIndex > 40)
                 break;
         }
-        int notDel = 0;
-        Set<Vertex> fordel = new HashSet<>();
-        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
-            notDel++;
-            if(notDel > 250){
-                fordel.add(vertexEdgeMapEntry.getKey());
-            }
-        }
-        for (Vertex vertex : fordel) {
-            dictBase.getInvertMap().remove(vertex);
-        }
-
+//        int notDel = 0;
+//        Set<Vertex> fordel = new HashSet<>();
+//        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
+//            notDel++;
+//            if (notDel > 250) {
+//                fordel.add(vertexEdgeMapEntry.getKey());
+//            }
+//        }
+//        for (Vertex vertex : fordel) {
+//            dictBase.getInvertMap().remove(vertex);
+//        }
 //        dictBase.saveAs("C:" + File.separator + "_diplom" + File.separator + "dict.json");
-        dictBase.saveAs( "result" + File.separator + "dict.json");
-        System.out.print("");
 
+        //dictBase.saveAs("result" + File.separator + "dict.json");
+        //System.out.print("");
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("result\\person.dat"))) {
+            oos.writeObject(dictBase);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream("result\\person.dat")))
+        {
+            DictBase p=(DictBase) ois.readObject();
+            System.out.print("");
+        }
+        catch(Exception ex){
+            System.out.println(ex.getMessage());
+        }
 //        for (Pair<Vertex, Double> vertexDoublePair : clastering) {
 //            Vertex vertex = vertexDoublePair.getKey();
 //            Double value = vertexDoublePair.getValue();
@@ -198,6 +211,6 @@ public class Main {
 //                break;
 //        }
 //        System.out.print("");
-
+        System.out.print("");
     }
 }

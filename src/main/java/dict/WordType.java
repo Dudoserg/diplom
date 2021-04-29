@@ -1,6 +1,8 @@
 package dict;
 
-public enum WordType {
+import java.io.Serializable;
+
+public enum WordType implements Serializable {
     Noun(1),
     Adjective(2),
     Participle(3),

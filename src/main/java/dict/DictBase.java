@@ -20,10 +20,7 @@ import threads.ThRun;
 import utils.Bigram;
 import utils.Unigram;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,8 +34,13 @@ import static guru.nidi.graphviz.model.Link.to;
 
 @Getter
 @Setter
-public class DictBase {
-    @JsonIgnore
+public class DictBase implements Serializable {
+
+    public static Map<Word, Vertex> vertex_cash;
+    static {
+        vertex_cash = new HashMap<>();
+    }
+
     private Map<Vertex, EdgeMap> map;
 
     private Map<Vertex, EdgeMap> invertMap;
@@ -101,8 +103,8 @@ public class DictBase {
     }
 
     public void addPair(String first, String second, double weight, RelationType relationType) {
-        Vertex f = Vertex.getVertex(first);
-        Vertex s = Vertex.getVertex(second);
+        Vertex f = Vertex.getVertex(this, first);
+        Vertex s = Vertex.getVertex(this, second);
         this.addPair(f, s, new Edge(f, s, weight, relationType));
     }
 
@@ -890,7 +892,12 @@ public class DictBase {
             Integer h = one.getValue();
             if (h > treshold) {
                 double betta = (double) h / (double) maxH + 1;
-                this.funcEdgeWeightCorrection(Vertex.getVertex(bigram.getFirst()), Vertex.getVertex(bigram.getSecond()), radius, betta);
+                this.funcEdgeWeightCorrection(
+                        Vertex.getVertex(this, bigram.getFirst()),
+                        Vertex.getVertex(this, bigram.getSecond()),
+                        radius,
+                        betta
+                );
             }
         }
         System.out.println("\t\t\tdone for " + (System.currentTimeMillis() - startTime) + " ms.");

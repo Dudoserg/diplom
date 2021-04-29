@@ -4,18 +4,14 @@ import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 @Getter
 @Setter
-public class Vertex {
-    public static Map<Word, Vertex> vertex_cash;
-    static {
-        vertex_cash = new HashMap<>();
-    }
-
+public class Vertex implements Serializable {
     static final int p = 31;
     static int HSIZE = 10;
 
@@ -28,12 +24,12 @@ public class Vertex {
         this.word = word;
     }
 
-    public static Vertex getVertex(String word){
+    public static Vertex getVertex(DictBase dictBase, String word){
         Word w = Word.getWord(word);
-        Vertex v =  vertex_cash.get(w);
+        Vertex v =  dictBase.vertex_cash.get(w);
         if (v == null) {
             v = new Vertex(w);
-            vertex_cash.put(w, v);
+            dictBase.vertex_cash.put(w, v);
         }
         return v;
     }

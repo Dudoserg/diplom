@@ -5,9 +5,11 @@ import dict.Vertex;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
-public class Edge {
+public class Edge implements Serializable {
     public static final Double DEF_BASE_WEIGHT = 1.0;
     public static final Double SYN_BASE_WEIGHT = 0.8;
     public static final Double ASS_BASE_WEIGHT = 0.5;
