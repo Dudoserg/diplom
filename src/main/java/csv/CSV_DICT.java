@@ -141,6 +141,7 @@ public class CSV_DICT {
         }
 
         System.out.println("done for " + (System.currentTimeMillis() - t) + " ms.");
+
         return dict;
     }
 

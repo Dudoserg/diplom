@@ -118,4 +118,8 @@ public class Helper {
         }
         writer.close();
     }
+
+    public void saveFirstCluster(){
+
+    }
 }
