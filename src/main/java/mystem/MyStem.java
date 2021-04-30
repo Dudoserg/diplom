@@ -86,6 +86,7 @@ public class MyStem {
     public void lemmatization() throws IOException, InterruptedException {
         System.out.print("myStemPath execution...\t\t");
         Long startTime = System.currentTimeMillis();
+        this.saveToFile(TEXT_WITHOUT_STOPWORDS_txt);
         try {
             String command = MYSTEM_exe + " " + addId(TEXT_WITHOUT_STOPWORDS_txt) + " " + addId(MYSTEM_RESULT_json) + " " +
                     "--format json -c -l -s -i ";

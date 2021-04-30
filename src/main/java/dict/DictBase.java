@@ -1262,6 +1262,14 @@ public class DictBase implements Serializable {
                     System.out.println();
                 }
             }
+            /// Считаем сумму весов всех вершин в данном кластере
+            List<Vertex> vertices = list.get(list.size() - 1);
+            double clusterWeight = vertices.stream()
+                    .mapToDouble(Vertex::getWeight)
+                    .sum();
+            cluster.setWeight(clusterWeight);
+            cluster.setCountVertex(vertices.size());
+            cluster.setVertexList(vertices);
         }
     }
 
@@ -1457,7 +1465,7 @@ public class DictBase implements Serializable {
                 .with(
                         graphViz
                 );
-        Graphviz.fromGraph(g).totalMemory(1000000000).height(6000).render(Format.PNG).toFile(new File(path));
+        Graphviz.fromGraph(g).totalMemory(1000000000).height(22000).render(Format.PNG).toFile(new File(path));
     }
 
     public static void graphviz_graphSaveToFile(List<Node> graphViz, String fileName, Format format) throws IOException {

@@ -10,12 +10,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Helper {
-
 
 
     public static String readFile(String path) throws IOException {
@@ -119,7 +119,11 @@ public class Helper {
         writer.close();
     }
 
-    public void saveFirstCluster(){
+    public void saveFirstCluster() {
 
+    }
+
+    public static String path(String... strings) {
+        return Arrays.stream(strings).collect(Collectors.joining(File.separator));
     }
 }

@@ -6,6 +6,7 @@ import data.Reviews;
 import dict.*;
 import dict.Edge.Edge;
 import mystem.MyStem;
+import mystem.MyStemItem;
 import settings.Settings;
 import utils.Bigram;
 import utils.Helper;
@@ -70,7 +71,7 @@ public class Main {
         settings = new Settings(
                 0.6, 0.3, 0.2, 3, 0.65, 3
         );
-
+        test();
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
         String data = String.join(" ", reviews.getTexts());
 
@@ -215,16 +216,26 @@ public class Main {
 //        }
 
 
-        DictBase интерьер1 = dictBase.getFullSubDict(Vertex.getVertex(dictBase, "селезень"), 0);
+        DictBase интерьер1 = dictBase.getFullSubDict(Vertex.getVertex(dictBase, "форма"), 0);
         DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(интерьер1), "result" + File.separator + "r1.png");
         int size1 = интерьер1.getInvertMap().size();
 
 
-        DictBase интерьер2 = dictBase.getFullSubDict(Vertex.getVertex(dictBase, "селезень"), 1);
+        DictBase интерьер2 = dictBase.getFullSubDict(Vertex.getVertex(dictBase, "форма"), 1);
         DictBase.graphviz_drawHight(DictBase.graphviz_getGraphViz(интерьер2), "result" + File.separator + "r2.png");
         int size2 = интерьер2.getInvertMap().size();
 
 
-        System.out.print("");
+
+    }
+
+    static void test() throws IOException, InterruptedException {
+        MyStem myStem = new MyStem(Helper.readFileLineByLine(Helper.path("data", "semeval", "restaurant", "test", "test.txt")), "test");
+        myStem = myStem.removeStopWord();
+        myStem.lemmatization();
+        for (MyStemItem item : myStem.getMyStemResult().getItemList()) {
+            String lex = item.getAnalysisList().get(0).getLex();
+        }
+        System.out.println();
     }
 }
