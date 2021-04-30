@@ -110,11 +110,11 @@ public class DictBase implements Serializable {
         }
     }
 
-//    public void addPair(String first, String second, double weight, RelationType relationType) {
-//        Vertex f = Vertex.getVertex(this, first);
-//        Vertex s = Vertex.getVertex(this, second);
-//        this.addPair(f, s, new Edge(f, s, weight, relationType));
-//    }
+    public void addPair(String first, String second, double weight, RelationType relationType) {
+        Vertex f = Vertex.getVertex(this, first);
+        Vertex s = Vertex.getVertex(this, second);
+        this.addPair(f, s, new Edge(f, s, weight, relationType));
+    }
 
     public void addPair(Vertex first, Vertex second, double weight, RelationType relationType) {
         this.addPair(first, second, new Edge(first, second, weight, relationType));
@@ -187,18 +187,23 @@ public class DictBase implements Serializable {
      */
     public DictBase getSubDict(Vertex w, int radius) {
         DictBase dictBase = new DictBase();
+        dictBase.vertex_cash = this.vertex_cash;
         this.getSubDict_aroundVertex(w, radius, dictBase);
         return dictBase;
     }
 
     public DictBase getInvertSubDict(Vertex w, int radius) {
         DictBase dictBase = new DictBase();
+        dictBase.vertex_cash = this.vertex_cash;
+
         this.getInvertSubDict_aroundVertex(w, radius, dictBase);
         return dictBase;
     }
 
     public DictBase getFullSubDict(Vertex w, int radius) {
         DictBase dictBase = new DictBase();
+        dictBase.vertex_cash = this.vertex_cash;
+
         this.getFullSubDict_aroundVertex(w, radius, dictBase);
         return dictBase;
     }

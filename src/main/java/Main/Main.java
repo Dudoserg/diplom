@@ -162,7 +162,7 @@ public class Main {
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
             c++;
             Vertex key = vertexEdgeMapEntry.getKey();
-            if (key.getIncludedInClusters().size() > 0) {
+            if (key.getIncludedInClusters().size() > 1) {
                 count++;
                 System.out.println(key.getWord().getStr() + "\t" + "[" +
                         key.getIncludedInClusters().stream()
