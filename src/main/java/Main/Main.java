@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -154,6 +155,24 @@ public class Main {
 //                break;
 //        }
         dictBase.saveTopClusters(clastering, settings.getSettings());
+        dictBase.assignVertexToClusters(clastering, settings.get_R_());
+
+        int c = 0;
+        int count = 0;
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
+            c++;
+            Vertex key = vertexEdgeMapEntry.getKey();
+            if (key.getIncludedInClusters().size() > 0) {
+                count++;
+                System.out.println(key.getWord().getStr() + "\t" + "[" +
+                        key.getIncludedInClusters().stream()
+                                .map(clusterIntegerPair ->
+                                        clusterIntegerPair.getKey().getCenter().getWord().getStr() + "(" + clusterIntegerPair.getValue() + ")"
+                                ).collect(Collectors.joining(", ")) + "]"
+                );
+            }
+        }
+
         String inter = "интерьер";
         String disign = "дизайн";
 
@@ -194,7 +213,6 @@ public class Main {
 //                System.out.println("\t" + vertexEdgeEntry.getKey().getWord().getStr());
 //            }
 //        }
-
 
 
         DictBase интерьер1 = dictBase.getFullSubDict(Vertex.getVertex(dictBase, "селезень"), 0);

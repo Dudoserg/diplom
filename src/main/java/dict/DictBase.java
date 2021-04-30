@@ -80,6 +80,11 @@ public class DictBase implements Serializable {
      * @param edge   дуга
      */
     private void addPair(Vertex first, Vertex second, Edge edge) {
+
+        // TODO добавить кэш дуг
+        //first = Vertex.getVertex(this, first.getWord().getStr());
+        //second = Vertex.getVertex(this, second.getWord().getStr());
+
         EdgeMap edgeMap = this.map.get(first);
         if (edgeMap == null) {
             edgeMap = new EdgeMap();
@@ -105,11 +110,11 @@ public class DictBase implements Serializable {
         }
     }
 
-    public void addPair(String first, String second, double weight, RelationType relationType) {
-        Vertex f = Vertex.getVertex(this, first);
-        Vertex s = Vertex.getVertex(this, second);
-        this.addPair(f, s, new Edge(f, s, weight, relationType));
-    }
+//    public void addPair(String first, String second, double weight, RelationType relationType) {
+//        Vertex f = Vertex.getVertex(this, first);
+//        Vertex s = Vertex.getVertex(this, second);
+//        this.addPair(f, s, new Edge(f, s, weight, relationType));
+//    }
 
     public void addPair(Vertex first, Vertex second, double weight, RelationType relationType) {
         this.addPair(first, second, new Edge(first, second, weight, relationType));
@@ -259,12 +264,12 @@ public class DictBase implements Serializable {
             for (Vertex s : invertEdgeMap.getEdgeMap().keySet()) {
                 if ("дизайн".equals(s.getWord().getStr())) {
                     System.out.print("");
-                    if("интерьер".equals(w.getWord().getStr()))
+                    if ("интерьер".equals(w.getWord().getStr()))
                         System.out.print("");
                 }
                 if ("дизайн".equals(w.getWord().getStr())) {
                     System.out.print("");
-                    if("интерьер".equals(s.getWord().getStr()))
+                    if ("интерьер".equals(s.getWord().getStr()))
                         System.out.print("");
                 }
                 Edge edge = invertEdgeMap.getEdgeMap().get(s);
@@ -1203,6 +1208,12 @@ public class DictBase implements Serializable {
         return list_weightOutgoingSorted;
     }
 
+    /**
+     * Помечаем вершины графа, к каким кластерам они относятся
+     *
+     * @param clusterHelperList
+     * @param radius
+     */
     public void assignVertexToClusters(List<ClusterHelper> clusterHelperList, int radius) {
         // Определяем какие вершины будут кластерами
         int countNoun = 0;
@@ -1220,7 +1231,32 @@ public class DictBase implements Serializable {
         // помечаем отношение вершин в графе к какому-либо центру кластера
         for (Cluster cluster : clusterList) {
             Vertex center = cluster.getCenter();
-            this.getSubDict(center, radius);
+            center.addCluster(cluster, 0);
+            List<List<Vertex>> list = new ArrayList<>();
+            // Поочередно находим вершины в радиусе
+            for (int i = 0; i < radius; i++) {
+                List<Vertex> l = new ArrayList<>(this.getSubDict(center, i).invertMap.keySet());
+                list.add(l);
+            }
+            // удаляем центры
+            list.forEach(vertices -> vertices.remove(center));
+            // первому радиусу расстояние 0
+            list.get(0).forEach(vertex -> vertex.addCluster(cluster, 1));
+            // остальным радиусам соответствующие расстояния
+            for(int i = 1 ; i < radius; i++){
+                List<Vertex> allPrevRadius = list.get(i - 1);
+                List<Vertex> allCurrentRadius = list.get(i);
+                // вычисляем вершины на расстоянии i
+                ArrayList<Vertex> currentRadius = new ArrayList<>(allCurrentRadius);
+                currentRadius.removeAll(allPrevRadius);
+                // присваиваем им соответствующие дистанции до центра кластера
+                int finalI = i;
+                for (Vertex vertex : currentRadius) {
+                    vertex.addCluster(cluster, finalI + 1);
+
+                    System.out.println();
+                }
+            }
         }
     }
 
