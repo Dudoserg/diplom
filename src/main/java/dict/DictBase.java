@@ -46,6 +46,10 @@ public class DictBase implements Serializable {
 
     private Map<Vertex, EdgeMap> invertMap;
 
+    public Vertex getVertex(String str){
+        return Vertex.getVertex(this, str);
+    }
+
     private List<Cluster> clusterList;
 
     public DictBase() {
@@ -1229,7 +1233,7 @@ public class DictBase implements Serializable {
                 clusterList.add(new Cluster(clusterHelper.getVertex()));
                 countNoun++;
             } else if (clusterHelper.getVertex().isAdjective() && countAdjective < 3) {
-                clusterList.add(new Cluster(clusterHelper.getVertex()));
+//                clusterList.add(new Cluster(clusterHelper.getVertex()));
                 countAdjective++;
             }
         }

@@ -13,10 +13,7 @@ import utils.Helper;
 import utils.Unigram;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -71,7 +68,6 @@ public class Main {
         settings = new Settings(
                 0.6, 0.3, 0.2, 3, 0.65, 3
         );
-        test();
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
         String data = String.join(" ", reviews.getTexts());
 
@@ -146,15 +142,15 @@ public class Main {
         List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
 
         System.out.println("==============================================================================");
-//        int tmpIndex = 0;
-//        for (ClusterHelper claster : clastering) {
-//            if (claster.getVertex().isAdjective())
-//                System.out.println((tmpIndex++) + ") " + claster.getVertex().getWord().getStr() + "\t" + "w(вершины)=" +
-//                        claster.getVertex().getWeight() + "\t" + "w(соседи)=" + claster.getVertex().getWeightOutgoingVertex() +
-//                        "\t" + "w(кластера)=" + claster.getClusterWeight());
-//            if (tmpIndex > 40)
-//                break;
-//        }
+        int tmpIndex = 0;
+        for (ClusterHelper claster : clastering) {
+            if (claster.getVertex().isNoun())
+                System.out.println((tmpIndex++) + ") " + claster.getVertex().getWord().getStr() + "\t" + "w(вершины)=" +
+                        claster.getVertex().getWeight() + "\t" + "w(соседи)=" + claster.getVertex().getWeightOutgoingVertex() +
+                        "\t" + "w(кластера)=" + claster.getClusterWeight());
+            if (tmpIndex > 40)
+                break;
+        }
         dictBase.saveTopClusters(clastering, settings.getSettings());
         dictBase.assignVertexToClusters(clastering, settings.get_R_());
 
@@ -174,7 +170,7 @@ public class Main {
             }
         }
 
-        String inter = "интерьер";
+   /*     String inter = "интерьер";
         String disign = "дизайн";
 
         {
@@ -223,18 +219,27 @@ public class Main {
 
         DictBase интерьер2 = dictBase.getFullSubDict(Vertex.getVertex(dictBase, "форма"), 1);
         DictBase.graphviz_drawHight(DictBase.graphviz_getGraphViz(интерьер2), "result" + File.separator + "r2.png");
-        int size2 = интерьер2.getInvertMap().size();
+        int size2 = интерьер2.getInvertMap().size();*/
 
+        test(dictBase);
 
 
     }
 
-    static void test() throws IOException, InterruptedException {
-        MyStem myStem = new MyStem(Helper.readFileLineByLine(Helper.path("data", "semeval", "restaurant", "test", "test.txt")), "test");
+    static void test(DictBase dictBase) throws IOException, InterruptedException {
+        String str = Helper.readFile(Helper.path("data", "semeval", "restaurant", "test", "test.txt"));
+        MyStem myStem = new MyStem(str, "test");
         myStem = myStem.removeStopWord();
         myStem.lemmatization();
+
         for (MyStemItem item : myStem.getMyStemResult().getItemList()) {
-            String lex = item.getAnalysisList().get(0).getLex();
+            if(item.isDelimeter() || item.isPoint()){
+
+            }else{
+                String lex = item.getAnalysisList().get(0).getLex();
+                Vertex vertex = dictBase.getVertex(lex);
+                System.out.println();
+            }
         }
         System.out.println();
     }
