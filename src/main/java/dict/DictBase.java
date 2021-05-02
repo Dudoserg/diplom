@@ -18,7 +18,6 @@ import mystem.StopWords;
 import threads.Th;
 import threads.ThRun;
 import utils.Bigram;
-import utils.Helper;
 import utils.Unigram;
 
 import java.io.*;
@@ -45,12 +44,6 @@ public class DictBase implements Serializable {
     private Map<Vertex, EdgeMap> map;
 
     private Map<Vertex, EdgeMap> invertMap;
-
-    public Vertex getVertex(String str){
-        return Vertex.getVertex(this, str);
-    }
-
-    private List<Cluster> clusterList;
 
     public DictBase() {
         this.map = new HashMap<>();
@@ -84,11 +77,6 @@ public class DictBase implements Serializable {
      * @param edge   дуга
      */
     private void addPair(Vertex first, Vertex second, Edge edge) {
-
-        // TODO добавить кэш дуг
-        //first = Vertex.getVertex(this, first.getWord().getStr());
-        //second = Vertex.getVertex(this, second.getWord().getStr());
-
         EdgeMap edgeMap = this.map.get(first);
         if (edgeMap == null) {
             edgeMap = new EdgeMap();
@@ -191,24 +179,13 @@ public class DictBase implements Serializable {
      */
     public DictBase getSubDict(Vertex w, int radius) {
         DictBase dictBase = new DictBase();
-        dictBase.vertex_cash = this.vertex_cash;
         this.getSubDict_aroundVertex(w, radius, dictBase);
         return dictBase;
     }
 
     public DictBase getInvertSubDict(Vertex w, int radius) {
         DictBase dictBase = new DictBase();
-        dictBase.vertex_cash = this.vertex_cash;
-
         this.getInvertSubDict_aroundVertex(w, radius, dictBase);
-        return dictBase;
-    }
-
-    public DictBase getFullSubDict(Vertex w, int radius) {
-        DictBase dictBase = new DictBase();
-        dictBase.vertex_cash = this.vertex_cash;
-
-        this.getFullSubDict_aroundVertex(w, radius, dictBase);
         return dictBase;
     }
 
@@ -248,46 +225,6 @@ public class DictBase implements Serializable {
             getInvertSubDict_aroundVertex(s, radius - 1, dictBase);
         }
     }
-
-
-    private void getFullSubDict_aroundVertex(Vertex w, int radius, DictBase dictBase) {
-        if (radius < 0)
-            return;
-
-        {
-            EdgeMap edgeMap = map.get(w);
-            if (edgeMap == null)
-                return;
-
-            for (Vertex s : edgeMap.getEdgeMap().keySet()) {
-                Edge edge = edgeMap.getEdgeMap().get(s);
-                dictBase.addPair(w, s, edge);
-                getFullSubDict_aroundVertex(s, radius - 1, dictBase);
-            }
-        }
-
-        {
-            EdgeMap invertEdgeMap = invertMap.get(w);
-            if (invertEdgeMap == null)
-                return;
-            for (Vertex s : invertEdgeMap.getEdgeMap().keySet()) {
-                if ("дизайн".equals(s.getWord().getStr())) {
-                    System.out.print("");
-                    if ("интерьер".equals(w.getWord().getStr()))
-                        System.out.print("");
-                }
-                if ("дизайн".equals(w.getWord().getStr())) {
-                    System.out.print("");
-                    if ("интерьер".equals(s.getWord().getStr()))
-                        System.out.print("");
-                }
-                Edge edge = invertEdgeMap.getEdgeMap().get(s);
-                dictBase.addPair(s, w, edge);
-                getFullSubDict_aroundVertex(s, radius - 1, dictBase);
-            }
-        }
-    }
-
 /*
     @Deprecated
     public DictBase getSubDict(DictBase result, Vertex w, int radius, Map<Vertex, Integer> used) {
@@ -972,10 +909,9 @@ public class DictBase implements Serializable {
 
     /**
      * Из всего графа, выделяем только те слова, что находятся в обучающей выборке + слова в радиусе R
-     *
      * @param dictBase Основной словарь
      * @param training Словарь построенный по тренировочной выборке
-     * @param R        радиус
+     * @param R радиус
      * @throws DictException ошибка при работе со словарем (удаление вершины)
      */
     public static void removeUnusedVertex(DictBase dictBase, DictBase training, int R) throws DictException {
@@ -1029,10 +965,9 @@ public class DictBase implements Serializable {
     /**
      * Проверяем, входит ли вершина в радиус тренировочной выборки, исходящие из вершины вершины
      * (тем самым учитываются исходящие вершины)
-     *
      * @param dictBase словарь в котором ведется проверка
-     * @param vertex   вершина, которую проверяем, входит ли она в радиус Р тренировочной выборки
-     * @param R        радиус
+     * @param vertex вершина, которую проверяем, входит ли она в радиус Р тренировочной выборки
+     * @param R      радиус
      * @return да\нет
      */
     private static Boolean findTrainInRadius(DictBase dictBase, Vertex vertex, Integer R) {
@@ -1061,10 +996,9 @@ public class DictBase implements Serializable {
     /**
      * Проверяем, входит ли вершина в радиус тренировочной выборки, в инвертированном словаре
      * (тем самым учитываются входящие вершины)
-     *
      * @param dictBase словарь в котором ведется проверка
-     * @param vertex   вершина, которую проверяем, входит ли она в радиус Р тренировочной выборки
-     * @param R        радиус
+     * @param vertex вершина, которую проверяем, входит ли она в радиус Р тренировочной выборки
+     * @param R      радиус
      * @return да\нет
      */
     private static Boolean findTrainInInvertRadius(DictBase dictBase, Vertex vertex, Integer R) {
@@ -1217,89 +1151,6 @@ public class DictBase implements Serializable {
         return list_weightOutgoingSorted;
     }
 
-    /**
-     * Помечаем вершины графа, к каким кластерам они относятся
-     *
-     * @param clusterHelperList
-     * @param radius
-     */
-    public void assignVertexToClusters(List<ClusterHelper> clusterHelperList, int radius) {
-        // Определяем какие вершины будут кластерами
-        int countNoun = 0;
-        int countAdjective = 0;
-        List<Cluster> clusterList = new ArrayList<>();
-        for (ClusterHelper clusterHelper : clusterHelperList) {
-            if (clusterHelper.getVertex().isNoun() && countNoun < 20) {
-                clusterList.add(new Cluster(clusterHelper.getVertex()));
-                countNoun++;
-            } else if (clusterHelper.getVertex().isAdjective() && countAdjective < 3) {
-//                clusterList.add(new Cluster(clusterHelper.getVertex()));
-                countAdjective++;
-            }
-        }
-        // помечаем отношение вершин в графе к какому-либо центру кластера
-        for (Cluster cluster : clusterList) {
-            Vertex center = cluster.getCenter();
-            center.addCluster(cluster, 0);
-            List<List<Vertex>> list = new ArrayList<>();
-            // Поочередно находим вершины в радиусе
-            for (int i = 0; i < radius; i++) {
-                List<Vertex> l = new ArrayList<>(this.getSubDict(center, i).invertMap.keySet());
-                list.add(l);
-            }
-            // удаляем центры
-            list.forEach(vertices -> vertices.remove(center));
-            // первому радиусу расстояние 0
-            list.get(0).forEach(vertex -> vertex.addCluster(cluster, 1));
-            // остальным радиусам соответствующие расстояния
-            for(int i = 1 ; i < radius; i++){
-                List<Vertex> allPrevRadius = list.get(i - 1);
-                List<Vertex> allCurrentRadius = list.get(i);
-                // вычисляем вершины на расстоянии i
-                ArrayList<Vertex> currentRadius = new ArrayList<>(allCurrentRadius);
-                currentRadius.removeAll(allPrevRadius);
-                // присваиваем им соответствующие дистанции до центра кластера
-                int finalI = i;
-                for (Vertex vertex : currentRadius) {
-                    vertex.addCluster(cluster, finalI + 1);
-
-                    System.out.println();
-                }
-            }
-            /// Считаем сумму весов всех вершин в данном кластере
-            List<Vertex> vertices = list.get(list.size() - 1);
-            double clusterWeight = vertices.stream()
-                    .mapToDouble(Vertex::getWeight)
-                    .sum();
-            cluster.setWeight(clusterWeight);
-            cluster.setCountVertex(vertices.size());
-            cluster.setVertexList(vertices);
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////  СОХРАНЕНИЕ ПРОМЕЖУТОЧНЫХ РЕЗУЛЬТАТОВ  ///////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void saveTopClusters(List<ClusterHelper> clastering, String name) throws IOException {
-        List<String> result = new ArrayList<>();
-        int tmpIndex = 0;
-        DecimalFormat decimalFormat = new DecimalFormat("#0.00");
-
-        for (ClusterHelper claster : clastering) {
-            if (claster.getVertex().isNoun()) {
-                String s = (tmpIndex++) + ") " + claster.getVertex().getWord().getStr() + "\t" +
-                        "w(вершины)=" + decimalFormat.format(claster.getVertex().getWeight()) + "\t" +
-                        "w(соседи)=" + decimalFormat.format(claster.getVertex().getWeightOutgoingVertex()) + "\t" +
-                        "w(кластера)=" + decimalFormat.format(claster.getClusterWeight());
-                result.add(s);
-            }
-            if (tmpIndex > 40)
-                break;
-        }
-        String resultStr = String.join("\n", result);
-        Helper.saveToFile(resultStr, "-" + File.separator + "_6_cluster top NOUN" + name + ".txt");
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////  ЧТЕНИЕ\ЗАПИСЬ СЛОВАРЯ  ///////////////////////////////////////////////////
@@ -1307,14 +1158,13 @@ public class DictBase implements Serializable {
 
     /**
      * Сериализовать словарь в файл по заданному пути
-     *
      * @param path путь сохранени
      * @throws IOException ошибка при записи файла
      */
     public void saveAs(String path) throws IOException {
         System.out.print("save dictionary to file (path='" + path + "') ... \t\t\t");
         long startTime = System.currentTimeMillis();
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("result\\restaurant.dat"))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("result\\person.dat"))) {
             oos.writeObject(this);
             System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
         } catch (Exception ex) {
@@ -1325,16 +1175,15 @@ public class DictBase implements Serializable {
 
     /**
      * Десериализация словаря из файла по пути
-     *
      * @param path путь
      * @return словарь
-     * @throws IOException            err
+     * @throws IOException err
      * @throws ClassNotFoundException err
      */
     public static DictBase readFrom(String path) throws IOException, ClassNotFoundException {
         System.out.print("readFrom dictionary from file (path='" + path + "') ... \t\t\t");
         long startTime = System.currentTimeMillis();
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("result\\restaurant.dat"))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("result\\person.dat"))) {
             DictBase dictBase = (DictBase) ois.readObject();
             System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
             return dictBase;
@@ -1356,9 +1205,11 @@ public class DictBase implements Serializable {
      * @throws DictException такого типа отношений не существует
      */
     public static List<Node> graphviz_getGraphViz(DictBase dictBase) throws DictException {
+        Map<Vertex, EdgeMap> map = dictBase.getMap();
         List<Node> result = new ArrayList<>();
+        Set<Map.Entry<Vertex, EdgeMap>> entries = map.entrySet();
 
-        for (Map.Entry<Vertex, EdgeMap> entry : dictBase.getMap().entrySet()) {
+        for (Map.Entry<Vertex, EdgeMap> entry : entries) {
             Vertex first = entry.getKey();
             EdgeMap value = entry.getValue();
 
@@ -1398,48 +1249,6 @@ public class DictBase implements Serializable {
                 result.add(resultNode);
             }
         }
-
-        for (Map.Entry<Vertex, EdgeMap> entry : dictBase.getInvertMap().entrySet()) {
-            Vertex second = entry.getKey();
-            EdgeMap value = entry.getValue();
-
-            for (Map.Entry<Vertex, Edge> wordRelationTypeEntry : value.getEdgeMap().entrySet()) {
-                Vertex first = wordRelationTypeEntry.getKey();
-                Edge edge = wordRelationTypeEntry.getValue();
-                RelationType type = edge.getRelationType();
-
-                Node link1 = node(first.getWord().getStr()).with(Color.BLACK);
-                Node link2 = node(second.getWord().getStr()).with(Color.BLACK);
-                Node resultNode = null;
-                DecimalFormat decimalFormat = new DecimalFormat("#0.00");
-                String weight_str = ("(" + decimalFormat.format(edge.getWeight()) + ")").replace(",", ".");
-                switch (type) {
-                    case ASS: {
-                        resultNode = link1.link(
-                                to(link2).with(Color.BLACK, Font.size(9), Label.of("ass" + weight_str))
-                        );
-                        break;
-                    }
-                    case SYN: {
-                        resultNode = link1.link(
-                                to(link2).with(Color.RED, Font.size(9), Label.of("syn" + weight_str))
-                        );
-                        break;
-                    }
-                    case DEF: {
-                        resultNode = link1.link(
-                                to(link2).with(Color.GREEN, Font.size(9), Label.of("def" + weight_str))
-                        );
-                        break;
-                    }
-                    default: {
-                        throw new DictException("UNKNOWN RELATIONS TYPE");
-                    }
-                }
-                result.add(resultNode);
-            }
-        }
-
         return result;
     }
 
@@ -1461,7 +1270,7 @@ public class DictBase implements Serializable {
         Graphviz.fromGraph(g).totalMemory(1000000000).height(3000).render(Format.PNG).toFile(new File(fileName));
     }
 
-    public static void graphviz_drawHight(List<Node> graphViz, String path) throws IOException {
+    public static void graphviz_drawHight(List<Node> graphViz, String fileName) throws IOException {
         Graph g = graph("example1").directed()
                 .graphAttr().with(Rank.dir(LEFT_TO_RIGHT))
                 .nodeAttr().with(Font.name("arial"))
@@ -1469,7 +1278,7 @@ public class DictBase implements Serializable {
                 .with(
                         graphViz
                 );
-        Graphviz.fromGraph(g).totalMemory(1000000000).height(22000).render(Format.PNG).toFile(new File(path));
+        Graphviz.fromGraph(g).totalMemory(1000000000).height(22000).render(Format.PNG).toFile(new File(fileName));
     }
 
     public static void graphviz_graphSaveToFile(List<Node> graphViz, String fileName, Format format) throws IOException {

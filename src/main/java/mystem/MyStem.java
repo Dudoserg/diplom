@@ -24,15 +24,15 @@ public class MyStem {
 
     private String id;
 
-//    public MyStem(List<String> words, String id) {
-//        this.id = id;
-//        this.words = words;
-//        this.text = words.stream().collect(Collectors.joining(" ")).trim();
-//
-//        if (stopWords == null) {
-//            stopWords = StopWords.getInstance();
-//        }
-//    }
+    public MyStem(List<String> words, String id) {
+        this.id = id;
+        this.words = words;
+        this.text = words.stream().collect(Collectors.joining(" ")).trim();
+
+        if (stopWords == null) {
+            stopWords = StopWords.getInstance();
+        }
+    }
 
     public MyStem(String text, String id) throws IOException {
         this.id = id;
@@ -59,11 +59,11 @@ public class MyStem {
 
     MyStemResult myStemResult;
 
-    public MyStem removeStopWord() throws IOException {
+    public MyStem removeStopWord() {
         if (stopWords == null) {
             stopWords = StopWords.getInstance();
         }
-        MyStem result = new MyStem(text, id);
+        MyStem result = new MyStem(words, id);
         result.words = result.words.stream()
                 .filter(s -> {
                     String tmp = s.trim().replaceAll("[ .?!,]", "");
@@ -86,7 +86,6 @@ public class MyStem {
     public void lemmatization() throws IOException, InterruptedException {
         System.out.print("myStemPath execution...\t\t");
         Long startTime = System.currentTimeMillis();
-        this.saveToFile(TEXT_WITHOUT_STOPWORDS_txt);
         try {
             String command = MYSTEM_exe + " " + addId(TEXT_WITHOUT_STOPWORDS_txt) + " " + addId(MYSTEM_RESULT_json) + " " +
                     "--format json -c -l -s -i ";

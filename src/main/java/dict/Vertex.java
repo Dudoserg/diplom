@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -18,16 +20,13 @@ public class Vertex implements Serializable {
     private double weightOutgoingVertex = 0.0;
     private boolean flag_train = false;
 
-    // cluster, radius до центра
-    private List<Pair<Cluster, Integer>> includedInClusters = new ArrayList<>();
-
     private Vertex(Word word) {
         this.word = word;
     }
 
-    public static Vertex getVertex(DictBase dictBase, String word) {
+    public static Vertex getVertex(DictBase dictBase, String word){
         Word w = Word.getWord(word);
-        Vertex v = dictBase.vertex_cash.get(w);
+        Vertex v =  dictBase.vertex_cash.get(w);
         if (v == null) {
             v = new Vertex(w);
             dictBase.vertex_cash.put(w, v);
@@ -50,18 +49,8 @@ public class Vertex implements Serializable {
     }
 
 
-    public boolean isNoun() {
+    public boolean isNoun(){
         return this.word.isNoun();
     }
 
-    public boolean isAdjective() {
-        return this.word.isAdjective();
-    }
-
-    public boolean addCluster(Cluster cluster, int distance) {
-        if (includedInClusters.contains(cluster))
-            return false;
-        includedInClusters.add(new Pair<>(cluster, distance));
-        return true;
-    }
 }

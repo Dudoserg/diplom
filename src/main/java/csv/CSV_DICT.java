@@ -141,7 +141,6 @@ public class CSV_DICT {
         }
 
         System.out.println("done for " + (System.currentTimeMillis() - t) + " ms.");
-
         return dict;
     }
 
@@ -221,7 +220,7 @@ public class CSV_DICT {
             listOfWords.add(key.getWord().getStr());
         }
 
-        MyStem myStem = new MyStem(listOfWords.stream().collect(Collectors.joining(" ")), "dd_");
+        MyStem myStem = new MyStem(listOfWords, "dd_");
         myStem.saveToFile(MyStem.TEXT_WITHOUT_STOPWORDS_txt);
         try {
             myStem.lemmatization();
