@@ -72,7 +72,11 @@ public class Word implements Serializable {
     }
 
 
-    public boolean isNoun(){
+    public boolean isNoun() {
         return PartOfSpeech.NOUN.equals(this.partOfSpeech);
+    }
+
+    public boolean isAdjective() {
+        return PartOfSpeech.ADJECTIVE.equals(this.partOfSpeech);
     }
 }

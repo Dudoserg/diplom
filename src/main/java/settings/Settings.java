@@ -5,6 +5,8 @@ import dict.RelationType;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.text.DecimalFormat;
+
 @Getter
 @Setter
 public class Settings {
@@ -26,20 +28,31 @@ public class Settings {
     }
 
     public double getWeight(RelationType relationType) throws DictException {
-        switch (relationType){
-            case ASS:{
+        switch (relationType) {
+            case ASS: {
                 return this._ASS_WEIGHT_;
             }
-            case DEF:{
+            case DEF: {
                 return this._DEF_WEIGHT_;
             }
-            case SYN:{
+            case SYN: {
                 return this._SYN_WEIGHT_;
             }
             case UNKNOWN:
-            default:{
-                throw  new DictException("unknown type of relationtype!");
+            default: {
+                throw new DictException("unknown type of relationtype!");
             }
         }
+    }
+
+    public String getSettings() {
+        DecimalFormat decimalFormat = new DecimalFormat("#0.00");
+        return "(" + "ass=" + decimalFormat.format(_ASS_WEIGHT_) + ", " +
+                "def=" + decimalFormat.format(_DEF_WEIGHT_) + ", " +
+                "syn=" + decimalFormat.format(_SYN_WEIGHT_) + ", " +
+                "R=" + _R_ + ", " +
+                "g=" + decimalFormat.format(_GAMMA_) + ", " +
+                "степень=" + _GAMMA_ATTENUATION_RATE_ + ", " +
+                ")";
     }
 }
