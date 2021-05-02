@@ -67,7 +67,7 @@ public class Main {
 
 
         settings = new Settings(
-                0.6 * 0.8, 0.3 * 0.8, 0.2 * 0.8, 3, 0.6, 3
+                0.6, 0.3, 0.2, 3, 0.65, 3
         );
 
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
@@ -136,7 +136,7 @@ public class Main {
         dictBase.printSortedVertex("-" + File.separator + "_4_dictionary_base after setVertexWeight.txt");
 
 
-        dictBase.saveAs("result" + File.separator + "restaurant.dat");
+        //dictBase.saveAs("result" + File.separator + "restaurant.dat");
 
 
         dictBase.correctVertexWeight(settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true);
@@ -162,45 +162,6 @@ public class Main {
             if (tmpIndex > 40)
                 break;
         }
-//        int notDel = 0;
-//        Set<Vertex> fordel = new HashSet<>();
-//        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
-//            notDel++;
-//            if (notDel > 250) {
-//                fordel.add(vertexEdgeMapEntry.getKey());
-//            }
-//        }
-//        for (Vertex vertex : fordel) {
-//            dictBase.getInvertMap().remove(vertex);
-//        }
-//        dictBase.saveAs("C:" + File.separator + "_diplom" + File.separator + "dict.json");
-
-        //dictBase.saveAs("result" + File.separator + "dict.json");
-        //System.out.print("");
-
-
-//        for (Pair<Vertex, Double> vertexDoublePair : clastering) {
-//            Vertex vertex = vertexDoublePair.getKey();
-//            Double value = vertexDoublePair.getValue();
-//            System.out.print(vertex.getWord().getStr() + "\t" + vertex.getWeight() + "\t" + value + "\t" + vertex.getWeightOutgoingVertex());
-//            System.out.print("");
-//        }
-//
-//
-//
-//        System.out.println("==============================================================================");
-//        int count = 0;
-//        for (int i = 0; i < 200; i++) {
-//            if (PartOfSpeech.NOUN.equals(clastering.get(i).getKey().getWord().getPartOfSpeech())) {
-//                if(clastering.get(i).getKey().getWeight() > 100){
-//                    count++;
-//                    System.out.println(clastering.get(i).getKey().getWord().getStr() + "\t" + clastering.get(i).getValue());
-//                }
-//            }
-//            if (count > 30)
-//                break;
-//        }
-//        System.out.print("");
-        System.out.print("");
+        System.out.println();
     }
 }
