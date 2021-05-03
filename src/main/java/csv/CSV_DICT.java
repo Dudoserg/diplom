@@ -119,11 +119,9 @@ public class CSV_DICT {
         int j = 2;
         for (CSV_CONNECTIONS con : connections) {
 
-            Vertex vertexFrom = Vertex.getVertex(dict, con.getWordFrom());
-            vertexFrom.getWord().setPartOfSpeech(con.getPartOfSpeechFrom());
+            Vertex vertexFrom = Vertex.getVertex(dict, con.getWordFrom(), con.getPartOfSpeechFrom());
 
-            Vertex vertexTo = Vertex.getVertex(dict, con.getWordTo());
-            vertexTo.getWord().setPartOfSpeech(con.getPartOfSpeechTo());
+            Vertex vertexTo = Vertex.getVertex(dict, con.getWordTo(), con.getPartOfSpeechTo());
             if (j == 4907)
                 System.out.print("");
             if ("ресторан".equals(vertexFrom.getWord().getStr()))
@@ -132,8 +130,8 @@ public class CSV_DICT {
                 System.out.print("");
 
             dict.addPair(
-                    vertexFrom,
-                    vertexTo,
+                    con.getWordFrom(),
+                    con.getWordTo(),
                     Main.settings.getWeight(con.getRelationType()),
                     con.getRelationType()
             );
@@ -173,11 +171,9 @@ public class CSV_DICT {
                 int j = 2;
                 for (CSV_CONNECTIONS con : connections) {
 
-                    Vertex vertexFrom = Vertex.getVertex(dict, con.getWordFrom());
-                    vertexFrom.getWord().setPartOfSpeech(con.getPartOfSpeechFrom());
+                    Vertex vertexFrom = Vertex.getVertex(dict, con.getWordFrom(), con.getPartOfSpeechFrom());
 
-                    Vertex vertexTo = Vertex.getVertex(dict, con.getWordTo());
-                    vertexTo.getWord().setPartOfSpeech(con.getPartOfSpeechTo());
+                    Vertex vertexTo = Vertex.getVertex(dict, con.getWordTo(), con.getPartOfSpeechTo());
                     if (j == 4907)
                         System.out.print("");
                     if ("ресторан".equals(vertexFrom.getWord().getStr()))
@@ -187,8 +183,8 @@ public class CSV_DICT {
 
                     try {
                         dict.addPair(
-                                vertexFrom,
-                                vertexTo,
+                                con.getWordFrom(),
+                                con.getWordTo(),
                                 Main.settings.getWeight(con.getRelationType()),
                                 con.getRelationType()
                         );

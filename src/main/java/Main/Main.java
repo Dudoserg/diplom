@@ -1,6 +1,5 @@
 package Main;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import csv.CSV_DICT;
 import data.Reviews;
 import dict.*;
@@ -11,11 +10,13 @@ import utils.Bigram;
 import utils.Helper;
 import utils.Unigram;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -103,6 +104,10 @@ public class Main {
         for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
             Bigram key = bigramIntegerEntry.getKey();
             Edge edge = dictBase.getEdge(Vertex.getVertex(dictBase, key.getFirst()), Vertex.getVertex(dictBase, key.getSecond()));
+
+//            Vertex vertexFrom = dictTrain.getVertex(key.getFirst());
+//            Vertex vertexTo = dictTrain.getVertex(key.getSecond());
+
             if (edge != null)
                 dictTrain.addPair(key.getFirst(), key.getSecond(), edge.getWeight(), edge.getRelationType());
             else
@@ -168,9 +173,25 @@ public class Main {
                 !"салат".equals(clastering.get(13).getVertex().getWord().getStr()) ||
                 Math.abs(clastering.get(13).getVertex().getWeight() - 242.0) > 0.001 ||
                 !"зал".equals(clastering.get(33).getVertex().getWord().getStr()) ||
-                Math.abs(clastering.get(33).getVertex().getWeightOutgoingVertex() - 657.44986) > 0.001 ) {
+                Math.abs(clastering.get(33).getVertex().getWeightOutgoingVertex() - 657.44986) > 0.001) {
             throw new IOException("ЕЕЕЕРРРРРРОООООРРРРР");
         }
+        //Vertex selezenVertex = dictBase.getVertex("селезень");
+        //List<HashSet<Vertex>> vertexInRadiuses = dictBase.findVertexInRadiuses(selezenVertex);
+
+//        DictBase selezen = dictBase.getFullSubDict(selezenVertex, 1);
+//        DictBase.graphviz_drawHight(DictBase.graphviz_getGraphViz(selezen), "result" + File.separator + "s1.png");
+
+        Vertex eda = dictBase.getVertex("еда");
+        DictBase subDict = dictBase.getSubDict(eda, settings.get_R_());
+        DictBase invertSubDict = dictBase.getInvertSubDict(eda, settings.get_R_());
+        DictBase fullSubDict = dictBase.getFullSubDict(eda, settings.get_R_());
+
+//        dictBase.saveAs("result" + File.separator + "restaurant.dat");
+        dictBase.distributeVerticesIntoClusters(clastering, settings.get_R_());
+        Vertex спорный = dictBase.getVertex("спорный");
+//        dictBase.saveAs("result" + File.separator + "restaurant2.dat");
+
 
         System.out.print("");
     }
