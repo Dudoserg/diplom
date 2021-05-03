@@ -148,4 +148,5 @@ buildNumber.properties
 
 
 /mystem/*.json
+/result/*.json
 /-/*.json
