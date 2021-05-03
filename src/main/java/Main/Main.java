@@ -176,13 +176,13 @@ public class Main {
                 Math.abs(clastering.get(33).getVertex().getWeightOutgoingVertex() - 657.44986) > 0.001) {
             throw new IOException("ЕЕЕЕРРРРРРОООООРРРРР");
         }
-        //Vertex selezenVertex = dictBase.getVertex("селезень");
-        //List<HashSet<Vertex>> vertexInRadiuses = dictBase.findVertexInRadiuses(selezenVertex);
+        Vertex eda = dictBase.getVertex("лето");
+        DictBase edaDict = dictBase.getFullSubDict(eda, 0);
+//        DictBase.graphviz_drawHight(DictBase.graphviz_getGraphViz(edaDict), "result" + File.separator + "s1.png");
+        List<HashSet<Vertex>> vertexInRadiuses = dictBase.findVertexInRadiuses(eda, 2);
 
-//        DictBase selezen = dictBase.getFullSubDict(selezenVertex, 1);
-//        DictBase.graphviz_drawHight(DictBase.graphviz_getGraphViz(selezen), "result" + File.separator + "s1.png");
 
-        Vertex eda = dictBase.getVertex("еда");
+
         DictBase subDict = dictBase.getSubDict(eda, settings.get_R_());
         DictBase invertSubDict = dictBase.getInvertSubDict(eda, settings.get_R_());
         DictBase fullSubDict = dictBase.getFullSubDict(eda, settings.get_R_());

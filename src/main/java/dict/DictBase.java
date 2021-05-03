@@ -1263,13 +1263,13 @@ public class DictBase implements Serializable {
             list.add(new HashSet<>());
         this.findVertexInRadiuses_recursion(list, used, startVertex, 0, maxRadius - 1);
         int r = 0;
-//        for (HashSet<Vertex> vertices : list) {
-//            System.out.println("r = " + r + " (count = " + vertices.size());
-//            for (Vertex vertex : vertices) {
-//                System.out.println("\t" + vertex.getWord().getStr());
-//            }
-//            System.out.println();
-//        }
+        for (HashSet<Vertex> vertices : list) {
+            System.out.println("r = " + r + " (count = " + vertices.size());
+            for (Vertex vertex : vertices) {
+                System.out.println("\t" + vertex.getWord().getStr());
+            }
+            System.out.println();
+        }
         return list;
     }
 
@@ -1284,11 +1284,11 @@ public class DictBase implements Serializable {
 
             for (Vertex s : edgeMap.getEdgeMap().keySet()) {
                 Edge edge = edgeMap.getEdgeMap().get(s);
-                if (!used.contains(s)) {
+               // if (!used.contains(s)) {
                     used.add(s);
                     vertices.add(s);
                     findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
-                }
+                //}
 
             }
         }
@@ -1299,11 +1299,11 @@ public class DictBase implements Serializable {
 
             for (Vertex s : edgeMap.getEdgeMap().keySet()) {
                 Edge edge = edgeMap.getEdgeMap().get(s);
-                if (!used.contains(s)) {
+                //if (!used.contains(s)) {
                     used.add(s);
                     vertices.add(s);
                     findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
-                }
+               // }
             }
         }
     }
