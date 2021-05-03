@@ -1,0 +1,1 @@
+"C:\Program Files\7-Zip\7z.exe" a -t7z -sdel files.7z *.txt
