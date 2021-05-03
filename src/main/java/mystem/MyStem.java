@@ -86,6 +86,7 @@ public class MyStem {
     public void lemmatization() throws IOException, InterruptedException {
         System.out.print("myStemPath execution...\t\t");
         Long startTime = System.currentTimeMillis();
+        saveToFile(TEXT_WITHOUT_STOPWORDS_txt);
         try {
             String command = MYSTEM_exe + " " + addId(TEXT_WITHOUT_STOPWORDS_txt) + " " + addId(MYSTEM_RESULT_json) + " " +
                     "--format json -c -l -s -i ";
@@ -93,8 +94,8 @@ public class MyStem {
                     .exec(command);
             p.waitFor();
             String json = Helper.readFile(addId(MYSTEM_RESULT_json));
-
             Helper.saveToFile(json, addId("-" + File.separator + "mystemResult.json"));
+
             ObjectMapper objectMapper = new ObjectMapper();
 
             // читаем результаты работы лемманизатора MyStem
@@ -127,6 +128,16 @@ public class MyStem {
         System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
     }
 
+    public void removeTmpFiles() {
+        this.removeFile(TEXT_WITHOUT_STOPWORDS_txt);
+        this.removeFile(MYSTEM_RESULT_json);
+    }
+
+    private boolean removeFile(String text_without_stopwords_txt) {
+        File f = new File(addId(text_without_stopwords_txt));
+        return f.delete();
+    }
+
     public void removeStopWordsFromLemmatization() {
         for (int i = this.myStemResult.getItemList().size() - 1; i >= 0; i--) {
             MyStemItem myStemItem = this.myStemResult.getItemList().get(i);
@@ -148,6 +159,27 @@ public class MyStem {
         }
         result += id + "_" + split[split.length - 1];
         return result;
+    }
+
+
+    public  List<List<String>> getSentencesList(){
+        List<List<String>> sentencesList = new ArrayList<>();
+        List<String> sentence = new ArrayList<>();
+        for (MyStemItem myStemItem : this.getMyStemResult().getItemList()) {
+            List<MyStemAnalysis> analysisList = myStemItem.getAnalysisList();
+            if (".".equals(myStemItem.getText().trim())) {
+                sentencesList.add(sentence);
+                sentence = new ArrayList<>();
+                System.out.println(".");
+                continue;
+            }
+            if (analysisList != null && analysisList.size() >= 1) {
+                MyStemAnalysis myStemAnalysis = analysisList.get(0);
+                System.out.println(myStemAnalysis.getLex());
+                sentence.add(myStemAnalysis.getLex());
+            }
+        }
+        return sentencesList;
     }
 
 }

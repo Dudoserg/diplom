@@ -1255,6 +1255,13 @@ public class DictBase implements Serializable {
         // Т.к. вершины до
     }
 
+    /**
+     * Поиск вершин для каждого из радиуса в промежутке [0...maxRadius]
+     *
+     * @param startVertex вершина, вокруг которой идет поиск
+     * @param maxRadius   списки вершин для каждого радиуса
+     * @return
+     */
     public List<HashSet<Vertex>> findVertexInRadiuses(Vertex startVertex, int maxRadius) {
         List<HashSet<Vertex>> list = new ArrayList<>();
         HashSet<Vertex> used = new HashSet<>();
@@ -1263,15 +1270,17 @@ public class DictBase implements Serializable {
             list.add(new HashSet<>());
         this.findVertexInRadiuses_recursion(list, used, startVertex, 0, maxRadius - 1);
         int r = 0;
-        for (HashSet<Vertex> vertices : list) {
-            System.out.println("r = " + r + " (count = " + vertices.size());
-            for (Vertex vertex : vertices) {
-                System.out.println("\t" + vertex.getWord().getStr());
-            }
-            System.out.println();
-        }
+        // print results
+//        for (HashSet<Vertex> vertices : list) {
+//            System.out.println("r = " + r + " (count = " + vertices.size());
+//            for (Vertex vertex : vertices) {
+//                System.out.println("\t" + vertex.getWord().getStr());
+//            }
+//            System.out.println();
+//        }
         return list;
     }
+
 
     public void findVertexInRadiuses_recursion(List<HashSet<Vertex>> list, HashSet<Vertex> used, Vertex w, int radius, int maxRadius) {
         if (radius > maxRadius)
@@ -1284,10 +1293,10 @@ public class DictBase implements Serializable {
 
             for (Vertex s : edgeMap.getEdgeMap().keySet()) {
                 Edge edge = edgeMap.getEdgeMap().get(s);
-               // if (!used.contains(s)) {
-                    used.add(s);
-                    vertices.add(s);
-                    findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
+                // if (!used.contains(s)) {
+                used.add(s);
+                vertices.add(s);
+                findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
                 //}
 
             }
@@ -1300,10 +1309,10 @@ public class DictBase implements Serializable {
             for (Vertex s : edgeMap.getEdgeMap().keySet()) {
                 Edge edge = edgeMap.getEdgeMap().get(s);
                 //if (!used.contains(s)) {
-                    used.add(s);
-                    vertices.add(s);
-                    findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
-               // }
+                used.add(s);
+                vertices.add(s);
+                findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
+                // }
             }
         }
     }
@@ -1448,5 +1457,15 @@ public class DictBase implements Serializable {
                         graphViz
                 );
         Graphviz.fromGraph(g).totalMemory(1000000000).render(format).toFile(new File(fileName));
+    }
+
+
+    public Map<String, Vertex> getStringVertexMap() {
+        Set<Map.Entry<Vertex, EdgeMap>> entries = getInvertMap().entrySet();
+        Map<String, Vertex> result = new HashMap<>();
+        for (Map.Entry<Vertex, EdgeMap> entry : entries) {
+            result.put(entry.getKey().getWord().getStr(), entry.getKey());
+        }
+        return result;
     }
 }

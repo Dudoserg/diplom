@@ -1,10 +1,15 @@
 package Main;
 
 import csv.CSV_DICT;
+import csv.CSV_words;
 import data.Reviews;
 import dict.*;
 import dict.Edge.Edge;
+import javafx.util.Pair;
 import mystem.MyStem;
+import mystem.MyStemAnalysis;
+import mystem.MyStemItem;
+import prog2.Sentence;
 import settings.Settings;
 import utils.Bigram;
 import utils.Helper;
@@ -12,10 +17,8 @@ import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -70,7 +73,6 @@ public class Main {
         settings = new Settings(
                 0.6, 0.3, 0.2, 3, 0.65, 3
         );
-
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
         String data = String.join(" ", reviews.getTexts());
 
@@ -176,23 +178,75 @@ public class Main {
                 Math.abs(clastering.get(33).getVertex().getWeightOutgoingVertex() - 657.44986) > 0.001) {
             throw new IOException("ЕЕЕЕРРРРРРОООООРРРРР");
         }
-        Vertex eda = dictBase.getVertex("лето");
-        DictBase edaDict = dictBase.getFullSubDict(eda, 0);
-//        DictBase.graphviz_drawHight(DictBase.graphviz_getGraphViz(edaDict), "result" + File.separator + "s1.png");
-        List<HashSet<Vertex>> vertexInRadiuses = dictBase.findVertexInRadiuses(eda, 2);
+
+        dictBase.distributeVerticesIntoClusters(clastering, settings.get_R_() - 1);
+//        dictBase.saveAs("result" + File.separator + "restaurant2_new.dat");
+
+        check(dictBase);
+        prog2(dictBase);
+        System.out.print("");
+    }
 
 
+    public static void prog2(DictBase dictBase) throws IOException, InterruptedException {
+        String s = Helper.readFile(Helper.path("data", "semeval", "restaurant", "test", "test.txt"));
 
-        DictBase subDict = dictBase.getSubDict(eda, settings.get_R_());
-        DictBase invertSubDict = dictBase.getInvertSubDict(eda, settings.get_R_());
-        DictBase fullSubDict = dictBase.getFullSubDict(eda, settings.get_R_());
-
-//        dictBase.saveAs("result" + File.separator + "restaurant.dat");
-        dictBase.distributeVerticesIntoClusters(clastering, settings.get_R_());
-        Vertex спорный = dictBase.getVertex("спорный");
-        dictBase.saveAs("result" + File.separator + "restaurant2_new.dat");
+        MyStem myStem = new MyStem(s, UUID.randomUUID().toString());
+        myStem = myStem.removeStopWord();
+        myStem.lemmatization();
+        myStem.removeStopWordsFromLemmatization();
+        myStem.removeTmpFiles();
+        List<List<String>> sentencesList = myStem.getSentencesList();
 
 
-         System.out.print("");
+        Map<String, Vertex> map = dictBase.getStringVertexMap();
+
+        for (List<String> strings : sentencesList) {
+            List<Sentence> list = new ArrayList<>();
+            for (String string : strings) {
+                list.add(new Sentence(string));
+            }
+
+            for (Sentence sentence : list) {
+                Vertex vertex = map.get(sentence.getWord());
+                System.out.println(vertex.getWord().getStr());
+                for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getClusterList()) {
+                    System.out.println("\t" + clusterIntegerPair.getKey().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getValue());
+                }
+                System.out.println();
+                if(vertex != null && vertex.getClusterList() != null && vertex.getClusterList().size() > 0){
+                    for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getClusterList()) {
+                        Cluster cluster = clusterIntegerPair.getKey();
+                        sentence.getFunc().put(cluster, vertex.getWeight());
+                    }
+                }
+            }
+            System.out.print("");
+
+        }
+        System.out.print("");
+    }
+
+    public static void check(DictBase dictBase) throws IOException {
+        List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
+
+        System.out.println("==============================================================================");
+
+        int tmpIndex = 0;
+        for (ClusterHelper claster : clastering) {
+            if (claster.getVertex().isNoun())
+                tmpIndex++;
+            if (tmpIndex > 40)
+                break;
+        }
+
+        if (!"отмечать".equals(clastering.get(20).getVertex().getWord().getStr()) ||
+                Math.abs(clastering.get(20).getVertex().getWeight() - 259.14787329) > 0.001 ||
+                !"салат".equals(clastering.get(13).getVertex().getWord().getStr()) ||
+                Math.abs(clastering.get(13).getVertex().getWeight() - 242.0) > 0.001 ||
+                !"зал".equals(clastering.get(33).getVertex().getWord().getStr()) ||
+                Math.abs(clastering.get(33).getVertex().getWeightOutgoingVertex() - 657.44986) > 0.001) {
+            throw new IOException("ЕЕЕЕРРРРРРОООООРРРРР");
+        }
     }
 }
