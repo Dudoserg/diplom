@@ -1231,52 +1231,26 @@ public class DictBase implements Serializable {
         int count = 0;
         // Распределяем вершины по кластерам
         for (Cluster cluster : clusterList) {
-            System.out.println("count = " + count++);
-            if (count == 9)
-                System.out.print("");
             Vertex center = cluster.getVertex();
-            if ("отношение".equals(center.getWord().getStr()))
-                System.out.print("");
+            center.addCluster(cluster, -1);
 
+            List<HashSet<Vertex>> vertexInRadiuses = findVertexInRadiuses(center, radius);
 
-
-            List<List<Vertex>> list = new ArrayList<>();
-            // находим подсловари с центром CENTER и радиусами [0...radius]
-            for (int i = 0; i < radius; i++) {
-                DictBase fullSubDict = this.getFullSubDict(center, i);
-                ArrayList<Vertex> vertices = new ArrayList<>(fullSubDict.getInvertMap().keySet());
-                vertices.remove(center);
-                list.add(vertices);
-            }
-
-            center.addCluster(cluster, 0);      // центр кластера
-            list.get(0).forEach(vertex -> vertex.addCluster(cluster, 1));   // первый радиус
-            // остальные радиусы
-            for (int i = 1; i < radius; i++) {
-                List<Vertex> allPrevRadius = list.get(i - 1);       // вершины на предыдущих радиусах
-                List<Vertex> allCurrentRadius = list.get(i);        // вершины на текущем и предыдущих радиусах
-                // разница = только вершины на текузем радиусе
-                ArrayList<Vertex> currentRadius = new ArrayList<>(allCurrentRadius);
-                currentRadius.removeAll(allPrevRadius);
-
-                for (Vertex vertex : currentRadius) {
-                    if ("спорный".equals(vertex.getWord().getStr()))
-                        System.out.println();
-                }
-
-                // вершинам на заданном расстоянии задаем соответствующую дистанцию
-                for (Vertex vertex : currentRadius) {
-                    vertex.addCluster(cluster, i + 1);
+            HashSet<Vertex> allVertex = new HashSet<>();
+            double sumWeight = 0.0;
+            // распределяем вершины по кластерам
+            for (int r = 0; r < vertexInRadiuses.size(); r++) {
+                HashSet<Vertex> set = vertexInRadiuses.get(r);
+                for (Vertex vertex : set) {
+                    vertex.addCluster(cluster, r);
+                    allVertex.add(vertex);
+                    // Считаем сумму весов всех вершин в данном кластере
+                    sumWeight += vertex.getWeight();
                 }
             }
 
-            // Считаем сумму весов всех вершин в данном кластере
-            List<Vertex> vertices = list.get(list.size() - 1);
-            double sum = vertices.stream()
-                    .mapToDouble(Vertex::getWeight)
-                    .sum();
-            cluster.setWeight(sum);
-            cluster.setVertexList(vertices);
+            cluster.setWeight(sumWeight);
+            cluster.setVertexList(new ArrayList<>(allVertex));
         }
         // Т.к. вершины до
     }
@@ -1285,9 +1259,9 @@ public class DictBase implements Serializable {
         List<HashSet<Vertex>> list = new ArrayList<>();
         HashSet<Vertex> used = new HashSet<>();
         used.add(startVertex);
-        for (int i = 0; i <= 1; i++)
+        for (int i = 0; i < maxRadius; i++)
             list.add(new HashSet<>());
-        this.findVertexInRadiuses_recursion(list, used, startVertex, 0, maxRadius);
+        this.findVertexInRadiuses_recursion(list, used, startVertex, 0, maxRadius - 1);
         int r = 0;
 //        for (HashSet<Vertex> vertices : list) {
 //            System.out.println("r = " + r + " (count = " + vertices.size());

@@ -190,9 +190,9 @@ public class Main {
 //        dictBase.saveAs("result" + File.separator + "restaurant.dat");
         dictBase.distributeVerticesIntoClusters(clastering, settings.get_R_());
         Vertex спорный = dictBase.getVertex("спорный");
-//        dictBase.saveAs("result" + File.separator + "restaurant2.dat");
+        dictBase.saveAs("result" + File.separator + "restaurant2_new.dat");
 
 
-        System.out.print("");
+         System.out.print("");
     }
 }
