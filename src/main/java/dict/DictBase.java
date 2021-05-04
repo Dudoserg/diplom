@@ -2,10 +2,7 @@ package dict;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dict.Edge.Edge;
-import guru.nidi.graphviz.attribute.Color;
-import guru.nidi.graphviz.attribute.Font;
-import guru.nidi.graphviz.attribute.Label;
-import guru.nidi.graphviz.attribute.Rank;
+import guru.nidi.graphviz.attribute.*;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
@@ -257,24 +254,22 @@ public class DictBase implements Serializable {
             return;
         {
             EdgeMap edgeMap = map.get(w);
-            if (edgeMap == null)
-                return;
-
-            for (Vertex s : edgeMap.getEdgeMap().keySet()) {
-                Edge edge = edgeMap.getEdgeMap().get(s);
-                dictBase.addPair(w, s, edge);
-                getFullSubDict_aroudVertex(s, radius - 1, dictBase);
+            if (edgeMap != null) {
+                for (Vertex s : edgeMap.getEdgeMap().keySet()) {
+                    Edge edge = edgeMap.getEdgeMap().get(s);
+                    dictBase.addPair(w, s, edge);
+                    getFullSubDict_aroudVertex(s, radius - 1, dictBase);
+                }
             }
         }
         {
             EdgeMap edgeMap = invertMap.get(w);
-            if (edgeMap == null)
-                return;
-
-            for (Vertex s : edgeMap.getEdgeMap().keySet()) {
-                Edge edge = edgeMap.getEdgeMap().get(s);
-                dictBase.addPair(s, w, edge);
-                getFullSubDict_aroudVertex(s, radius - 1, dictBase);
+            if (edgeMap != null) {
+                for (Vertex s : edgeMap.getEdgeMap().keySet()) {
+                    Edge edge = edgeMap.getEdgeMap().get(s);
+                    dictBase.addPair(s, w, edge);
+                    getFullSubDict_aroudVertex(s, radius - 1, dictBase);
+                }
             }
         }
     }
@@ -511,6 +506,7 @@ public class DictBase implements Serializable {
             this.addPair(tmp.from, tmp.to, tmp.weight, tmp.relationType);
         }
     }
+
 
     public static class FindPathHelper {
         Vertex vertex;
@@ -1288,31 +1284,28 @@ public class DictBase implements Serializable {
         HashSet<Vertex> vertices = list.get(radius);
         {
             EdgeMap edgeMap = map.get(w);
-            if (edgeMap == null)
-                return;
-
-            for (Vertex s : edgeMap.getEdgeMap().keySet()) {
-                Edge edge = edgeMap.getEdgeMap().get(s);
-                // if (!used.contains(s)) {
-                used.add(s);
-                vertices.add(s);
-                findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
-                //}
-
+            if (edgeMap != null) {
+                for (Vertex s : edgeMap.getEdgeMap().keySet()) {
+                    Edge edge = edgeMap.getEdgeMap().get(s);
+                    // if (!used.contains(s)) {
+                    used.add(s);
+                    vertices.add(s);
+                    findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
+                    //}
+                }
             }
         }
         {
             EdgeMap edgeMap = invertMap.get(w);
-            if (edgeMap == null)
-                return;
-
-            for (Vertex s : edgeMap.getEdgeMap().keySet()) {
-                Edge edge = edgeMap.getEdgeMap().get(s);
-                //if (!used.contains(s)) {
-                used.add(s);
-                vertices.add(s);
-                findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
-                // }
+            if (edgeMap != null) {
+                for (Vertex s : edgeMap.getEdgeMap().keySet()) {
+                    Edge edge = edgeMap.getEdgeMap().get(s);
+                    //if (!used.contains(s)) {
+                    used.add(s);
+                    vertices.add(s);
+                    findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
+                    // }
+                }
             }
         }
     }
@@ -1371,7 +1364,7 @@ public class DictBase implements Serializable {
      * @return Список нод для библиотеки графвиз
      * @throws DictException такого типа отношений не существует
      */
-    public static List<Node> graphviz_getGraphViz(DictBase dictBase) throws DictException {
+    public static List<Node> graphviz_getGraphViz( DictBase dictBase, String centr) throws DictException {
         Map<Vertex, EdgeMap> map = dictBase.getMap();
         List<Node> result = new ArrayList<>();
         Set<Map.Entry<Vertex, EdgeMap>> entries = map.entrySet();
@@ -1385,8 +1378,20 @@ public class DictBase implements Serializable {
                 Edge edge = wordRelationTypeEntry.getValue();
                 RelationType type = edge.getRelationType();
 
-                Node link1 = node(first.getWord().getStr()).with(Color.BLACK);
-                Node link2 = node(second.getWord().getStr()).with(Color.BLACK);
+
+                Node link1 = null;
+                if(centr != null && centr.equals(first.getWord().getStr()))
+                    link1 = node(first.getWord().getStr()).with(Color.RED, Style.FILLED);
+                else
+                    link1 = node(first.getWord().getStr().toUpperCase()).with(Color.BLACK);
+
+                Node link2 = null;
+                if(centr != null && centr.equals(second.getWord().getStr()))
+                    link2 = node(second.getWord().getStr().toUpperCase()).with(Color.RED, Style.FILLED);
+                else
+                    link2 = node(second.getWord().getStr()).with(Color.BLACK);
+
+
                 Node resultNode = null;
                 DecimalFormat decimalFormat = new DecimalFormat("#0.00");
                 String weight_str = ("(" + decimalFormat.format(edge.getWeight()) + ")").replace(",", ".");
@@ -1459,6 +1464,9 @@ public class DictBase implements Serializable {
         Graphviz.fromGraph(g).totalMemory(1000000000).render(format).toFile(new File(fileName));
     }
 
+    public void draw(String center,String path) throws DictException, IOException {
+        DictBase.graphviz_drawHight(DictBase.graphviz_getGraphViz(this, center), path);
+    }
 
     public Map<String, Vertex> getStringVertexMap() {
         Set<Map.Entry<Vertex, EdgeMap>> entries = getInvertMap().entrySet();

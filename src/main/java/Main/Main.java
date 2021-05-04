@@ -135,7 +135,7 @@ public class Main {
         dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
 
 
-        dictBase.correctEdgeWeight(bigramFrequensy, 10, settings.get_R_());
+        dictBase.correctEdgeWeight(bigramFrequensy, 1, settings.get_R_());
         dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
 
@@ -183,8 +183,20 @@ public class Main {
 //        dictBase.saveAs("result" + File.separator + "restaurant2_new.dat");
 
         check(dictBase);
+
+        Vertex ss = dictBase.getVertex("спиртной");
+        Set<Vertex> asdf = dictBase.getInvertMap().keySet();
+        if(asdf.contains(ss))
+            System.out.println();
+
+        DictBase spirtnoy = dictBase.getFullSubDict(ss, 0);
+        spirtnoy.draw("спиртной", Helper.path("result", "spirt.png"));
+
+
         prog2(dictBase);
         System.out.print("");
+
+
     }
 
 
@@ -209,6 +221,11 @@ public class Main {
 
             for (Sentence sentence : list) {
                 Vertex vertex = map.get(sentence.getWord());
+
+                if(vertex == null)
+                    continue;
+                if("спиртной".equals(sentence.getWord()))
+                    System.out.print("");
                 System.out.println(vertex.getWord().getStr());
                 for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getClusterList()) {
                     System.out.println("\t" + clusterIntegerPair.getKey().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getValue());
@@ -230,7 +247,7 @@ public class Main {
     public static void check(DictBase dictBase) throws IOException {
         List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
 
-        System.out.println("==============================================================================");
+        //System.out.println("==============================================================================");
 
         int tmpIndex = 0;
         for (ClusterHelper claster : clastering) {
