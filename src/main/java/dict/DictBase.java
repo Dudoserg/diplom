@@ -1214,12 +1214,12 @@ public class DictBase implements Serializable {
      * @param clusterHelperList
      * @param radius            радиус
      */
-    public void distributeVerticesIntoClusters(List<ClusterHelper> clusterHelperList, int radius) {
+    public void distributeVerticesIntoClusters(List<ClusterHelper> clusterHelperList, int countCluster, int radius) {
         // Определяем какие вершины будут центрами кластеров
         List<Cluster> clusterList = new ArrayList<>();
         int countNoun = 0;
         for (ClusterHelper clusterHelper : clusterHelperList) {
-            if (clusterHelper.getVertex().isNoun() && countNoun < 20) {
+            if (clusterHelper.getVertex().isNoun() && countNoun < countCluster) {
                 countNoun++;
                 clusterList.add(new Cluster(clusterHelper.getVertex()));
             }

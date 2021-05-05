@@ -175,7 +175,7 @@ public class Main {
         // TODO
         // TODO какой радиус брать инвертированный или нет
         // TODO
-        dictBase.distributeVerticesIntoClusters(clastering, settings.get_R_() - 1);
+        dictBase.distributeVerticesIntoClusters(clastering, 15, settings.get_R_() - 1);
 //        dictBase.saveAs("result" + File.separator + "restaurant2_new.dat");
 
         check(dictBase);
@@ -266,15 +266,24 @@ public class Main {
                     funct.put(key, funct.get(key) + tmp);
                 }
             }
-//            for (Map.Entry<Cluster, Double> clusterDoubleEntry : funct.entrySet()) {
-//                Cluster cluster = clusterDoubleEntry.getKey();
-//                Double value = clusterDoubleEntry.getValue();
-//                double coeff = (Math.log(cluster.getWeight()) / Math.log(2)) / cluster.getWeight();
-//                funct.put(cluster, value * value * coeff);
-//            }
+            // Умножаем на логарифм
+            for (Map.Entry<Cluster, Double> clusterDoubleEntry : funct.entrySet()) {
+                Cluster cluster = clusterDoubleEntry.getKey();
+                Double value = clusterDoubleEntry.getValue();
+                double coeff = (Math.log(cluster.getWeight()) / Math.log(2)) / cluster.getWeight();
+                funct.put(cluster, value * value * coeff);
+            }
+
             List<Map.Entry<Cluster, Double>> sortedResult = new ArrayList<>(funct.entrySet());
             sortedResult.sort((first, second) -> -Double.compare(first.getValue(), second.getValue()));
-            for(int i = 0 ; i < 5; i++){
+
+            System.out.println(
+                    wordList.stream()
+                            .map(wordOfSentence -> wordOfSentence.getWord())
+                            .collect(Collectors.joining(" "))
+            );
+
+            for (int i = 0; i < 5; i++) {
                 Map.Entry<Cluster, Double> clusterDoubleEntry = sortedResult.get(i);
                 String str = clusterDoubleEntry.getKey().getVertex().getWord().getStr();
                 System.out.println("\t" + str + "\t" + clusterDoubleEntry.getValue());
