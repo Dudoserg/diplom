@@ -40,6 +40,7 @@ public class DictBase implements Serializable {
     private Map<Vertex, EdgeMap> map;
 
     private Map<Vertex, EdgeMap> invertMap;
+    private List<Cluster> clusterList;
 
     public DictBase() {
         this.map = new HashMap<>();
@@ -1249,6 +1250,7 @@ public class DictBase implements Serializable {
             cluster.setVertexList(new ArrayList<>(allVertex));
         }
         // Т.к. вершины до
+        this.clusterList = clusterList;
     }
 
     /**
@@ -1295,19 +1297,19 @@ public class DictBase implements Serializable {
                 }
             }
         }
-        {
-            EdgeMap edgeMap = invertMap.get(w);
-            if (edgeMap != null) {
-                for (Vertex s : edgeMap.getEdgeMap().keySet()) {
-                    Edge edge = edgeMap.getEdgeMap().get(s);
-                    //if (!used.contains(s)) {
-                    used.add(s);
-                    vertices.add(s);
-                    findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
-                    // }
-                }
-            }
-        }
+//        {
+//            EdgeMap edgeMap = invertMap.get(w);
+//            if (edgeMap != null) {
+//                for (Vertex s : edgeMap.getEdgeMap().keySet()) {
+//                    Edge edge = edgeMap.getEdgeMap().get(s);
+//                    //if (!used.contains(s)) {
+//                    used.add(s);
+//                    vertices.add(s);
+//                    findVertexInRadiuses_recursion(list, used, s, radius + 1, maxRadius);
+//                    // }
+//                }
+//            }
+//        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1383,11 +1385,11 @@ public class DictBase implements Serializable {
                 if(centr != null && centr.equals(first.getWord().getStr()))
                     link1 = node(first.getWord().getStr()).with(Color.RED, Style.FILLED);
                 else
-                    link1 = node(first.getWord().getStr().toUpperCase()).with(Color.BLACK);
+                    link1 = node(first.getWord().getStr()).with(Color.BLACK);
 
                 Node link2 = null;
                 if(centr != null && centr.equals(second.getWord().getStr()))
-                    link2 = node(second.getWord().getStr().toUpperCase()).with(Color.RED, Style.FILLED);
+                    link2 = node(second.getWord().getStr()).with(Color.RED, Style.FILLED);
                 else
                     link2 = node(second.getWord().getStr()).with(Color.BLACK);
 

@@ -1,15 +1,12 @@
 package Main;
 
 import csv.CSV_DICT;
-import csv.CSV_words;
 import data.Reviews;
 import dict.*;
 import dict.Edge.Edge;
 import javafx.util.Pair;
 import mystem.MyStem;
-import mystem.MyStemAnalysis;
-import mystem.MyStemItem;
-import prog2.Sentence;
+import prog2.WordOfSentence;
 import settings.Settings;
 import utils.Bigram;
 import utils.Helper;
@@ -19,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -65,7 +61,7 @@ public class Main {
 //        {
 //            ObjectMapper objectMapper = new ObjectMapper();
 //            String str = Helper.readFile("result" + File.separator + "dict.json");
-//            DictBase ss = objectMapper.readValue(str, DictBase.class);
+//            DictBase testVertex = objectMapper.readValue(str, DictBase.class);
 //            System.out.println();
 //        }
 
@@ -135,7 +131,7 @@ public class Main {
         dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
 
 
-        dictBase.correctEdgeWeight(bigramFrequensy, 1, settings.get_R_());
+        dictBase.correctEdgeWeight(bigramFrequensy, 5, settings.get_R_());
         dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
 
@@ -170,27 +166,27 @@ public class Main {
                 break;
         }
 
-        if (!"отмечать".equals(clastering.get(20).getVertex().getWord().getStr()) ||
-                Math.abs(clastering.get(20).getVertex().getWeight() - 259.14787329) > 0.001 ||
-                !"салат".equals(clastering.get(13).getVertex().getWord().getStr()) ||
-                Math.abs(clastering.get(13).getVertex().getWeight() - 242.0) > 0.001 ||
-                !"зал".equals(clastering.get(33).getVertex().getWord().getStr()) ||
-                Math.abs(clastering.get(33).getVertex().getWeightOutgoingVertex() - 657.44986) > 0.001) {
-            throw new IOException("ЕЕЕЕРРРРРРОООООРРРРР");
-        }
+        check(dictBase);
 
+        // TODO
+        // TODO
+        // TODO
+        // TODO
+        // TODO
+        // TODO какой радиус брать инвертированный или нет
+        // TODO
         dictBase.distributeVerticesIntoClusters(clastering, settings.get_R_() - 1);
 //        dictBase.saveAs("result" + File.separator + "restaurant2_new.dat");
 
         check(dictBase);
 
-        Vertex ss = dictBase.getVertex("спиртной");
-        Set<Vertex> asdf = dictBase.getInvertMap().keySet();
-        if(asdf.contains(ss))
-            System.out.println();
+//        Vertex testVertex = dictBase.getVertex("отмечать");
+//        Set<Vertex> asdf = dictBase.getInvertMap().keySet();
+//        if(asdf.contains(testVertex))
+//            System.out.println();
 
-        DictBase spirtnoy = dictBase.getFullSubDict(ss, 0);
-        spirtnoy.draw("спиртной", Helper.path("result", "spirt.png"));
+//        DictBase testDict = dictBase.getSubDict(testVertex, 1);
+//        testDict.draw("отмечать", Helper.path("result", "test.png"));
 
 
         prog2(dictBase);
@@ -213,31 +209,77 @@ public class Main {
 
         Map<String, Vertex> map = dictBase.getStringVertexMap();
 
+        // перебираем все предложения оцениваемого отзыва
         for (List<String> strings : sentencesList) {
-            List<Sentence> list = new ArrayList<>();
+            // Список слов текущего предложения
+            List<WordOfSentence> wordList = new ArrayList<>();
             for (String string : strings) {
-                list.add(new Sentence(string));
+                wordList.add(new WordOfSentence(string, null));
             }
 
-            for (Sentence sentence : list) {
-                Vertex vertex = map.get(sentence.getWord());
-
-                if(vertex == null)
+            // перебираем слова из оцениваемого предложения
+            for (WordOfSentence word : wordList) {
+                // находим соответствующую слову из оцениваемого предложения, вершину из графа
+                Vertex vertex = map.get(word.getWord());
+                word.setVertex(vertex);
+                if (vertex == null)
                     continue;
-                if("спиртной".equals(sentence.getWord()))
+
+                /////////////////////
+                if ("спиртной".equals(word.getWord()))
                     System.out.print("");
                 System.out.println(vertex.getWord().getStr());
-                for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getClusterList()) {
+                for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getShortest()) {
                     System.out.println("\t" + clusterIntegerPair.getKey().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getValue());
                 }
                 System.out.println();
-                if(vertex != null && vertex.getClusterList() != null && vertex.getClusterList().size() > 0){
+                /////////////////////
+
+
+                // все кластеры, в которые входит данное слово из графа, помещаем в объект-слово
+                if (vertex != null && vertex.getClusterList() != null && vertex.getClusterList().size() > 0) {
                     for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getClusterList()) {
                         Cluster cluster = clusterIntegerPair.getKey();
-                        sentence.getFunc().put(cluster, vertex.getWeight());
+                        Integer value = clusterIntegerPair.getValue();
+                        word.getFunc().put(cluster, value);
                     }
                 }
             }
+            System.out.print("");
+            // перебираем все слова из предложения, и считаем по формуле характеристику - принадлежности
+            // всего предложения к каждому из кластеров
+            List<Cluster> clusterList = dictBase.getClusterList();
+            Map<Cluster, Double> funct = new HashMap<>();
+            for (Cluster cluster : clusterList) {
+                funct.put(cluster, 0.0);
+            }
+
+            for (WordOfSentence wordOfSentence : wordList) {
+                for (Map.Entry<Cluster, Integer> clusterDoubleEntry : wordOfSentence.getFunc().entrySet()) {
+                    Cluster key = clusterDoubleEntry.getKey();
+                    Integer distance = clusterDoubleEntry.getValue();
+                    double tmp = wordOfSentence.getVertex().getWeight();
+                    if (distance != -1) {
+                        double c = Math.pow(0.8, distance + 1);
+                        tmp *= c;
+                    }
+                    funct.put(key, funct.get(key) + tmp);
+                }
+            }
+//            for (Map.Entry<Cluster, Double> clusterDoubleEntry : funct.entrySet()) {
+//                Cluster cluster = clusterDoubleEntry.getKey();
+//                Double value = clusterDoubleEntry.getValue();
+//                double coeff = (Math.log(cluster.getWeight()) / Math.log(2)) / cluster.getWeight();
+//                funct.put(cluster, value * value * coeff);
+//            }
+            List<Map.Entry<Cluster, Double>> sortedResult = new ArrayList<>(funct.entrySet());
+            sortedResult.sort((first, second) -> -Double.compare(first.getValue(), second.getValue()));
+            for(int i = 0 ; i < 5; i++){
+                Map.Entry<Cluster, Double> clusterDoubleEntry = sortedResult.get(i);
+                String str = clusterDoubleEntry.getKey().getVertex().getWord().getStr();
+                System.out.println("\t" + str + "\t" + clusterDoubleEntry.getValue());
+            }
+            System.out.println();
             System.out.print("");
 
         }
@@ -245,6 +287,8 @@ public class Main {
     }
 
     public static void check(DictBase dictBase) throws IOException {
+        if (true)
+            return;
         List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
 
         //System.out.println("==============================================================================");

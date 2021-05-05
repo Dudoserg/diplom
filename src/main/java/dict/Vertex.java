@@ -71,4 +71,26 @@ public class Vertex implements Serializable {
     }
 
 
+    List<Pair<Cluster, Integer>> shortest;
+    public List<Pair<Cluster, Integer>> getShortest(){
+        if(this.shortest == null){
+            this.shortest = new ArrayList<>();
+            for (Pair<Cluster, Integer> clusterIntegerPair : this.clusterList) {
+                Cluster key = clusterIntegerPair.getKey();
+                Integer value = clusterIntegerPair.getValue();
+
+                Pair<Cluster, Integer> resultContain = shortest.stream()
+                        .filter(r -> r.getKey().getVertex().equals(key.getVertex()))
+                        .findFirst()
+                        .orElse(null);
+
+                if(resultContain == null){
+                    shortest.add(clusterIntegerPair);
+                }
+            }
+        }
+        shortest.sort((o1, o2) -> Integer.compare(o1.getValue(), o2.getValue()));
+        return shortest;
+    }
+
 }
