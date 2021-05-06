@@ -1029,8 +1029,8 @@ public class DictBase implements Serializable {
         if (R == 0)
             return false;
         EdgeMap edgeMap = dictBase.invertMap.get(vertex);
-        if (edgeMap == null)
-            System.out.println("edgeMap == null");
+       // if (edgeMap == null)
+            //System.out.print("edgeMap == null");
         // Все вершины входящие в текущую
         boolean result = false;
         assert edgeMap != null;
@@ -1062,7 +1062,7 @@ public class DictBase implements Serializable {
             return false;
         EdgeMap edgeMap = dictBase.map.get(vertex);
         if (edgeMap == null) {
-            System.out.println("edgeMap == null");
+            //System.out.print("edgeMap == null");
             return false;
         }
         // Все вершины входящие в текущую
@@ -1345,7 +1345,7 @@ public class DictBase implements Serializable {
     public static DictBase readFrom(String path) throws IOException, ClassNotFoundException {
         System.out.print("readFrom dictionary from file (path='" + path + "') ... \t\t\t");
         long startTime = System.currentTimeMillis();
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("result\\person.dat"))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
             DictBase dictBase = (DictBase) ois.readObject();
             System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
             return dictBase;

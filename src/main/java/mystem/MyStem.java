@@ -3,6 +3,8 @@ package mystem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
+import prog2.Sentence;
+import prog2.WordOfSentence;
 import utils.Helper;
 
 import java.io.BufferedWriter;
@@ -24,10 +26,19 @@ public class MyStem {
 
     private String id;
 
+
+    private String baseString;
+    private String text;
+    private List<String> words;
+    private StopWords stopWords;
+
+    MyStemResult myStemResult;
+
+
     public MyStem(List<String> words, String id) {
         this.id = id;
         this.words = words;
-        this.text = words.stream().collect(Collectors.joining(" ")).trim();
+        this.baseString = this.text = words.stream().collect(Collectors.joining(" ")).trim();
 
         if (stopWords == null) {
             stopWords = StopWords.getInstance();
@@ -42,7 +53,7 @@ public class MyStem {
         text = text.replace(",", ", ");
         text = text.replace("!", "! ");
         text = text.replace("?", "? ");
-        this.text = text.trim().replaceAll(" +", " ").toLowerCase();
+        this.baseString = this.text = text.trim().replaceAll(" +", " ").toLowerCase();
         this.words = Arrays.stream(this.text.split(" "))
                 .filter(s -> !s.equals(" "))
                 .collect(Collectors.toList());
@@ -51,13 +62,6 @@ public class MyStem {
             stopWords = StopWords.getInstance();
         }
     }
-
-
-    private String text;
-    private List<String> words;
-    private StopWords stopWords;
-
-    MyStemResult myStemResult;
 
     public MyStem removeStopWord() {
         if (stopWords == null) {
@@ -162,7 +166,7 @@ public class MyStem {
     }
 
 
-    public  List<List<String>> getSentencesList(){
+    public List<List<String>> getSentencesList() {
         List<List<String>> sentencesList = new ArrayList<>();
         List<String> sentence = new ArrayList<>();
         for (MyStemItem myStemItem : this.getMyStemResult().getItemList()) {
@@ -177,6 +181,33 @@ public class MyStem {
                 MyStemAnalysis myStemAnalysis = analysisList.get(0);
                 System.out.println(myStemAnalysis.getLex());
                 sentence.add(myStemAnalysis.getLex());
+            }
+        }
+        return sentencesList;
+    }
+
+
+    public List<Sentence> getSentencesList2() {
+        List<String> collect = Arrays.stream(this.baseString.split("\\."))
+                .map(elem -> elem + ".")
+                .collect(Collectors.toList());
+
+        int it = 0;
+        List<Sentence> sentencesList = new ArrayList<>();
+        Sentence sentence = new Sentence();
+        for (MyStemItem myStemItem : this.getMyStemResult().getItemList()) {
+            List<MyStemAnalysis> analysisList = myStemItem.getAnalysisList();
+            sentence.addElemToProcessedText(myStemItem.getText().trim());
+            if (".".equals(myStemItem.getText().trim())) {
+                sentencesList.add(sentence);
+                sentence.setProcessedText(collect.get(it++));
+                sentence = new Sentence();
+                continue;
+            }
+            if (analysisList != null && analysisList.size() >= 1) {
+                MyStemAnalysis myStemAnalysis = analysisList.get(0);
+//                System.out.println(myStemAnalysis.getLex());
+                sentence.getWordOfSentenceList().add(new WordOfSentence(myStemAnalysis.getLex()));
             }
         }
         return sentencesList;

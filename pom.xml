@@ -71,6 +71,12 @@
             <version>1.7.30</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.languagetool</groupId>
+            <artifactId>language-ru</artifactId>
+            <version>5.3</version>
+        </dependency>
+
     </dependencies>
 
 </project>

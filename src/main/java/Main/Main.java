@@ -1,11 +1,13 @@
 package Main;
 
+import SpellerChecker.Languagetool;
 import csv.CSV_DICT;
 import data.Reviews;
 import dict.*;
 import dict.Edge.Edge;
 import javafx.util.Pair;
 import mystem.MyStem;
+import prog2.Sentence;
 import prog2.WordOfSentence;
 import settings.Settings;
 import utils.Bigram;
@@ -14,6 +16,7 @@ import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -188,16 +191,127 @@ public class Main {
 //        DictBase testDict = dictBase.getSubDict(testVertex, 1);
 //        testDict.draw("отмечать", Helper.path("result", "test.png"));
 
+        Vertex vertex = dictBase.getVertex("персонал");
 
-        prog2(dictBase);
+        //prog2(dictBase);
+        prog22(dictBase);
         System.out.print("");
 
 
     }
 
+    public static void prog22(DictBase dictBase) throws IOException, InterruptedException {
+        long startTime = System.currentTimeMillis();
+        String s = Helper.readFile(Helper.path("data", "semeval", "restaurant", "test", "test.txt"));
+        Languagetool languagetool = new Languagetool();
+        s = languagetool.getCorrect(s);
+        System.out.println(s);
+
+        MyStem myStem = new MyStem(s, UUID.randomUUID().toString());
+        myStem = myStem.removeStopWord();
+        myStem.lemmatization();
+        myStem.removeStopWordsFromLemmatization();
+        myStem.removeTmpFiles();
+
+
+        List<Sentence> sentencesList2 = myStem.getSentencesList2();
+
+        // слово  - соответствующая ему вершина в графе
+        Map<String, Vertex> map = dictBase.getStringVertexMap();
+
+        // цикл по предложениям обрабатываемого текста
+        for (Sentence sentence : sentencesList2) {
+            // список слов предложения приведенных к лексической форме
+            List<WordOfSentence> wordOfSentenceList = sentence.getWordOfSentenceList();
+
+            // перебираем слова из предложения, помечаем в какие кластера отностися каждое из слов
+            for (WordOfSentence wordOfSentence : wordOfSentenceList) {
+                // Находим вершину из графа соответствующей текущему слову
+                Vertex vertex = map.get(wordOfSentence.getWord());
+                wordOfSentence.setVertex(vertex);
+                if (vertex == null) {
+                    // такого слова в графе нет, завершаем обработку слова
+                    continue;
+                }
+
+                // слово может относиться к нескольким кластерам, перебираем каждый из кластеров
+                for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getShortest()) {
+                    wordOfSentence.addCluster(
+                            clusterIntegerPair.getKey(),
+                            clusterIntegerPair.getValue()
+                    );
+                }
+
+                /////************************************
+//                System.out.println(wordOfSentence.getWord());
+//                wordOfSentence.getFunc().entrySet().stream()
+//                        .sorted((o1, o2) -> Integer.compare(o1.getValue(), o2.getValue()))
+//                        .forEach(elem ->
+//                                System.out.println("\t" + elem.getKey().getVertex().getWord().getStr() + "\t" + elem.getValue())
+//                        );
+                /////************************************
+            }
+
+            Map<Cluster, Double> result = dictBase.getClusterList().stream().collect(Collectors.toMap(
+                    cluster -> cluster,
+                    cluster -> 0.0
+            ));
+            // опять перебираем все слова, и считаем характеристические функции принадлежности кластеру
+            for (WordOfSentence wordOfSentence : wordOfSentenceList) {
+                if (wordOfSentence.getVertex() == null)
+                    continue;
+                for (Map.Entry<Cluster, Integer> clusterIntegerEntry : wordOfSentence.getFunc().entrySet()) {
+                    Cluster keyCluster = clusterIntegerEntry.getKey();
+                    Integer valueDistance = clusterIntegerEntry.getValue();
+                    double coeff = 0;   // коэффициент затухания
+                    if (valueDistance == -1) {
+                        // данное слово является центром кластера
+                        coeff = 1;
+                    } else {
+                        // 0 - одна дуга до центра => первая степень затухания
+                        // 1 - две дуги до центра => вторая степень затухания
+                        coeff = Math.pow(0.8, valueDistance + 1);
+                    }
+                    // вес вершины в кластере
+//                    double weight = keyCluster.getVertex().getWeight();
+                    double weight = wordOfSentence.getVertex().getWeight();
+                    // влияние вершины на характеристическую функцию принадлежности предложения к кластеру
+                    double wordValue = weight * coeff;
+
+                    result.put(keyCluster, result.get(keyCluster) + wordValue);
+                }
+            }
+
+//            for (Map.Entry<Cluster, Double> clusterDoubleEntry : result.entrySet()) {
+//                Cluster key = clusterDoubleEntry.getKey();
+//                Double oldValue = clusterDoubleEntry.getValue();
+//                Double newValue =((Math.log(key.getWeight()) / Math.log(2))) / key.getWeight() * oldValue;
+//                result.put(key, newValue);
+//            }
+
+
+            List<Map.Entry<Cluster, Double>> sortedResult = new ArrayList<>(result.entrySet());
+            sortedResult.sort((first, second) -> -Double.compare(first.getValue(), second.getValue()));
+
+            System.out.println("=======================================================================================");
+            System.out.println(sentence.getProcessedText());
+            for (int i = 0; i < 5; i++) {
+                Map.Entry<Cluster, Double> elem = sortedResult.get(i);
+                System.out.println("\t" + elem.getKey().getVertex().getWord().getStr() + "\t"
+                        + elem.getValue());
+            }
+            System.out.println();
+        }
+        System.out.println("prog 22 time = " + (System.currentTimeMillis() - startTime) + " ms.");
+
+    }
 
     public static void prog2(DictBase dictBase) throws IOException, InterruptedException {
+        long startTime = System.currentTimeMillis();
         String s = Helper.readFile(Helper.path("data", "semeval", "restaurant", "test", "test.txt"));
+        Languagetool languagetool = new Languagetool();
+        s = languagetool.getCorrect(s);
+        System.out.println(s);
 
         MyStem myStem = new MyStem(s, UUID.randomUUID().toString());
         myStem = myStem.removeStopWord();
@@ -226,8 +340,6 @@ public class Main {
                     continue;
 
                 /////////////////////
-                if ("спиртной".equals(word.getWord()))
-                    System.out.print("");
                 System.out.println(vertex.getWord().getStr());
                 for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getShortest()) {
                     System.out.println("\t" + clusterIntegerPair.getKey().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getValue());
@@ -237,8 +349,8 @@ public class Main {
 
 
                 // все кластеры, в которые входит данное слово из графа, помещаем в объект-слово
-                if (vertex != null && vertex.getClusterList() != null && vertex.getClusterList().size() > 0) {
-                    for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getClusterList()) {
+                if (vertex != null && vertex.getShortest() != null && vertex.getShortest().size() > 0) {
+                    for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getShortest()) {
                         Cluster cluster = clusterIntegerPair.getKey();
                         Integer value = clusterIntegerPair.getValue();
                         word.getFunc().put(cluster, value);
@@ -267,12 +379,12 @@ public class Main {
                 }
             }
             // Умножаем на логарифм
-            for (Map.Entry<Cluster, Double> clusterDoubleEntry : funct.entrySet()) {
-                Cluster cluster = clusterDoubleEntry.getKey();
-                Double value = clusterDoubleEntry.getValue();
-                double coeff = (Math.log(cluster.getWeight()) / Math.log(2)) / cluster.getWeight();
-                funct.put(cluster, value * value * coeff);
-            }
+//            for (Map.Entry<Cluster, Double> clusterDoubleEntry : funct.entrySet()) {
+//                Cluster cluster = clusterDoubleEntry.getKey();
+//                Double value = clusterDoubleEntry.getValue();
+//                double coeff = (Math.log(cluster.getWeight()) / Math.log(2)) / cluster.getWeight();
+//                funct.put(cluster,  value * coeff);
+//            }
 
             List<Map.Entry<Cluster, Double>> sortedResult = new ArrayList<>(funct.entrySet());
             sortedResult.sort((first, second) -> -Double.compare(first.getValue(), second.getValue()));
@@ -292,8 +404,10 @@ public class Main {
             System.out.print("");
 
         }
-        System.out.print("");
+        System.out.println("prog 2 time = " + (System.currentTimeMillis() - startTime) + " ms.");
     }
+
+
 
     public static void check(DictBase dictBase) throws IOException {
         if (true)
