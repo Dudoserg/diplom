@@ -70,7 +70,8 @@ public class Main {
 
 
         settings = new Settings(
-                0.4, 0.3, 0.3, 3, 0.65, 3
+                0.6, 0.3, 0.2, 3, 0.65, 3
+
         );
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
         String data = String.join(" ", reviews.getTexts());
@@ -104,7 +105,7 @@ public class Main {
         DictBase dictTrain = new DictBase();
         for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
             Bigram key = bigramIntegerEntry.getKey();
-            Edge edge = dictBase.getEdge(Vertex.getVertex(dictBase, key.getFirst()), Vertex.getVertex(dictBase, key.getSecond()));
+            Edge edge = dictBase.getEdge(dictBase.getVertex( key.getFirst()), dictBase.getVertex( key.getSecond()));
 
 //            Vertex vertexFrom = dictTrain.getVertex(key.getFirst());
 //            Vertex vertexTo = dictTrain.getVertex(key.getSecond());
@@ -191,7 +192,6 @@ public class Main {
 //        DictBase testDict = dictBase.getSubDict(testVertex, 1);
 //        testDict.draw("отмечать", Helper.path("result", "test.png"));
 
-        Vertex vertex = dictBase.getVertex("персонал");
 
         //prog22(dictBase);
         System.out.print("");
@@ -407,29 +407,45 @@ public class Main {
     }
 
 
-
     public static void check(DictBase dictBase) throws IOException {
-        if (true)
-            return;
-        List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
 
-        //System.out.println("==============================================================================");
-
+        List<ClusterHelper> clusterNoun = new ArrayList<>();
         int tmpIndex = 0;
-        for (ClusterHelper claster : clastering) {
+        for (ClusterHelper claster : dictBase.clastering(1, 0.1)) {
             if (claster.getVertex().isNoun())
-                tmpIndex++;
+                clusterNoun.add(claster);
             if (tmpIndex > 40)
                 break;
         }
 
-        if (!"отмечать".equals(clastering.get(20).getVertex().getWord().getStr()) ||
-                Math.abs(clastering.get(20).getVertex().getWeight() - 259.14787329) > 0.001 ||
-                !"салат".equals(clastering.get(13).getVertex().getWord().getStr()) ||
-                Math.abs(clastering.get(13).getVertex().getWeight() - 242.0) > 0.001 ||
-                !"зал".equals(clastering.get(33).getVertex().getWord().getStr()) ||
-                Math.abs(clastering.get(33).getVertex().getWeightOutgoingVertex() - 657.44986) > 0.001) {
-            throw new IOException("ЕЕЕЕРРРРРРОООООРРРРР");
+        class CheckHelper {
+            int num;
+            String str;
+            double w;
+
+            public CheckHelper(int num, String str, double w) {
+                this.num = num;
+                this.str = str;
+                this.w = w;
+            }
+        }
+
+        List<CheckHelper> checkHelperList = new ArrayList<>();
+        checkHelperList.add(new CheckHelper(0, "ресторан", 1081.457093968435));
+        checkHelperList.add(new CheckHelper(1, "кухня", 413.90067142111377));
+        checkHelperList.add(new CheckHelper(2, "интерьер", 403.96756074427947));
+        checkHelperList.add(new CheckHelper(8, "действие", 303.04020666838267));
+        checkHelperList.add(new CheckHelper(9, "обслуживание", 390.74540059062997));
+        checkHelperList.add(new CheckHelper(10, "салат", 256.31315033019007));
+        checkHelperList.add(new CheckHelper(11, "порция", 213.34987608559865));
+        checkHelperList.add(new CheckHelper(12, "вкус", 203.05622547208844));
+
+
+        for (CheckHelper checkHelper : checkHelperList) {
+            if (!checkHelper.str.equals(clusterNoun.get(checkHelper.num).getVertex().getWord().getStr()) ||
+                    Math.abs(clusterNoun.get(checkHelper.num).getVertex().getWeight() - checkHelper.w) > 0.00001) {
+                throw new IOException("ЕЕЕЕРРРРРРОООООРРРРР");
+            }
         }
     }
 }

@@ -74,10 +74,10 @@ public class CSV_DICT {
             if (wordFrom.getSpelling().matches("[a-zA-Z]+") || wordTo.getSpelling().matches("[a-zA-Z]+")) {
                 continue;
             }
-            Vertex fromVertex = Vertex.getVertex(dict, wordFrom.getSpelling());
+            Vertex fromVertex = dict.getVertex(wordFrom.getSpelling());
             fromVertex.getWord().setPartOfSpeech(PartOfSpeech.getPart(wordFrom.getPartOfSpeech()));
 
-            Vertex toVertex = Vertex.getVertex(dict, wordTo.getSpelling());
+            Vertex toVertex = dict.getVertex(wordTo.getSpelling());
             toVertex.getWord().setPartOfSpeech(PartOfSpeech.getPart(wordTo.getPartOfSpeech()));
 
 
@@ -119,9 +119,9 @@ public class CSV_DICT {
         int j = 2;
         for (CSV_CONNECTIONS con : connections) {
 
-            Vertex vertexFrom = Vertex.getVertex(dict, con.getWordFrom(), con.getPartOfSpeechFrom());
+            Vertex vertexFrom = dict.getVertex(con.getWordFrom(), con.getPartOfSpeechFrom());
 
-            Vertex vertexTo = Vertex.getVertex(dict, con.getWordTo(), con.getPartOfSpeechTo());
+            Vertex vertexTo = dict.getVertex(con.getWordTo(), con.getPartOfSpeechTo());
             if (j == 4907)
                 System.out.print("");
             if ("ресторан".equals(vertexFrom.getWord().getStr()))
@@ -171,9 +171,9 @@ public class CSV_DICT {
                 int j = 2;
                 for (CSV_CONNECTIONS con : connections) {
 
-                    Vertex vertexFrom = Vertex.getVertex(dict, con.getWordFrom(), con.getPartOfSpeechFrom());
+                    Vertex vertexFrom = dict.getVertex(con.getWordFrom(), con.getPartOfSpeechFrom());
 
-                    Vertex vertexTo = Vertex.getVertex(dict, con.getWordTo(), con.getPartOfSpeechTo());
+                    Vertex vertexTo = dict.getVertex(con.getWordTo(), con.getPartOfSpeechTo());
                     if (j == 4907)
                         System.out.print("");
                     if ("ресторан".equals(vertexFrom.getWord().getStr()))
@@ -228,7 +228,7 @@ public class CSV_DICT {
         for (MyStemItem myStemItem : myStem.getMyStemResult().getItemList()) {
             myStemItem.calcPartOfSpeech();
             PartOfSpeech partOfSpeech = myStemItem.getPartOfSpeech();
-            Vertex vertex = Vertex.getVertex(dict, myStemItem.getText());
+            Vertex vertex = dict.getVertex(myStemItem.getText());
             vertex.getWord().setPartOfSpeech(partOfSpeech);
             System.out.print("");
         }

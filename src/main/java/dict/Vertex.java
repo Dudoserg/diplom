@@ -21,30 +21,33 @@ public class Vertex implements Serializable {
     // список кластеров в которые входит вершины
     private List<Pair<Cluster, Integer>> clusterList = new ArrayList<>();
 
-    private Vertex(Word word) {
+    public Vertex(Word word) {
         this.word = word;
     }
 
-    public static Vertex getVertex(DictBase dictBase, String word) {
-        Word w = Word.getWord(word);
-        Vertex v = dictBase.vertex_cash.get(w);
-        if (v == null) {
-            v = new Vertex(w);
-            dictBase.vertex_cash.put(w, v);
-        }
-        return v;
-    }
 
-    public static Vertex getVertex(DictBase dictBase, String word, PartOfSpeech partOfSpeech) {
-        Word w = Word.getWord(word);
-        w.setPartOfSpeech(partOfSpeech);
-        Vertex v = dictBase.vertex_cash.get(w);
-        if (v == null) {
-            v = new Vertex(w);
-            dictBase.vertex_cash.put(w, v);
-        }
-        return v;
-    }
+
+
+//    public static Vertex getVertex(DictBase dictBase, String word) {
+//        Word w = Word.getWord(word);
+//        Vertex v = dictBase.vertex_cash.get(w);
+//        if (v == null) {
+//            v = new Vertex(w);
+//            dictBase.vertex_cash.put(w, v);
+//        }
+//        return v;
+//    }
+//
+//    public static Vertex getVertex(DictBase dictBase, String word, PartOfSpeech partOfSpeech) {
+//        Word w = Word.getWord(word);
+//        w.setPartOfSpeech(partOfSpeech);
+//        Vertex v = dictBase.vertex_cash.get(w);
+//        if (v == null) {
+//            v = new Vertex(w);
+//            dictBase.vertex_cash.put(w, v);
+//        }
+//        return v;
+//    }
 
 
     public boolean isNoun() {

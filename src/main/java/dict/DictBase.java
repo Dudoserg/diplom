@@ -61,8 +61,25 @@ public class DictBase implements Serializable {
         return edge;
     }
 
-    public Vertex getVertex(String str) {
-        return Vertex.getVertex(this, str);
+    public Vertex getVertex(String word) {
+        Word w = Word.getWord(word);
+        Vertex v = this.vertex_cash.get(w);
+        if (v == null) {
+            v = new Vertex(w);
+            this.vertex_cash.put(w, v);
+        }
+        return v;
+    }
+
+    public Vertex getVertex(String word, PartOfSpeech partOfSpeech) {
+        Word w = Word.getWord(word);
+        w.setPartOfSpeech(partOfSpeech);
+        Vertex v = this.vertex_cash.get(w);
+        if (v == null) {
+            v = new Vertex(w);
+            this.vertex_cash.put(w, v);
+        }
+        return v;
     }
 
     @JsonIgnore
@@ -104,8 +121,8 @@ public class DictBase implements Serializable {
     }
 
     public void addPair(String first, String second, double weight, RelationType relationType) {
-        Vertex f = Vertex.getVertex(this, first);
-        Vertex s = Vertex.getVertex(this, second);
+        Vertex f = this.getVertex( first);
+        Vertex s = this.getVertex( second);
         this.addPair(f, s, new Edge(f, s, weight, relationType));
     }
 
@@ -946,8 +963,8 @@ public class DictBase implements Serializable {
             if (h > treshold) {
                 double betta = (double) h / (double) maxH + 1;
                 this.funcEdgeWeightCorrection(
-                        Vertex.getVertex(this, bigram.getFirst()),
-                        Vertex.getVertex(this, bigram.getSecond()),
+                        this.getVertex( bigram.getFirst()),
+                        this.getVertex( bigram.getSecond()),
                         radius,
                         betta
                 );
