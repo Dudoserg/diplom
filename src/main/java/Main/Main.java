@@ -5,6 +5,8 @@ import csv.CSV_DICT;
 import data.Reviews;
 import dict.*;
 import dict.Edge.Edge;
+import dict.ModificateEdge.ModificateEdgeInterface;
+import dict.ModificateEdge.ModificateEdgeInterfaceImpl;
 import javafx.util.Pair;
 import mystem.MyStem;
 import prog2.Sentence;
@@ -134,8 +136,9 @@ public class Main {
         DictBase.removeUnusedVertex(dictBase, dictTrain, settings.get_R_());
         dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
 
-
-        dictBase.correctEdgeWeight(bigramFrequensy, 5, settings.get_R_());
+        ModificateEdgeInterface modificateEdge =
+                new ModificateEdgeInterfaceImpl(bigramFrequensy, 5, settings.get_R_());
+        modificateEdge.modificate(dictBase);
         dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
 

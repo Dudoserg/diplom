@@ -126,7 +126,7 @@ public class DictBase implements Serializable {
         this.addPair(f, s, new Edge(f, s, weight, relationType));
     }
 
-    private void addPair(Vertex first, Vertex second, double weight, RelationType relationType) {
+    public void addPair(Vertex first, Vertex second, double weight, RelationType relationType) {
         this.addPair(first, second, new Edge(first, second, weight, relationType));
     }
 
@@ -189,7 +189,7 @@ public class DictBase implements Serializable {
 
 
     /**
-     * Получить подСловарь
+     * Получить подСловарь  радиусом radius и центром в вершине w
      *
      * @param w      вершина словаря
      * @param radius радиус
@@ -202,7 +202,7 @@ public class DictBase implements Serializable {
     }
 
     /**
-     * Получить подсловарь
+     * Получить подсловарь радиусом radius и центром в вершине w
      *
      * @param w        центр словаря
      * @param radius   радиус словаря (количество дуг)
@@ -697,7 +697,7 @@ public class DictBase implements Serializable {
      * @param radius максимальный размер пути
      * @return наилучший путь между двумя вершинами, с максимальным весом
      */
-    private Way findMaxWay(Vertex first, Vertex last, int radius) {
+    public Way findMaxWay(Vertex first, Vertex last, int radius) {
         List<Way> ways = this.findWays(first, last, radius);
 
         Way bestWay = null;
@@ -922,56 +922,8 @@ public class DictBase implements Serializable {
     //////////////////////////////////////////    КОРРЕКТИРОВКА ВЕСОВ ДУГ //////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Функция корректировки весов дуг по биграмм
-     *
-     * @param first  первая часть биграммы
-     * @param second вторая часть биграммы
-     * @param betta  коэффициент усилиния веса > 1
-     */
-    private void funcEdgeWeightCorrection(Vertex first, Vertex second, int radius, double betta) throws DictException {
-        if (betta < 1) {
-            throw new DictException(" betta should be more than 1.0 ");
-        }
-        final double eps = 0.05;        // минимально рассматриваемый вес пути
-        final double maxLink = 0.95;    // максимально допустимый вес дуги
-        Way way = findMaxWay(first, second, radius);
-        try {
-            if (way != null && !way.isEmpty() && way.getWeight() > eps) {
-                for (Edge edge : way.getWay()) {
-                    edge.setWeight(Math.min(maxLink, edge.getWeight() * betta));
-                }
-            } else {
-                //TODO установить верный тип связи
-                addPair(first, second, eps * betta, RelationType.ASS);
-            }
-        } catch (NullPointerException e) {
-            throw e;
-        }
-    }
 
-    public void correctEdgeWeight(Map<Bigram, Integer> bigramFrequensy, int treshold, int radius) throws DictException {
-        Long startTime = System.currentTimeMillis();
-        System.out.print("correctEdgeWeight...");
 
-        Integer maxH = bigramFrequensy.entrySet().stream()
-                .max((first, second) -> first.getValue() > second.getValue() ? 1 : -1).get().getValue();
-
-        for (Map.Entry<Bigram, Integer> one : bigramFrequensy.entrySet()) {
-            Bigram bigram = one.getKey();
-            Integer h = one.getValue();
-            if (h > treshold) {
-                double betta = (double) h / (double) maxH + 1;
-                this.funcEdgeWeightCorrection(
-                        this.getVertex( bigram.getFirst()),
-                        this.getVertex( bigram.getSecond()),
-                        radius,
-                        betta
-                );
-            }
-        }
-        System.out.println("\t\t\tdone for " + (System.currentTimeMillis() - startTime) + " ms.");
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////    УДАЛЕНИЕ ЛИШНИХ СЛОВ ИЗ БАЗОВОГО ГРАФА  ////////////////////////////////////////////
