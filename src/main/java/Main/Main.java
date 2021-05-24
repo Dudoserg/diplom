@@ -70,7 +70,7 @@ public class Main {
 
 
         settings = new Settings(
-                0.6, 0.3, 0.2, 3, 0.65, 3
+                0.4, 0.3, 0.3, 3, 0.65, 3
         );
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
         String data = String.join(" ", reviews.getTexts());
@@ -193,8 +193,7 @@ public class Main {
 
         Vertex vertex = dictBase.getVertex("персонал");
 
-        //prog2(dictBase);
-        prog22(dictBase);
+        //prog22(dictBase);
         System.out.print("");
 
 

@@ -535,7 +535,7 @@ public class DictBase implements Serializable {
      * @param R     - максимальная длина пути, которые рассматриваем
      * @return List<List < Vertex>> список всех возможных путей между вершинами
      */
-    public List<Way> findWays(Vertex first, Vertex last, int R) {
+    private List<Way> findWays(Vertex first, Vertex last, int R) {
         /// извлекаем все возможные пути
         List<List<Vertex>> result = new ArrayList<>();
         List<Way> waysList = new ArrayList<>();
@@ -614,7 +614,7 @@ public class DictBase implements Serializable {
     }
 
     @Deprecated
-    public List<Vertex> findAnyWay(Vertex first, Vertex last, int R) {
+    private List<Vertex> findAnyWay(Vertex first, Vertex last, int R) {
         List<FindPathHelper> path = new ArrayList<>();
         EdgeMap edgeMap = map.get(first);
 
@@ -680,7 +680,7 @@ public class DictBase implements Serializable {
      * @param radius максимальный размер пути
      * @return наилучший путь между двумя вершинами, с максимальным весом
      */
-    public Way findMaxWay(Vertex first, Vertex last, int radius) {
+    private Way findMaxWay(Vertex first, Vertex last, int radius) {
         List<Way> ways = this.findWays(first, last, radius);
 
         Way bestWay = null;
