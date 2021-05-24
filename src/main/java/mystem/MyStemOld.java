@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-public class MyStem {
+public class MyStemOld {
     private static final String MYSTEM_exe = "mystem" + File.separator + "exe" + File.separator + "mystem.exe";
     private static final String MYSTEM_RESULT_json = "mystem" + File.separator + "mystemResult.json";
     public static final String FULL_TEXT = "mystem" + File.separator + "full_text.txt";
@@ -35,7 +35,7 @@ public class MyStem {
     MyStemResult myStemResult;
 
 
-    public MyStem(List<String> words, String id) {
+    public MyStemOld(List<String> words, String id) {
         this.id = id;
         this.words = words;
         this.baseString = this.text = words.stream().collect(Collectors.joining(" ")).trim();
@@ -45,7 +45,7 @@ public class MyStem {
         }
     }
 
-    public MyStem(String text, String id) throws IOException {
+    public MyStemOld(String text, String id) throws IOException {
         this.id = id;
         text = text.replace("\r\n", " ");
         text = text.replace("\n", " ");
@@ -63,11 +63,11 @@ public class MyStem {
         }
     }
 
-    public MyStem removeStopWord() {
+    public MyStemOld removeStopWord() {
         if (stopWords == null) {
             stopWords = StopWords.getInstance();
         }
-        MyStem result = new MyStem(words, id);
+        MyStemOld result = new MyStemOld(words, id);
         result.words = result.words.stream()
                 .filter(s -> {
                     String tmp = s.trim().replaceAll("[ .?!,]", "");

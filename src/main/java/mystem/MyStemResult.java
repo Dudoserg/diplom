@@ -37,7 +37,7 @@ public class MyStemResult {
                     bigramList.add(new Bigram(tmp.get(j).toLowerCase(), tmp.get(j + 1).toLowerCase()));
                 }
                 tmp = new ArrayList<>();
-            } else if( !myStemItem.isDelimeter()){
+            } else if (!myStemItem.isDelimeter()) {
                 tmp.add(myStemItem.getBaseForm());
             }
         }
@@ -48,13 +48,23 @@ public class MyStemResult {
         return map;
     }
 
-    public Map<Unigram, Integer> getUnigramFrequensy(){
-        Map<Unigram,Integer> map = new HashMap<>();
+    public Map<Unigram, Integer> getUnigramFrequensy() {
+        Map<Unigram, Integer> map = new HashMap<>();
         for (MyStemItem myStemItem : itemList) {
-            if(!myStemItem.isDelimeter()){
+            if (!myStemItem.isDelimeter()) {
                 map.merge(new Unigram(myStemItem.getBaseForm()), 1, Integer::sum);
             }
         }
         return map;
+    }
+
+    public void removeStopWords(StopWordsInterface words) {
+        List<String> stopWords = words.getStopWords();
+        for (int i = itemList.size() - 1; i >= 0; i--) {
+            MyStemItem myStemItem = itemList.get(i);
+            if (stopWords.contains(myStemItem.getText())) {
+                itemList.remove(i);
+            }
+        }
     }
 }

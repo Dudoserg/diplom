@@ -1,21 +1,24 @@
-package threads;
+package dict.CorrectVertexWeight.threads;
 
+import dict.CorrectVertexWeight.CorrectVertexWeight;
 import dict.DictBase;
 import dict.Vertex;
 
 import java.util.function.Function;
 
 public class ThRun implements Runnable{
-    Th th;
-    DictBase dictBase;
-    int radius;
-    double gamma;
-    Function<Double, Double> gammaFunction;
+    private final DictBase dictBase;
+    private final Th th;
+    private final CorrectVertexWeight correctVertexWeight;
+    private final int radius;
+    private final double gamma;
+    private final Function<Double, Double> gammaFunction;
 
-    public ThRun(Th th, DictBase dictBase, int radius, double gamma, Function<Double, Double> gammaFunction) {
+    public ThRun(Th th, CorrectVertexWeight correctVertexWeight, DictBase dictBase, int radius, double gamma, Function<Double, Double> gammaFunction) {
         this.th = th;
-        this.dictBase = dictBase;
+        this.correctVertexWeight = correctVertexWeight;
         this.radius = radius;
+        this.dictBase = dictBase;
         this.gamma = gamma;
         this.gammaFunction = gammaFunction;
     }
@@ -26,7 +29,7 @@ public class ThRun implements Runnable{
         for (Vertex v : th.vertexList) {
             weightAdd = v.getWeight();
             th.cycle.add(v);
-            dictBase.funWeight(v, weightAdd, radius, gamma, gammaFunction, th.tmpWeight, th.cycle);
+            correctVertexWeight.funWeight(dictBase, v, weightAdd, radius, gamma, gammaFunction, th.tmpWeight, th.cycle);
             th.cycle.remove(v);
         }
         //        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {

@@ -9,7 +9,7 @@ import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import dict.*;
 import javafx.util.Pair;
-import mystem.MyStem;
+import mystem.MyStemOld;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
 
@@ -216,16 +216,16 @@ public class CSV_DICT {
             listOfWords.add(key.getWord().getStr());
         }
 
-        MyStem myStem = new MyStem(listOfWords, "dd_");
-        myStem.saveToFile(MyStem.TEXT_WITHOUT_STOPWORDS_txt);
+        MyStemOld myStemOld = new MyStemOld(listOfWords, "dd_");
+        myStemOld.saveToFile(MyStemOld.TEXT_WITHOUT_STOPWORDS_txt);
         try {
-            myStem.lemmatization();
+            myStemOld.lemmatization();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
 
-        for (MyStemItem myStemItem : myStem.getMyStemResult().getItemList()) {
+        for (MyStemItem myStemItem : myStemOld.getMyStemResult().getItemList()) {
             myStemItem.calcPartOfSpeech();
             PartOfSpeech partOfSpeech = myStemItem.getPartOfSpeech();
             Vertex vertex = dict.getVertex(myStemItem.getText());
@@ -292,14 +292,14 @@ public class CSV_DICT {
         String collect = unique.stream().collect(Collectors.joining(" . "));
 
         // определяем части речи данных слов
-        MyStem myStem = new MyStem(collect, "qwe");
-        myStem.saveToFile(MyStem.TEXT_WITHOUT_STOPWORDS_txt);
+        MyStemOld myStemOld = new MyStemOld(collect, "qwe");
+        myStemOld.saveToFile(MyStemOld.TEXT_WITHOUT_STOPWORDS_txt);
         try {
-            myStem.lemmatization();
+            myStemOld.lemmatization();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        MyStemResult myStemResult = myStem.getMyStemResult();
+        MyStemResult myStemResult = myStemOld.getMyStemResult();
 
         // создаем хешмап с ключом - слово , значение - часть речи
         HashMap<String, PartOfSpeech> map = new HashMap<>();

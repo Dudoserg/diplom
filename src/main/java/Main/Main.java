@@ -4,11 +4,18 @@ import SpellerChecker.Languagetool;
 import csv.CSV_DICT;
 import data.Reviews;
 import dict.*;
+import dict.CorrectVertexWeight.CorrectVertexWeight;
+import dict.CorrectVertexWeight.CorrectVertexWeightInterface;
 import dict.Edge.Edge;
 import dict.ModificateEdge.ModificateEdgeInterface;
 import dict.ModificateEdge.ModificateEdgeInterfaceImpl;
+import dict.SetVertexWeight.SetVertexWeight;
+import dict.SetVertexWeight.SetVertexWeightInterface;
 import javafx.util.Pair;
-import mystem.MyStem;
+import mystem.MyStemOld;
+import mystem.MyStemResult;
+import mystem.Mystem;
+import mystem.StopWords;
 import prog2.Sentence;
 import prog2.WordOfSentence;
 import settings.Settings;
@@ -18,7 +25,6 @@ import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,34 +69,32 @@ public class Main {
 
     public static void mystemTest() throws IOException, DictException, InterruptedException {
 
-//        {
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            String str = Helper.readFile("result" + File.separator + "dict.json");
-//            DictBase testVertex = objectMapper.readValue(str, DictBase.class);
-//            System.out.println();
-//        }
-
-
         settings = new Settings(
                 0.6, 0.3, 0.2, 3, 0.65, 3
 
         );
+
+
+        //Mystem mystem = new Mystem();
+        //MyStemResult analyze = mystem.analyze(Helper.readFile( "mystem" + File.separator + "tt__full_text.txt"));
+        //analyze.removeStopWords(StopWords.getInstance());
+
         Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
         String data = String.join(" ", reviews.getTexts());
 
-        MyStem myStemText = new MyStem(data, "tt_");
+        //MyStemOld myStemOldText = new MyStemOld(data, "tt_");
 
-        myStemText.saveToFile(MyStem.FULL_TEXT);
-        myStemText = myStemText.removeStopWord();
-        myStemText.saveToFile(MyStem.TEXT_WITHOUT_STOPWORDS_txt);
-        myStemText.saveToFile("-" + File.separator + "text_withoutStopWord.txt");
+        //myStemOldText.saveToFile(MyStemOld.FULL_TEXT);
+        //myStemOldText = myStemOldText.removeStopWord();
+        //myStemOldText.saveToFile(MyStemOld.TEXT_WITHOUT_STOPWORDS_txt);
+        //myStemOldText.saveToFile("-" + File.separator + "text_withoutStopWord.txt");
 
-        myStemText.lemmatization();
-        myStemText.removeStopWordsFromLemmatization();
+        //myStemOldText.lemmatization();
+        //myStemOldText.removeStopWordsFromLemmatization();
 
 
-        Map<Bigram, Integer> bigramFrequensy = myStemText.getMyStemResult().getBigramFrequensy();
-        Map<Unigram, Integer> unigramFrequensy = myStemText.getMyStemResult().getUnigramFrequensy();
+        Map<Bigram, Integer> bigramFrequensy = myStemOldText.getMyStemResult().getBigramFrequensy();
+        Map<Unigram, Integer> unigramFrequensy = myStemOldText.getMyStemResult().getUnigramFrequensy();
 
         Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
         Helper.printUnigram(unigramFrequensy, "-" + File.separator + "_0_unigram_frequency.txt");
@@ -108,9 +112,6 @@ public class Main {
         for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
             Bigram key = bigramIntegerEntry.getKey();
             Edge edge = dictBase.getEdge(dictBase.getVertex( key.getFirst()), dictBase.getVertex( key.getSecond()));
-
-//            Vertex vertexFrom = dictTrain.getVertex(key.getFirst());
-//            Vertex vertexTo = dictTrain.getVertex(key.getSecond());
 
             if (edge != null)
                 dictTrain.addPair(key.getFirst(), key.getSecond(), edge.getWeight(), edge.getRelationType());
@@ -142,14 +143,20 @@ public class Main {
         dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
 
-        dictBase.setVertexWeight(unigramFrequensy);
+        SetVertexWeightInterface setVertexWeightInterface =
+                new SetVertexWeight(unigramFrequensy);
+        setVertexWeightInterface.setVertexWeight(dictBase);
         dictBase.printSortedVertex("-" + File.separator + "_4_dictionary_base after setVertexWeight.txt");
 
 
         //dictBase.saveAs("result" + File.separator + "restaurant.dat");
 
+        CorrectVertexWeightInterface correctVertexWeight = new CorrectVertexWeight(
+                settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true
+        );
+        correctVertexWeight.correctVertexWeight(dictBase);
 
-        dictBase.correctVertexWeight(settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true);
+
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
                 settings.get_R_() + ",gamma=" + settings.get_GAMMA_() + " 3 затухание).txt");
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base NOUN after correctVertexWeight(r=" +
@@ -209,14 +216,14 @@ public class Main {
         s = languagetool.getCorrect(s);
         System.out.println(s);
 
-        MyStem myStem = new MyStem(s, UUID.randomUUID().toString());
-        myStem = myStem.removeStopWord();
-        myStem.lemmatization();
-        myStem.removeStopWordsFromLemmatization();
-        myStem.removeTmpFiles();
+        MyStemOld myStemOld = new MyStemOld(s, UUID.randomUUID().toString());
+        myStemOld = myStemOld.removeStopWord();
+        myStemOld.lemmatization();
+        myStemOld.removeStopWordsFromLemmatization();
+        myStemOld.removeTmpFiles();
 
 
-        List<Sentence> sentencesList2 = myStem.getSentencesList2();
+        List<Sentence> sentencesList2 = myStemOld.getSentencesList2();
 
         // слово  - соответствующая ему вершина в графе
         Map<String, Vertex> map = dictBase.getStringVertexMap();
@@ -315,12 +322,12 @@ public class Main {
         s = languagetool.getCorrect(s);
         System.out.println(s);
 
-        MyStem myStem = new MyStem(s, UUID.randomUUID().toString());
-        myStem = myStem.removeStopWord();
-        myStem.lemmatization();
-        myStem.removeStopWordsFromLemmatization();
-        myStem.removeTmpFiles();
-        List<List<String>> sentencesList = myStem.getSentencesList();
+        MyStemOld myStemOld = new MyStemOld(s, UUID.randomUUID().toString());
+        myStemOld = myStemOld.removeStopWord();
+        myStemOld.lemmatization();
+        myStemOld.removeStopWordsFromLemmatization();
+        myStemOld.removeTmpFiles();
+        List<List<String>> sentencesList = myStemOld.getSentencesList();
 
 
         Map<String, Vertex> map = dictBase.getStringVertexMap();

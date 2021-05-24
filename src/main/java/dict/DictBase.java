@@ -1,6 +1,9 @@
 package dict;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import dict.CorrectVertexWeight.CorrectVertexWeight;
+import dict.CorrectVertexWeight.threads.Th;
+import dict.CorrectVertexWeight.threads.ThRun;
 import dict.Edge.Edge;
 import guru.nidi.graphviz.attribute.*;
 import guru.nidi.graphviz.engine.Format;
@@ -11,9 +14,6 @@ import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
 import mystem.StopWords;
-import threads.Th;
-import threads.ThRun;
-import utils.Bigram;
 import utils.Unigram;
 
 import java.io.*;
@@ -722,67 +722,41 @@ public class DictBase implements Serializable {
     //////////////////////////////////////    КОРРЕКТИРОВКА ВЕСОВ ВЕРШИН     ///////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void setVertexWeight(Map<Unigram, Integer> unigramFrequensy) {
-        Long startTime = System.currentTimeMillis();
-        System.out.print("setVertexWeight");
-
-        Map<String, Integer> collect =
-                unigramFrequensy.entrySet().stream()
-                        .collect(Collectors.toMap(
-                                o -> o.getKey().getFirst(), Map.Entry::getValue
-                        ));
-
-        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
-            Vertex key = vertexEdgeMapEntry.getKey();
-            Integer integer = collect.get(key.getWord().getStr());
-            if (integer != null) {
-                key.setWeight(integer.doubleValue());
-            } else {
-                key.setWeight(0.0);
-            }
-        }
-        System.out.println("\t\t\tdone for " + (System.currentTimeMillis() - startTime) + " ms.");
-
-    }
-
-    /* распространение веса вершины на ее соседей в радиусе R
-     * 0,95	0,9025	0,857375	0,81450625	0,773780938
-     *
-     * @param radius     радиус
-     * @param gamma коэффициент затухания
-     * @param gamma_degree  [1,3]
-     */
+/*
+    @Deprecated
+    // перенесено в класс CorrectVertexWeight
     public void correctVertexWeight(int radius, double gamma, int gamma_degree, boolean thread) throws DictException, InterruptedException {
-        Function<Double, Double> function = null;
-        switch (gamma_degree) {
-            case 1: {
-                function = aDouble -> aDouble;
-                break;
-            }
-            case 2: {
-                function = aDouble -> aDouble * aDouble;
-                break;
-            }
-            case 3: {
-                function = aDouble -> aDouble * aDouble * aDouble;
-                break;
-            }
-            default: {
-                throw new DictException("the passed parameter 'gamma_degree = " + gamma_degree +
-                        "' is out of bounds of allowed values [1,3]");
-            }
-        }
-        long startTime = System.currentTimeMillis();
-        if (thread) {
-            System.out.print("correctVertexWeightThread ...\t\t");
-            correctVertexWeightThread(radius, gamma, function);
-        } else {
-            System.out.print("correctVertexWeight ...\t\t");
-            correctVertexWeight(radius, gamma, function);
-        }
-        System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
+//        Function<Double, Double> function = null;
+//        switch (gamma_degree) {
+//            case 1: {
+//                function = aDouble -> aDouble;
+//                break;
+//            }
+//            case 2: {
+//                function = aDouble -> aDouble * aDouble;
+//                break;
+//            }
+//            case 3: {
+//                function = aDouble -> aDouble * aDouble * aDouble;
+//                break;
+//            }
+//            default: {
+//                throw new DictException("the passed parameter 'gamma_degree = " + gamma_degree +
+//                        "' is out of bounds of allowed values [1,3]");
+//            }
+//        }
+//        long startTime = System.currentTimeMillis();
+//        if (thread) {
+//            System.out.print("correctVertexWeightThread ...\t\t");
+//            correctVertexWeightThread(radius, gamma, function);
+//        } else {
+//            System.out.print("correctVertexWeight ...\t\t");
+//            correctVertexWeight(radius, gamma, function);
+//        }
+//        System.out.println("done for " + (System.currentTimeMillis() - startTime) + " ms.");
     }
 
+    @Deprecated
     private void correctVertexWeight(int radius, double gamma, Function<Double, Double> gammaFunction) throws InterruptedException {
         double weightAdd = 0;
         int counter = 0;
@@ -819,36 +793,37 @@ public class DictBase implements Serializable {
         }
     }
 
+    @Deprecated
     private void correctVertexWeightThread(int radius, double gamma, Function<Double, Double> gammaFunction) throws InterruptedException {
         double weightAdd = 0;
         int counter = 0;
 
-        List<Th> threads = new ArrayList<>();
+        List<Th> dict.CorrectVertexWeight.threads = new ArrayList<>();
         int countThreads = 4;
         int numThread = 0;
         // создаем треды
         for (int i = 0; i < countThreads; i++) {
             Th th = new Th();
             th.thread = new Thread(new ThRun(th, this, radius, gamma, gammaFunction));
-            threads.add(th);
+            dict.CorrectVertexWeight.threads.add(th);
         }
         // помещаем в них обрабатываемые вершины
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : invertMap.entrySet()) {
-            threads.get(numThread).vertexList.add(vertexEdgeMapEntry.getKey());
+            dict.CorrectVertexWeight.threads.get(numThread).vertexList.add(vertexEdgeMapEntry.getKey());
             numThread++;
             if (numThread == countThreads)
                 numThread = 0;
         }
 
-        for (Th thread : threads) {
+        for (Th thread : dict.CorrectVertexWeight.threads) {
             thread.thread.start();
         }
-        for (Th thread : threads) {
+        for (Th thread : dict.CorrectVertexWeight.threads) {
             thread.thread.join();
         }
 
         Map<Vertex, Double> tmpWeight = new HashMap<>();
-        for (Th th : threads) {
+        for (Th th : dict.CorrectVertexWeight.threads) {
             for (Map.Entry<Vertex, Double> vertexDoubleEntry : th.tmpWeight.entrySet()) {
                 Vertex v = vertexDoubleEntry.getKey();
                 Double w = vertexDoubleEntry.getValue();
@@ -888,6 +863,7 @@ public class DictBase implements Serializable {
         }
     }
 
+    @Deprecated
     public void funWeight(Vertex vertex, double weightAdd, int radius, double gamma, Function<Double, Double> gammaFunction,
                           Map<Vertex, Double> tmpWeight, List<Vertex> cycle) {
         if (radius < 0)
@@ -917,7 +893,7 @@ public class DictBase implements Serializable {
             }
         }
     }
-
+*/
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////    КОРРЕКТИРОВКА ВЕСОВ ДУГ //////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

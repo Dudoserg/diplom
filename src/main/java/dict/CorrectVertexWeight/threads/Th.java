@@ -1,4 +1,4 @@
-package threads;
+package dict.CorrectVertexWeight.threads;
 
 import dict.Vertex;
 
