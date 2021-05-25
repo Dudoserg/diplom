@@ -29,7 +29,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
+    static Integer start;
+    static Integer finish;
+
     public static void main(String[] args) throws Exception {
+        start = Integer.valueOf(args[0]);
+        finish = Integer.valueOf(args[1]);
+
+        System.out.println(" start = " + start + "\t" + finish);
+
+        System.out.println("Поехали?");
+        System.in.read();
 /*        DecimalFormat decimalFormat = new DecimalFormat("#0.00");
         double x = 0.95;
 
@@ -71,8 +81,8 @@ public class Main {
 //
 //        DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(db, "A"), "t.png");
 
-//        perfomanceTest();
-        mystemTest();
+        perfomanceTest();
+        //mystemTest();
     }
 
     private static void perfomanceTest() throws IOException, DictException, InterruptedException {
@@ -119,12 +129,12 @@ public class Main {
         Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
 
         long startTime;
-        for (int a = 5; a <= 20; a = a + 5) {
-            for (int s = 5; s <= 20; s = s + 5) {
-                for (int d = 5; d <= 20; d = d + 5) {
+        for (int a = start; a <= finish; a = a + 1) {
+            for (int s = start; s <= finish; s = s + 1) {
+                for (int d = start; d <= finish; d = d + 1) {
                     startTime = System.currentTimeMillis();
                     settings = new Settings(
-                            a / 100.0, s / 100.0, d / 100.0, 3, 0.99, 1
+                            a / 100.0, s / 100.0, d / 100.0, 3, 0.65, 2
                     );
 
                     DictBase dictBase = CSV_DICT.loadFullDict();
