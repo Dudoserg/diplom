@@ -44,7 +44,7 @@ public class Mystem {
         text = text.replace("-", "? ");
         text.replace(System.lineSeparator(), " ");
         text = text.trim().replaceAll("\\s{2,}", " ");
-
+        text = text.toLowerCase();
         // save text TO FULL FILE
         saveToFile(text, FULL_TEXT);
         // analyze
@@ -103,13 +103,13 @@ public class Mystem {
         return f.delete();
     }
 
-    public void saveToFile(String text, String path) throws IOException {
+    private void saveToFile(String text, String path) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(path));
         writer.write(text);
         writer.close();
     }
 
-    public String readFile(String path) throws IOException {
+    private String readFile(String path) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, StandardCharsets.UTF_8.name());
     }

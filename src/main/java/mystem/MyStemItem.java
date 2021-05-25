@@ -1,7 +1,6 @@
 package mystem;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dict.PartOfSpeech;
 import lombok.Getter;
@@ -10,7 +9,6 @@ import utils.Helper;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,5 +76,12 @@ public class MyStemItem {
         // TODO
         String json = new ObjectMapper().writeValueAsString(allWordsByTypes);
         Helper.saveToFile(json, "-" + File.separator + "allWordsByTypes.json");
+    }
+
+
+    public MyStemAnalysis getPopularVariant(){
+        if(this.getAnalysisList() != null && this.getAnalysisList().size() > 0)
+            return this.getAnalysisList().get(0);
+        return null;
     }
 }

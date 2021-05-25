@@ -951,7 +951,7 @@ public class DictBase implements Serializable {
     /**
      * Помечаем все вершины как тренировочные
      */
-    public void setFlagTrain(DictBase train) {
+    private void setFlagTrain(DictBase train) {
         Set<Vertex> trainVertexSet = new HashSet<>(train.invertMap.keySet());
 
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {

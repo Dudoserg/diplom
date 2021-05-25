@@ -62,45 +62,200 @@ public class Main {
 //        System.out.println( (System.currentTimeMillis() - l));
 
         //Start start = new Start();
+
+//        DictBase db = new DictBase();
+//        db.addPair("A", "B", 1, RelationType.DEF);
+//        db.addPair("B", "C", 1, RelationType.DEF);
+//        db.addPair("A", "D", 1, RelationType.DEF);
+//        db.addPair("D", "C", 1, RelationType.DEF);
+//
+//        DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(db, "A"), "t.png");
+
+//        perfomanceTest();
         mystemTest();
     }
 
-    public static Settings settings;
+    private static void perfomanceTest() throws IOException, DictException, InterruptedException {
+        boolean isNew = false;
 
-    public static void mystemTest() throws IOException, DictException, InterruptedException {
+        Map<Bigram, Integer> bigramFrequensy;
+        Map<Unigram, Integer> unigramFrequensy;
 
-        settings = new Settings(
-                0.6, 0.3, 0.2, 3, 0.65, 3
+        if (isNew) {
+            Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
+            String data = String.join(" ", reviews.getTexts());
+            Mystem mystem = new Mystem();
+            MyStemResult myStemResult = mystem.analyze(data);
 
-        );
-
-
-        //Mystem mystem = new Mystem();
-        //MyStemResult analyze = mystem.analyze(Helper.readFile( "mystem" + File.separator + "tt__full_text.txt"));
-        //analyze.removeStopWords(StopWords.getInstance());
-
-        Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
-        String data = String.join(" ", reviews.getTexts());
-
-        //MyStemOld myStemOldText = new MyStemOld(data, "tt_");
-
-        //myStemOldText.saveToFile(MyStemOld.FULL_TEXT);
-        //myStemOldText = myStemOldText.removeStopWord();
-        //myStemOldText.saveToFile(MyStemOld.TEXT_WITHOUT_STOPWORDS_txt);
-        //myStemOldText.saveToFile("-" + File.separator + "text_withoutStopWord.txt");
-
-        //myStemOldText.lemmatization();
-        //myStemOldText.removeStopWordsFromLemmatization();
+            myStemResult.removeStopWords(StopWords.getInstance());
+            //myStemResult.saveText();
 
 
-        Map<Bigram, Integer> bigramFrequensy = myStemOldText.getMyStemResult().getBigramFrequensy();
-        Map<Unigram, Integer> unigramFrequensy = myStemOldText.getMyStemResult().getUnigramFrequensy();
+            bigramFrequensy = myStemResult.getBigramFrequensy();
+            unigramFrequensy = myStemResult.getUnigramFrequensy();
+        } else {
+
+            Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
+            String data = String.join(" ", reviews.getTexts());
+
+            MyStemOld myStemOldText = new MyStemOld(data, "tt_");
+
+            myStemOldText.saveToFile(MyStemOld.FULL_TEXT);
+            myStemOldText = myStemOldText.removeStopWord();
+            myStemOldText.saveToFile(MyStemOld.TEXT_WITHOUT_STOPWORDS_txt);
+            myStemOldText.saveToFile("-" + File.separator + "text_withoutStopWord.txt");
+
+            myStemOldText.lemmatization();
+            myStemOldText.removeStopWordsFromLemmatization();
+
+
+            bigramFrequensy = myStemOldText.getMyStemResult().getBigramFrequensy();
+            unigramFrequensy = myStemOldText.getMyStemResult().getUnigramFrequensy();
+        }
 
         Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
         Helper.printUnigram(unigramFrequensy, "-" + File.separator + "_0_unigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
 
+        long startTime;
+        for (int a = 5; a <= 20; a = a + 5) {
+            for (int s = 5; s <= 20; s = s + 5) {
+                for (int d = 5; d <= 20; d = d + 5) {
+                    startTime = System.currentTimeMillis();
+                    settings = new Settings(
+                            a / 100.0, s / 100.0, d / 100.0, 3, 0.99, 1
+                    );
+
+                    DictBase dictBase = CSV_DICT.loadFullDict();
+
+
+                    dictBase.removeStopWords();
+
+                    DictBase dictTrain = new DictBase();
+                    for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
+                        Bigram key = bigramIntegerEntry.getKey();
+                        Edge edge = dictBase.getEdge(dictBase.getVertex(key.getFirst()), dictBase.getVertex(key.getSecond()));
+
+                        if (edge != null)
+                            dictTrain.addPair(key.getFirst(), key.getSecond(), edge.getWeight(), edge.getRelationType());
+                        else
+                            dictTrain.addPair(key.getFirst(), key.getSecond(), Edge.ASS_BASE_WEIGHT, RelationType.ASS);
+                    }
+                    dictTrain.removeStopWords();
+
+
+                    DictBase.removeUnusedVertex(dictBase, dictTrain, settings.get_R_());
+
+                    ModificateEdgeInterface modificateEdge =
+                            new ModificateEdgeInterfaceImpl(bigramFrequensy, 5, settings.get_R_());
+                    modificateEdge.modificate(dictBase);
+
+
+                    SetVertexWeightInterface setVertexWeightInterface =
+                            new SetVertexWeight(unigramFrequensy);
+                    setVertexWeightInterface.setVertexWeight(dictBase);
+
+                    CorrectVertexWeightInterface correctVertexWeight = new CorrectVertexWeight(
+                            settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true
+                    );
+                    correctVertexWeight.correctVertexWeight(dictBase);
+
+                    dictBase.calculateWeightOfOutgoingVertex();
+
+                    List<Vertex> allVertex = new ArrayList<>();
+                    for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
+                        allVertex.add(vertexEdgeMapEntry.getKey());
+                    }
+                    Collections.sort(allVertex, (o1, o2) -> -Double.compare(o1.getWeight(), o2.getWeight()));
+                    StringBuilder result = new StringBuilder();
+                    int tmpIndex = 0;
+
+                    for (int i = 0; i < 100; i++) {
+                        Vertex vertex = allVertex.get(i);
+                        result
+                                .append((tmpIndex++) + ") " + vertex.getWord().getStr() + "\t" + vertex.getWeight())
+                                .append("\n");
+                    }
+
+//                    List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
+//
+//
+//                    for (ClusterHelper cluster : clastering) {
+//
+//                        String tmp = (tmpIndex++) + ") " + cluster.getVertex().getWord().getStr() + "\t" + "w=" +
+//                                cluster.getVertex().getWeight() + "\t" + "wO=" + cluster.getVertex().getWeightOutgoingVertex() +
+//                                "\t" + "wC=" + cluster.getClusterWeight();
+//                        result.append(tmp);
+//                        result.append("\n");
+//                        if (tmpIndex > 100)
+//                            break;
+//                    }
+                    Helper.saveToFile(result.toString(), "test" + File.separator +
+                            "A" + String.valueOf((int) (settings.get_ASS_WEIGHT_() * 100)) + "_" +
+                            "S" + String.valueOf((int) (settings.get_SYN_WEIGHT_() * 100)) + "_" +
+                            "D" + String.valueOf((int) (settings.get_DEF_WEIGHT_() * 100)) + ".txt"
+                    );
+                    System.out.println("\n====\ntime = " + (System.currentTimeMillis() - startTime) + "\n=====");
+                }
+            }
+        }
+
+
+    }
+
+    public static Settings settings;
+
+    public static void mystemTest() throws IOException, DictException, InterruptedException {
+
+
+        boolean isNew = false;
+
+        Map<Bigram, Integer> bigramFrequensy;
+        Map<Unigram, Integer> unigramFrequensy;
+
+        if (isNew) {
+            Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
+            String data = String.join(" ", reviews.getTexts());
+            Mystem mystem = new Mystem();
+            MyStemResult myStemResult = mystem.analyze(data);
+
+            myStemResult.removeStopWords(StopWords.getInstance());
+            //myStemResult.saveText();
+
+
+            bigramFrequensy = myStemResult.getBigramFrequensy();
+            unigramFrequensy = myStemResult.getUnigramFrequensy();
+        } else {
+
+            Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
+            String data = String.join(" ", reviews.getTexts());
+
+            MyStemOld myStemOldText = new MyStemOld(data, "tt_");
+
+            myStemOldText.saveToFile(MyStemOld.FULL_TEXT);
+            myStemOldText = myStemOldText.removeStopWord();
+            myStemOldText.saveToFile(MyStemOld.TEXT_WITHOUT_STOPWORDS_txt);
+            myStemOldText.saveToFile("-" + File.separator + "text_withoutStopWord.txt");
+
+            myStemOldText.lemmatization();
+            myStemOldText.removeStopWordsFromLemmatization();
+
+
+            bigramFrequensy = myStemOldText.getMyStemResult().getBigramFrequensy();
+            unigramFrequensy = myStemOldText.getMyStemResult().getUnigramFrequensy();
+        }
+
+        Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
+        Helper.printUnigram(unigramFrequensy, "-" + File.separator + "_0_unigram_frequency.txt");
+        Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
+        Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
+
+
+        settings = new Settings(
+//                0.05, 0.05, 0.15, 3, 0.65, 3
+                0.6, 0.3, 0.2, 3, 0.65, 3
+        );
 
         DictBase dictBase = CSV_DICT.loadFullDict();
 
@@ -111,7 +266,7 @@ public class Main {
         DictBase dictTrain = new DictBase();
         for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
             Bigram key = bigramIntegerEntry.getKey();
-            Edge edge = dictBase.getEdge(dictBase.getVertex( key.getFirst()), dictBase.getVertex( key.getSecond()));
+            Edge edge = dictBase.getEdge(dictBase.getVertex(key.getFirst()), dictBase.getVertex(key.getSecond()));
 
             if (edge != null)
                 dictTrain.addPair(key.getFirst(), key.getSecond(), edge.getWeight(), edge.getRelationType());
@@ -122,6 +277,8 @@ public class Main {
         dictTrain.printSortedEdge("-" + File.separator + "_1_dictionary_train.txt");
         dictBase.printSortedEdge("-" + File.separator + "_1_dictionary_base.txt");
         System.out.println("\t\t\tdone");
+
+        calculate_countEdgeByTypes(dictBase);
 
 //        {
 //            DictBase dishes = dictBase.getSubDict(Vertex.getVertex("блюдо"), 1);
@@ -180,7 +337,6 @@ public class Main {
                 break;
         }
 
-        check(dictBase);
 
         // TODO
         // TODO
@@ -192,7 +348,7 @@ public class Main {
         dictBase.distributeVerticesIntoClusters(clastering, 15, settings.get_R_() - 1);
 //        dictBase.saveAs("result" + File.separator + "restaurant2_new.dat");
 
-        check(dictBase);
+        //check(dictBase);
 
 //        Vertex testVertex = dictBase.getVertex("отмечать");
 //        Set<Vertex> asdf = dictBase.getInvertMap().keySet();
@@ -203,10 +359,32 @@ public class Main {
 //        testDict.draw("отмечать", Helper.path("result", "test.png"));
 
 
-        //prog22(dictBase);
+        prog22(dictBase);
         System.out.print("");
 
 
+    }
+
+    private static void calculate_countEdgeByTypes(DictBase dictBase) {
+        System.out.println("=======================================================");
+        Map<RelationType, Integer> map = new HashMap<>();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getMap().entrySet()) {
+            EdgeMap value = vertexEdgeMapEntry.getValue();
+            for (Map.Entry<Vertex, Edge> vertexEdgeEntry : value.getEdgeMap().entrySet()) {
+                Edge edgeEntryValue = vertexEdgeEntry.getValue();
+                RelationType type = edgeEntryValue.getRelationType();
+                map.put(
+                        type,
+                        map.get(type) == null ? 0 : map.get(type) + 1
+                );
+            }
+        }
+        for (Map.Entry<RelationType, Integer> relationTypeIntegerEntry : map.entrySet()) {
+            Integer count = relationTypeIntegerEntry.getValue();
+            RelationType relationType = relationTypeIntegerEntry.getKey();
+            System.out.println(relationType.getStr() + "\t" + count);
+        }
+        System.out.println("=======================================================");
     }
 
     public static void prog22(DictBase dictBase) throws IOException, InterruptedException {
