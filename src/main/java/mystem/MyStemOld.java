@@ -97,7 +97,6 @@ public class MyStemOld {
             Process p = Runtime.getRuntime()
                     .exec(command);
             System.out.println(command);
-            Thread.sleep(5000);
             p.waitFor();
             System.out.println("1");
             String json = Helper.readFile(addId(MYSTEM_RESULT_json));

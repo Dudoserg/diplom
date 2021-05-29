@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CSV_DICT {
+
+    public static final String DICTIONARY_PATH = "data" + File.separator + "connections3.csv";
+
     public static DictBase loadFullDict_old() throws DictException, IOException {
         System.out.print("loadFullDict...");
 
@@ -55,7 +58,7 @@ public class CSV_DICT {
 
             double weight = 0.0;
             RelationType relationType = null;
-
+            // TODO ПОПРАВИТЬ, ВЫБРАТЬ МАКСИМАЛЬНЫЙ ВЕС, А НЕ ПРОСТО больше 0
             if (con.getDefWeight() > 0) {
                 weight = con.getDefWeight();
                 weight = Main.settings.get_DEF_WEIGHT_();
@@ -107,7 +110,8 @@ public class CSV_DICT {
         Long t = System.currentTimeMillis();
 
 
-        String connections_fileName = "data" + File.separator + "connections2.csv";
+//        String connections_fileName = "data" + File.separator + "connections2.csv";
+        String connections_fileName = DICTIONARY_PATH;
 
         List<CSV_CONNECTIONS> connections = new CsvToBeanBuilder(new FileReader(connections_fileName))
                 .withSeparator(';')

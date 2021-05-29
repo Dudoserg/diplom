@@ -12,10 +12,7 @@ import dict.ModificateEdge.ModificateEdgeInterfaceImpl;
 import dict.SetVertexWeight.SetVertexWeight;
 import dict.SetVertexWeight.SetVertexWeightInterface;
 import javafx.util.Pair;
-import mystem.MyStemOld;
-import mystem.MyStemResult;
-import mystem.Mystem;
-import mystem.StopWords;
+import mystem.*;
 import prog2.Sentence;
 import prog2.WordOfSentence;
 import settings.Settings;
@@ -25,6 +22,7 @@ import utils.Unigram;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,56 +31,87 @@ public class Main {
     static Integer finish;
 
     public static void main(String[] args) throws Exception {
-        start = Integer.valueOf(args[0]);
-        finish = Integer.valueOf(args[1]);
+//        start = Integer.valueOf(args[0]);
+//        finish = Integer.valueOf(args[1]);
+//
+//        System.out.println(" start = " + start + "\t" + finish);
+//
+//        System.out.println("Поехали?");
+//        System.in.read();
 
-        System.out.println(" start = " + start + "\t" + finish);
+//        perfomanceTest();
+//        correctingDictionary();
+        mystemTest();
+    }
 
-        System.out.println("Поехали?");
-        System.in.read();
-/*        DecimalFormat decimalFormat = new DecimalFormat("#0.00");
-        double x = 0.95;
-
-        for(int i = 0 ; i < 5 ; i++){
-            System.out.print(decimalFormat.format(x) + "  ");
-            x = x * x;
+    private static void correctingDictionary() throws IOException, DictException, InterruptedException {
+        settings = new Settings(
+//                0.05, 0.05, 0.15, 3, 0.65, 3
+                0.6, 0.3, 0.2, 3, 0.65, 3
+        );
+        DictBase dictBase = CSV_DICT.loadFullDict();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
+            Vertex key = vertexEdgeMapEntry.getKey();
+            stringBuilder.append(key.getWord().getStr() + "\n");
         }
-        System.out.print("");
+        Mystem mystem = new Mystem();
+        MyStemResult analyze = mystem.analyze(stringBuilder.toString());
+        int count = 0;
+        Map<String, String> mapForSwap = new HashMap<>();
+        for (MyStemItem myStemItem : analyze.getItemList()) {
+            String firstAnalyseOrText = myStemItem.getFirstAnalyseOrText();
+            String before = myStemItem.getText();
+            String after = firstAnalyseOrText.replace("\n", "");
+            String result = before + "\t\t" + after;
+            if (!before.equals(" ") && !after.equals(" ")) {
 
-        x = 0.95;
-        for(int i = 0 ; i < 5 ; i++){
-            System.out.print(decimalFormat.format(x) + "  ");
-            x = x * x * x;
+                if (!before.equals(after)) {
+                    mapForSwap.put(before, after);
+                    System.out.println(result);
+                    count++;
+                } else {
+                    // System.out.println(result);
+                }
+            }
         }
-        if(true)
-            return;*/
-//        long l = System.currentTimeMillis();
-//        Map<dict.Word, dict.Word> map = new HashMap<>();
-//        TreeSet<Integer> treeSet = new TreeSet<>();
-//        for (int i = 0; i < 2*1000*1000; i++) {
-//            dict.Word word = new dict.Word("hello" + i);
-//            map.put(word, new dict.Word("hello"));
-//            treeSet.add(word.hashCode());
-////            if(i % (10*1000) == 0)
-////                System.out.println(i);
-//        }
-//
-//        dict.Word hello = map.get(new dict.Word("hello"));
-//
-//        System.out.println( (System.currentTimeMillis() - l));
+        System.out.println("\n\n" + "count = " + count);
 
-        //Start start = new Start();
+        // читаем теперь словарь, и меняем все неправильные глаголы К НОРМАЛЬНОЙ БАЗОВОЙ ФОРМЕ
+        String pathDictionary = "data" + File.separator + "connections2.csv";
+        String pathCorrectDictionary = "data" + File.separator + "connections3.csv";
+        List<String> strings = Helper.readFileLineByLine(pathDictionary);
+        String rowWithColumnTitle = strings.get(0);
+        strings.remove(0);
 
-//        DictBase db = new DictBase();
-//        db.addPair("A", "B", 1, RelationType.DEF);
-//        db.addPair("B", "C", 1, RelationType.DEF);
-//        db.addPair("A", "D", 1, RelationType.DEF);
-//        db.addPair("D", "C", 1, RelationType.DEF);
-//
-//        DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(db, "A"), "t.png");
+        StringBuilder correctDictionaryBuilder = new StringBuilder();
+        correctDictionaryBuilder.append(rowWithColumnTitle + "\n");
+        for (String string : strings) {
+            String[] split = string.split(";");
+            String id = split[0];
+            String firstPartOfSpeech = split[1];
+            String secondPartOfSpeech = split[2];
+            String relationType = split[3];
+            String firstWord = split[4];
+            String secondWord = split[5];
 
-        perfomanceTest();
-        //mystemTest();
+            String rightFirstWord = mapForSwap.get(firstWord);
+            if (rightFirstWord != null) {
+                firstWord = rightFirstWord;
+            }
+
+            String rightSecondWord = mapForSwap.get(secondWord);
+            if (rightSecondWord != null) {
+                secondWord = rightSecondWord;
+            }
+            String result = id + ";" + firstPartOfSpeech + ";" + secondPartOfSpeech + ";" + relationType +
+                    ";" + firstWord + ";" + secondWord;
+            System.out.println("==========================================");
+            System.out.println(string);
+            System.out.println(result);
+            correctDictionaryBuilder.append(result + "\n");
+        }
+        Helper.saveToFile(correctDictionaryBuilder.toString(), pathCorrectDictionary);
     }
 
     private static void perfomanceTest() throws IOException, DictException, InterruptedException {
@@ -127,17 +156,21 @@ public class Main {
         Helper.printUnigram(unigramFrequensy, "-" + File.separator + "_0_unigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
+        settings = new Settings(
+                100 / 100.0, 100 / 100.0, 100 / 100.0, 3, 0.65, 2
+        );
+        DictBase dictBase_base = CSV_DICT.loadFullDict();
+
 
         long startTime;
-        for (int a = start; a <= finish; a = a + 1) {
-            for (int s = start; s <= finish; s = s + 1) {
-                for (int d = start; d <= finish; d = d + 1) {
+        for (int a = 75; a <= 75; a = a + 2) {
+            for (int s = 1; s <= 100; s = s + 2) {
+                for (int d = 1; d <= 100; d = d + 2) {
                     startTime = System.currentTimeMillis();
                     settings = new Settings(
                             a / 100.0, s / 100.0, d / 100.0, 3, 0.65, 2
                     );
-
-                    DictBase dictBase = CSV_DICT.loadFullDict();
+                    DictBase dictBase = dictBase_base.copy();
 
 
                     dictBase.removeStopWords();
@@ -178,40 +211,44 @@ public class Main {
                         allVertex.add(vertexEdgeMapEntry.getKey());
                     }
                     Collections.sort(allVertex, (o1, o2) -> -Double.compare(o1.getWeight(), o2.getWeight()));
-                    StringBuilder result = new StringBuilder();
+                    StringBuilder pretendents = new StringBuilder();
                     int tmpIndex = 0;
-
-                    for (int i = 0; i < 100; i++) {
+                    DecimalFormat decimalFormat = new DecimalFormat("#0.0000000");
+                    for (int i = 0; i < 1000; i++) {
                         Vertex vertex = allVertex.get(i);
-                        result
-                                .append((tmpIndex++) + ") " + vertex.getWord().getStr() + "\t" + vertex.getWeight())
+                        pretendents
+                                .append((tmpIndex++) + ") " + vertex.getWord().getStr() + "\t" + decimalFormat.format(vertex.getWeight()))
                                 .append("\n");
                     }
-
-//                    List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
-//
-//
-//                    for (ClusterHelper cluster : clastering) {
-//
-//                        String tmp = (tmpIndex++) + ") " + cluster.getVertex().getWord().getStr() + "\t" + "w=" +
-//                                cluster.getVertex().getWeight() + "\t" + "wO=" + cluster.getVertex().getWeightOutgoingVertex() +
-//                                "\t" + "wC=" + cluster.getClusterWeight();
-//                        result.append(tmp);
-//                        result.append("\n");
-//                        if (tmpIndex > 100)
-//                            break;
-//                    }
-                    Helper.saveToFile(result.toString(), "test" + File.separator +
+                    Helper.saveToFile(pretendents.toString(), "test" + File.separator +
                             "A" + String.valueOf((int) (settings.get_ASS_WEIGHT_() * 100)) + "_" +
                             "S" + String.valueOf((int) (settings.get_SYN_WEIGHT_() * 100)) + "_" +
                             "D" + String.valueOf((int) (settings.get_DEF_WEIGHT_() * 100)) + ".txt"
                     );
+
+
+                    List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
+                    String clusterStr = "";
+                    tmpIndex = 0;
+                    for (ClusterHelper cluster : clastering) {
+
+                        clusterStr += (tmpIndex++) + ")\t" + cluster.getVertex().getWord().getStr() + "\t" + "w=" +
+                                cluster.getVertex().getWeight() + "\t" + "wO=" + cluster.getVertex().getWeightOutgoingVertex() +
+                                "\t" + "wC=" + cluster.getClusterWeight() + "\n";
+                        if (tmpIndex > 1000)
+                            break;
+                    }
+                    Helper.saveToFile(clusterStr, "test" + File.separator +
+                            "A" + String.valueOf((int) (settings.get_ASS_WEIGHT_() * 100)) + "_" +
+                            "S" + String.valueOf((int) (settings.get_SYN_WEIGHT_() * 100)) + "_" +
+                            "D" + String.valueOf((int) (settings.get_DEF_WEIGHT_() * 100)) + "_cluster.txt"
+                    );
+
+
                     System.out.println("\n====\ntime = " + (System.currentTimeMillis() - startTime) + "\n=====");
                 }
             }
         }
-
-
     }
 
     public static Settings settings;
@@ -263,12 +300,12 @@ public class Main {
 
 
         settings = new Settings(
-//                0.05, 0.05, 0.15, 3, 0.65, 3
-                0.6, 0.3, 0.2, 3, 0.65, 3
+                0.05, 0.05, 0.15, 3, 0.65, 3
+//                0.6, 0.3, 0.2, 3, 0.65, 3
         );
 
         DictBase dictBase = CSV_DICT.loadFullDict();
-
+        // dictBase.drawNearVertex("ресторан", 1, "rest.png");
         //dictBase.bidirectional(RelationType.ASS);///////////////////////////////////////////////////////////////////////
 
         dictBase.removeStopWords();
@@ -305,7 +342,7 @@ public class Main {
         dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
 
         ModificateEdgeInterface modificateEdge =
-                new ModificateEdgeInterfaceImpl(bigramFrequensy, 5, settings.get_R_());
+                new ModificateEdgeInterfaceImpl(bigramFrequensy, 15, settings.get_R_());
         modificateEdge.modificate(dictBase);
         dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
@@ -323,6 +360,7 @@ public class Main {
         );
         correctVertexWeight.correctVertexWeight(dictBase);
 
+        dictBase.drawNearVertex("ресторан", 1, "rest2.png");
 
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
                 settings.get_R_() + ",gamma=" + settings.get_GAMMA_() + " 3 затухание).txt");
@@ -347,6 +385,45 @@ public class Main {
                 break;
         }
 
+        List<ClusterHelper> sublist = new ArrayList<>(clastering);
+
+        List<ClusterHelper> forRemoving = new ArrayList<>();
+        for (ClusterHelper helper1 : sublist) {
+            for (ClusterHelper helper2 : sublist) {
+                boolean isSyn = false;
+                Edge edge12 = dictBase.checkRelation(helper1.getVertex(), helper2.getVertex());
+                Edge edge21 = dictBase.checkRelation(helper2.getVertex(), helper1.getVertex());
+                if (edge12 != null && edge12.getRelationType().equals(RelationType.SYN)) {
+                    isSyn = true;
+                }
+                if (edge21 != null && edge21.getRelationType().equals(RelationType.SYN)) {
+                    isSyn = true;
+                }
+                if (isSyn) {
+                    System.out.println("====" + helper1.getVertex().getWord().getStr() + " ==== " +
+                            helper2.getVertex().getWord().getStr() + "====");
+                    if (helper1.getVertex().getWeight() > helper2.getVertex().getWeight()) {
+                        forRemoving.add(helper2);
+                    } else {
+                        forRemoving.add(helper1);
+                    }
+                }
+            }
+        }
+        //sublist.removeAll(forRemoving);
+
+         tmpIndex = 0;
+        System.out.println("рассматриваемые кластера:");
+        for (ClusterHelper claster : sublist) {
+            if (claster.getVertex().isNoun())
+                System.out.println((tmpIndex++) + ") " + claster.getVertex().getWord().getStr() + "\t" + "w=" +
+                        claster.getVertex().getWeight() + "\t" + "wO=" + claster.getVertex().getWeightOutgoingVertex() +
+                        "\t" + "wC=" + claster.getClusterWeight());
+            if (tmpIndex > 40)
+                break;
+        }
+        System.out.println();
+
 
         // TODO
         // TODO
@@ -355,7 +432,9 @@ public class Main {
         // TODO
         // TODO какой радиус брать инвертированный или нет
         // TODO
-        dictBase.distributeVerticesIntoClusters(clastering, 15, settings.get_R_() - 1);
+
+//        dictBase.drawNearVertex("ресторан", 0, "restic.png");
+        dictBase.distributeVertexIntoClusters(sublist, 20, settings.get_R_() - 1);
 //        dictBase.saveAs("result" + File.separator + "restaurant2_new.dat");
 
         //check(dictBase);
@@ -423,6 +502,7 @@ public class Main {
 
             // перебираем слова из предложения, помечаем в какие кластера отностися каждое из слов
             for (WordOfSentence wordOfSentence : wordOfSentenceList) {
+                System.out.println("=======\n" + wordOfSentence.getWord());
                 // Находим вершину из графа соответствующей текущему слову
                 Vertex vertex = map.get(wordOfSentence.getWord());
                 wordOfSentence.setVertex(vertex);
@@ -437,6 +517,8 @@ public class Main {
                             clusterIntegerPair.getKey(),
                             clusterIntegerPair.getValue()
                     );
+                    System.out.println(clusterIntegerPair.getKey().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getValue());
+                    System.out.print("");
                 }
 
                 /////************************************
@@ -479,12 +561,13 @@ public class Main {
                 }
             }
 
-//            for (Map.Entry<Cluster, Double> clusterDoubleEntry : result.entrySet()) {
-//                Cluster key = clusterDoubleEntry.getKey();
-//                Double oldValue = clusterDoubleEntry.getValue();
-//                Double newValue =((Math.log(key.getWeight()) / Math.log(2))) / key.getWeight() * oldValue;
-//                result.put(key, newValue);
-//            }
+            for (Map.Entry<Cluster, Double> clusterDoubleEntry : result.entrySet()) {
+                Cluster key = clusterDoubleEntry.getKey();
+                Double oldValue = clusterDoubleEntry.getValue();
+                double clusterWeight = key.getWeight();
+                Double newValue = Math.sqrt(((Math.log(clusterWeight) / Math.log(2))) / clusterWeight) * oldValue;
+                result.put(key, newValue);
+            }
 
 
             List<Map.Entry<Cluster, Double>> sortedResult = new ArrayList<>(result.entrySet());

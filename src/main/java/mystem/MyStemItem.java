@@ -84,4 +84,11 @@ public class MyStemItem {
             return this.getAnalysisList().get(0);
         return null;
     }
+
+    public String getFirstAnalyseOrText(){
+        if(this.analysisList != null && this.analysisList.size() > 0){
+            return this.analysisList.get(0).getLex();
+        }
+        return this.text;
+    }
 }

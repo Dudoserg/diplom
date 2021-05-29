@@ -46,6 +46,12 @@ public class Helper {
         writer.write(text);
         writer.close();
     }
+    public static boolean removeFile(String path){
+        File file = new File(path);
+        if(file.exists())
+            return file.delete();
+        return false;
+    }
 
     public static void printUnigram(Map<Unigram, Integer> map, String path) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(path));
