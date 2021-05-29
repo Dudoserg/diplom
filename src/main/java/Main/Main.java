@@ -360,7 +360,7 @@ public class Main {
         );
         correctVertexWeight.correctVertexWeight(dictBase);
 
-        dictBase.drawNearVertex("ресторан", 1, "rest2.png");
+        //dictBase.drawNearVertex("ресторан", 1, "rest2.png");
 
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
                 settings.get_R_() + ",gamma=" + settings.get_GAMMA_() + " 3 затухание).txt");
@@ -434,7 +434,7 @@ public class Main {
         // TODO
 
 //        dictBase.drawNearVertex("ресторан", 0, "restic.png");
-        dictBase.distributeVertexIntoClusters(sublist, 20, settings.get_R_() - 1);
+        dictBase.distributeVertexIntoClusters(sublist, 15, settings.get_R_() - 1);
 //        dictBase.saveAs("result" + File.separator + "restaurant2_new.dat");
 
         //check(dictBase);
