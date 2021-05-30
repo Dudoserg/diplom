@@ -1262,7 +1262,14 @@ public class DictBase implements Serializable {
         return list;
     }
 
-
+    /**
+     * Выбираем, какие вершины относим к кластеру
+     * @param list
+     * @param used
+     * @param w
+     * @param radius
+     * @param maxRadius
+     */
     public void findVertexInRadiuses_recursion(List<HashSet<Vertex>> list, HashSet<Vertex> used, Vertex w, int radius, int maxRadius) {
         if (radius > maxRadius)
             return;

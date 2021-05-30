@@ -1,5 +1,6 @@
 package dict.CorrectVertexWeight;
 
+import Main.Main;
 import dict.DictBase;
 import dict.DictException;
 import dict.Edge.Edge;
@@ -106,7 +107,7 @@ public class CorrectVertexWeight implements CorrectVertexWeightInterface {
         int counter = 0;
 
         List<Th> threads = new ArrayList<>();
-        int countThreads = 4;
+        int countThreads = Main.settings.getCountThreads();
         int numThread = 0;
         // создаем треды
         for (int i = 0; i < countThreads; i++) {

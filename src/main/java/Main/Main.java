@@ -29,8 +29,12 @@ import java.util.stream.Collectors;
 public class Main {
     static Integer start;
     static Integer finish;
+    public static Settings settings;
 
     public static void main(String[] args) throws Exception {
+//        if(args.length == 0){
+//            settings.loadDefault();
+//        }
 //        start = Integer.valueOf(args[0]);
 //        finish = Integer.valueOf(args[1]);
 //
@@ -41,7 +45,7 @@ public class Main {
 
 //        perfomanceTest();
 //        correctingDictionary();
-        mystemTest();
+        start();
     }
 
     private static void correctingDictionary() throws IOException, DictException, InterruptedException {
@@ -115,11 +119,11 @@ public class Main {
     }
 
     private static void perfomanceTest() throws IOException, DictException, InterruptedException {
-        boolean isNew = false;
 
         Map<Bigram, Integer> bigramFrequensy;
         Map<Unigram, Integer> unigramFrequensy;
 
+        boolean isNew = false;
         if (isNew) {
             Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
             String data = String.join(" ", reviews.getTexts());
@@ -163,9 +167,9 @@ public class Main {
 
 
         long startTime;
-        for (int a = 75; a <= 75; a = a + 2) {
-            for (int s = 1; s <= 100; s = s + 2) {
-                for (int d = 1; d <= 100; d = d + 2) {
+        for (int a = 0; a <= 100; a = a + 3) {
+            for (int s = 0; s <= 100; s = s + 3) {
+                for (int d = 0; d <= 100; d = d + 3) {
                     startTime = System.currentTimeMillis();
                     settings = new Settings(
                             a / 100.0, s / 100.0, d / 100.0, 3, 0.65, 2
@@ -191,7 +195,7 @@ public class Main {
                     DictBase.removeUnusedVertex(dictBase, dictTrain, settings.get_R_());
 
                     ModificateEdgeInterface modificateEdge =
-                            new ModificateEdgeInterfaceImpl(bigramFrequensy, 5, settings.get_R_());
+                            new ModificateEdgeInterfaceImpl(bigramFrequensy, 10, settings.get_R_());
                     modificateEdge.modificate(dictBase);
 
 
@@ -251,11 +255,13 @@ public class Main {
         }
     }
 
-    public static Settings settings;
 
-    public static void mystemTest() throws IOException, DictException, InterruptedException {
+    public static void start() throws IOException, DictException, InterruptedException {
 
-
+        settings = new Settings(
+                0.05, 0.05, 0.15, 3, 0.65, 3
+//                0.6, 0.3, 0.2, 3, 0.65, 3
+        );
         boolean isNew = false;
 
         Map<Bigram, Integer> bigramFrequensy;
@@ -299,10 +305,7 @@ public class Main {
         Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
 
 
-        settings = new Settings(
-                0.05, 0.05, 0.15, 3, 0.65, 3
-//                0.6, 0.3, 0.2, 3, 0.65, 3
-        );
+
 
         DictBase dictBase = CSV_DICT.loadFullDict();
         // dictBase.drawNearVertex("ресторан", 1, "rest.png");
@@ -686,7 +689,6 @@ public class Main {
         }
         System.out.println("prog 2 time = " + (System.currentTimeMillis() - startTime) + " ms.");
     }
-
 
     public static void check(DictBase dictBase) throws IOException {
 

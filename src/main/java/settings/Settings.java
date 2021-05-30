@@ -14,7 +14,7 @@ public class Settings {
     private Integer _R_;
     private Double _GAMMA_;
     private Integer _GAMMA_ATTENUATION_RATE_;
-
+    private int countThreads = 12;
 
     public Settings(Double _ASS_WEIGHT_, Double _SYN_WEIGHT_, Double _DEF_WEIGHT_, Integer _R_, Double _GAMMA_, Integer _GAMMA_ATTENUATION_RATE_) {
         this._ASS_WEIGHT_ = _ASS_WEIGHT_;
@@ -41,5 +41,10 @@ public class Settings {
                 throw  new DictException("unknown type of relationtype!");
             }
         }
+    }
+
+    public void loadDefault() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("association = ");
     }
 }
