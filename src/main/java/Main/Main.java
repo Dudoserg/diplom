@@ -43,9 +43,9 @@ public class Main {
 //        System.out.println("Поехали?");
 //        System.in.read();
 
-//        perfomanceTest();
+        perfomanceTest();
 //        correctingDictionary();
-        start();
+//        start();
     }
 
     private static void correctingDictionary() throws IOException, DictException, InterruptedException {
@@ -172,7 +172,7 @@ public class Main {
                 for (int d = 0; d <= 100; d = d + 3) {
                     startTime = System.currentTimeMillis();
                     settings = new Settings(
-                            a / 100.0, s / 100.0, d / 100.0, 3, 0.65, 2
+                            a / 100.0, s / 100.0, 57 / 100.0, 3, 0.65, 2
                     );
                     DictBase dictBase = dictBase_base.copy();
 
@@ -259,7 +259,7 @@ public class Main {
     public static void start() throws IOException, DictException, InterruptedException {
 
         settings = new Settings(
-                0.05, 0.05, 0.15, 3, 0.65, 3
+                0.30, 0.12, 0.21, 3, 0.65, 3
 //                0.6, 0.3, 0.2, 3, 0.65, 3
         );
         boolean isNew = false;
