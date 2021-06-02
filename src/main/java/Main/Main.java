@@ -1,7 +1,6 @@
 package Main;
 
 import SpellerChecker.Languagetool;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import csv.CSV_DICT;
 import data.TrainLoader;
 import data.Reviews;
@@ -41,13 +40,16 @@ public class Main {
         instance.set_GAMMA_(0.65);
         instance.set_R_(3);
         instance.set_GAMMA_ATTENUATION_RATE_(3);
-        instance.setCountThreads(2);
+        instance.setCountThreads(4);
 
-        start();
+        DictBase dictBase = start();
+        dictBase.saveToFile("out.txt");
+//        prog22(dictBase);
+        System.out.print("");
     }
 
 
-    public static void start() throws IOException, DictException, InterruptedException, IllegalAccessException {
+    public static DictBase start() throws IOException, DictException, InterruptedException, IllegalAccessException {
 
 //        settings = new Settings(
 //                0.15, 0.15, 0.25, 3, 0.65, 3
@@ -150,7 +152,7 @@ public class Main {
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base NOUN after correctVertexWeight(r=" +
                 Settings.getInstance().get_R_() + ",gamma=" + Settings.getInstance().get_GAMMA_() + " 3 затухание).txt", PartOfSpeech.NOUN, 100);
 
-
+        //////////////////
         dictBase.calculateWeightOfOutgoingVertex();
         List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
 
@@ -207,21 +209,11 @@ public class Main {
         System.out.println();
 
 
-        // TODO
-        // TODO
-        // TODO
-        // TODO
-        // TODO
         // TODO какой радиус брать инвертированный или нет
-        // TODO
-
         dictBase.distributeVertexIntoClusters(sublist, 15, Settings.getInstance().get_R_() - 1);
 
 
-        prog22(dictBase);
-        System.out.print("");
-
-
+        return dictBase;
     }
 
     private static void calculate_countEdgeByTypes(DictBase dictBase) {

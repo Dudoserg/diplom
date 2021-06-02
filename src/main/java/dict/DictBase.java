@@ -1,10 +1,8 @@
 package dict;
 
-import Main.Main;
+import Output.Output;
+import Output.VertexAndCluster;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import dict.CorrectVertexWeight.CorrectVertexWeight;
-import dict.CorrectVertexWeight.threads.Th;
-import dict.CorrectVertexWeight.threads.ThRun;
 import dict.Edge.Edge;
 import guru.nidi.graphviz.attribute.*;
 import guru.nidi.graphviz.engine.Format;
@@ -16,13 +14,11 @@ import lombok.Getter;
 import lombok.Setter;
 import mystem.StopWords;
 import settings.Settings;
-import utils.Unigram;
 
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static guru.nidi.graphviz.attribute.Rank.RankDir.LEFT_TO_RIGHT;
@@ -84,9 +80,9 @@ public class DictBase implements Serializable {
         return v;
     }
 
-    public Edge checkRelation(Vertex first, Vertex second){
+    public Edge checkRelation(Vertex first, Vertex second) {
         EdgeMap edgeMap = map.get(first);
-        if(edgeMap == null)
+        if (edgeMap == null)
             return null;
         Edge edge = edgeMap.getEdgeMap().get(second);
         return edge;
@@ -131,8 +127,8 @@ public class DictBase implements Serializable {
     }
 
     public void addPair(String first, String second, double weight, RelationType relationType) {
-        Vertex f = this.getVertex( first);
-        Vertex s = this.getVertex( second);
+        Vertex f = this.getVertex(first);
+        Vertex s = this.getVertex(second);
         this.addPair(f, s, new Edge(f, s, weight, relationType));
     }
 
@@ -927,8 +923,6 @@ public class DictBase implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////    УДАЛЕНИЕ ЛИШНИХ СЛОВ ИЗ БАЗОВОГО ГРАФА  ////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1002,8 +996,8 @@ public class DictBase implements Serializable {
         if (R == 0)
             return false;
         EdgeMap edgeMap = dictBase.invertMap.get(vertex);
-       // if (edgeMap == null)
-            //System.out.print("edgeMap == null");
+        // if (edgeMap == null)
+        //System.out.print("edgeMap == null");
         // Все вершины входящие в текущую
         boolean result = false;
         assert edgeMap != null;
@@ -1265,6 +1259,7 @@ public class DictBase implements Serializable {
 
     /**
      * Выбираем, какие вершины относим к кластеру
+     *
      * @param list
      * @param used
      * @param w
@@ -1357,7 +1352,7 @@ public class DictBase implements Serializable {
      * @return Список нод для библиотеки графвиз
      * @throws DictException такого типа отношений не существует
      */
-    public static List<Node> graphviz_getGraphViz( DictBase dictBase, String centr) throws DictException {
+    public static List<Node> graphviz_getGraphViz(DictBase dictBase, String centr) throws DictException {
         Map<Vertex, EdgeMap> map = dictBase.getMap();
         List<Node> result = new ArrayList<>();
         Set<Map.Entry<Vertex, EdgeMap>> entries = map.entrySet();
@@ -1373,13 +1368,13 @@ public class DictBase implements Serializable {
 
 
                 Node link1 = null;
-                if(centr != null && centr.equals(first.getWord().getStr()))
+                if (centr != null && centr.equals(first.getWord().getStr()))
                     link1 = node(first.getWord().getStr()).with(Color.RED, Style.FILLED);
                 else
                     link1 = node(first.getWord().getStr()).with(Color.BLACK);
 
                 Node link2 = null;
-                if(centr != null && centr.equals(second.getWord().getStr()))
+                if (centr != null && centr.equals(second.getWord().getStr()))
                     link2 = node(second.getWord().getStr()).with(Color.RED, Style.FILLED);
                 else
                     link2 = node(second.getWord().getStr()).with(Color.BLACK);
@@ -1417,7 +1412,7 @@ public class DictBase implements Serializable {
         return result;
     }
 
-    public  void drawNearVertex(String str, int r, String path) throws DictException, IOException {
+    public void drawNearVertex(String str, int r, String path) throws DictException, IOException {
         Vertex vertex = this.getVertex(str);
         DictBase fullSubDict = this.getFullSubDict(vertex, r);
         List<Node> nodes = DictBase.graphviz_getGraphViz(fullSubDict, str);
@@ -1464,7 +1459,7 @@ public class DictBase implements Serializable {
         Graphviz.fromGraph(g).totalMemory(1000000000).render(format).toFile(new File(fileName));
     }
 
-    public void draw(String center,String path) throws DictException, IOException {
+    public void draw(String center, String path) throws DictException, IOException {
         DictBase.graphviz_drawHight(DictBase.graphviz_getGraphViz(this, center), path);
     }
 
@@ -1475,5 +1470,59 @@ public class DictBase implements Serializable {
             result.put(entry.getKey().getWord().getStr(), entry.getKey());
         }
         return result;
+    }
+
+
+    public void saveToFile(String filePath) throws IOException {
+
+
+        Output output = new Output();
+
+        for (Map.Entry<Vertex, EdgeMap> elem : this.map.entrySet()) {
+            Vertex vertexFirst = elem.getKey();
+            output.getVertexSet().add(vertexFirst);
+            output.getPartOfSpeechSet().add(vertexFirst.getWord().getPartOfSpeech());
+
+            EdgeMap smegniy = elem.getValue();
+            for (Map.Entry<Vertex, Edge> vertexEdgeEntry : smegniy.getEdgeMap().entrySet()) {
+                Vertex vertexSecond = vertexEdgeEntry.getKey();
+                Edge edge = vertexEdgeEntry.getValue();
+                output.getPartOfSpeechSet().add(vertexSecond.getWord().getPartOfSpeech());
+
+                output.getEdgeList().add(edge);
+
+                output.getVertexSet().add(vertexSecond);
+            }
+        }
+
+        for (Cluster cluster : this.clusterList) {
+            output.getClusterSet().add(cluster);
+        }
+        // сохраняем части речи
+        output.createPartOfSpeechHashMap();
+        output.savePartOfSpeech();
+
+        // сохраняем список вершин
+        output.createVertexHashMap();
+        output.saveVertex();
+
+        // сохраняем все дуги словаря
+        output.saveEdge();
+
+        // сохраняем кластера
+        output.createClusterHashMap();
+        output.saveCluster();
+
+        /// сохраняем вхождение вершин в кластера
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
+            Vertex vertex = vertexEdgeMapEntry.getKey();
+            List<Pair<Cluster, Integer>> clusterList = vertex.getClusterList();
+            for (Pair<Cluster, Integer> clusterIntegerPair : clusterList) {
+                Integer distance = clusterIntegerPair.getValue();
+                Cluster cluster = clusterIntegerPair.getKey();
+                output.getVertexAndClustersList().add(new VertexAndCluster(vertex, cluster, distance));
+            }
+        }
+        output.saveVertexAndClusters();
     }
 }
