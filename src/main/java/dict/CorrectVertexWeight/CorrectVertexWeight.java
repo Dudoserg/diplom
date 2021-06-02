@@ -9,7 +9,9 @@ import dict.Vertex;
 import javafx.util.Pair;
 import dict.CorrectVertexWeight.threads.Th;
 import dict.CorrectVertexWeight.threads.ThRun;
+import settings.Settings;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +33,7 @@ public class CorrectVertexWeight implements CorrectVertexWeightInterface {
     }
 
     @Override
-    public void correctVertexWeight(DictBase dictBase) throws DictException, InterruptedException {
+    public void correctVertexWeight(DictBase dictBase) throws DictException, InterruptedException, IOException, IllegalAccessException {
         Function<Double, Double> function = null;
         switch (gamma_degree) {
             case 1: {
@@ -102,12 +104,12 @@ public class CorrectVertexWeight implements CorrectVertexWeightInterface {
 
     @Deprecated
     private void correctVertexWeightThread(DictBase dictBase, int radius, double gamma, Function<Double, Double> gammaFunction)
-            throws InterruptedException {
+            throws InterruptedException, IOException, IllegalAccessException {
         double weightAdd = 0;
         int counter = 0;
 
         List<Th> threads = new ArrayList<>();
-        int countThreads = Main.settings.getCountThreads();
+        int countThreads = Settings.getInstance().getCountThreads();
         int numThread = 0;
         // создаем треды
         for (int i = 0; i < countThreads; i++) {

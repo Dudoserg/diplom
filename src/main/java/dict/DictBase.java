@@ -15,6 +15,7 @@ import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
 import mystem.StopWords;
+import settings.Settings;
 import utils.Unigram;
 
 import java.io.*;
@@ -534,7 +535,7 @@ public class DictBase implements Serializable {
         }
     }
 
-    public DictBase copy() throws DictException {
+    public DictBase copy() throws DictException, IOException, IllegalAccessException {
         DictBase dictBase = new DictBase();
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : this.invertMap.entrySet()) {
             Vertex first = vertexEdgeMapEntry.getKey();
@@ -545,7 +546,7 @@ public class DictBase implements Serializable {
                 Edge edge = vertexEdgeEntry.getValue();
 
                 dictBase.addPair(second.getWord().getStr(), first.getWord().getStr(),
-                        Main.settings.getWeight(edge.getRelationType()), edge.getRelationType());
+                        Settings.getInstance().getWeight(edge.getRelationType()), edge.getRelationType());
 
             }
         }

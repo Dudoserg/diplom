@@ -12,6 +12,7 @@ import javafx.util.Pair;
 import mystem.MyStemOld;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
+import settings.Settings;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -26,7 +27,7 @@ public class CSV_DICT {
 
     public static final String DICTIONARY_PATH = "data" + File.separator + "connections3.csv";
 
-    public static DictBase loadFullDict_old() throws DictException, IOException {
+    public static DictBase loadFullDict_old() throws DictException, IOException, IllegalAccessException {
         System.out.print("loadFullDict...");
 
         String words_fileName = "data" + File.separator + "words2.csv";
@@ -61,15 +62,15 @@ public class CSV_DICT {
             // TODO ПОПРАВИТЬ, ВЫБРАТЬ МАКСИМАЛЬНЫЙ ВЕС, А НЕ ПРОСТО больше 0
             if (con.getDefWeight() > 0) {
                 weight = con.getDefWeight();
-                weight = Main.settings.get_DEF_WEIGHT_();
+                weight = Settings.getInstance().get_DEF_WEIGHT_();
                 relationType = RelationType.DEF;
             } else if (con.getAssWeight() > 0) {
                 weight = con.getAssWeight();
-                weight = Main.settings.get_ASS_WEIGHT_();
+                weight = Settings.getInstance().get_ASS_WEIGHT_();
                 relationType = RelationType.ASS;
             } else if (con.getSynWeight() > 0) {
                 weight = con.getSynWeight();
-                weight = Main.settings.get_SYN_WEIGHT_();
+                weight = Settings.getInstance().get_SYN_WEIGHT_();
                 relationType = RelationType.SYN;
             } else {
                 throw new DictException("weight of edge equals 0.0 [id=" + con.getId() + "]");
@@ -105,7 +106,7 @@ public class CSV_DICT {
     }
 
 
-    public static DictBase loadFullDict() throws FileNotFoundException, DictException {
+    public static DictBase loadFullDict() throws IOException, DictException, IllegalAccessException {
         System.out.print("read Dictionary from file...\t\t");
         Long t = System.currentTimeMillis();
 
@@ -136,7 +137,7 @@ public class CSV_DICT {
             dict.addPair(
                     con.getWordFrom(),
                     con.getWordTo(),
-                    Main.settings.getWeight(con.getRelationType()),
+                    Settings.getInstance().getWeight(con.getRelationType()),
                     con.getRelationType()
             );
             j++;
@@ -189,10 +190,14 @@ public class CSV_DICT {
                         dict.addPair(
                                 con.getWordFrom(),
                                 con.getWordTo(),
-                                Main.settings.getWeight(con.getRelationType()),
+                                Settings.getInstance().getWeight(con.getRelationType()),
                                 con.getRelationType()
                         );
                     } catch (DictException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                     j++;

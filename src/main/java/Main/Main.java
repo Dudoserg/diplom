@@ -1,6 +1,7 @@
 package Main;
 
 import SpellerChecker.Languagetool;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import csv.CSV_DICT;
 import data.TrainLoader;
 import data.Reviews;
@@ -30,252 +31,42 @@ import java.util.stream.Collectors;
 public class Main {
     static Integer start;
     static Integer finish;
-    public static Settings settings;
+    //public static Settings settings;
 
     public static void main(String[] args) throws Exception {
-//        if(args.length == 0){
-//            settings.loadDefault();
-//        }
-//        start = Integer.valueOf(args[0]);
-//        finish = Integer.valueOf(args[1]);
-//
-//        System.out.println(" start = " + start + "\t" + finish);
-//
-//        System.out.println("Поехали?");
-//        System.in.read();
+        Settings instance = Settings.load();
+        instance.set_ASS_WEIGHT_(0.15);
+        instance.set_SYN_WEIGHT_(0.1);
+        instance.set_DEF_WEIGHT_(0.3);
+        instance.set_GAMMA_(0.65);
+        instance.set_R_(3);
+        instance.set_GAMMA_ATTENUATION_RATE_(3);
+        instance.setCountThreads(2);
 
-//        perfomanceTest();
-//        correctingDictionary();
         start();
     }
 
-    private static void correctingDictionary() throws IOException, DictException, InterruptedException {
-        settings = new Settings(
-//                0.05, 0.05, 0.15, 3, 0.65, 3
-                0.6, 0.3, 0.2, 3, 0.65, 3
-        );
-        DictBase dictBase = CSV_DICT.loadFullDict();
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
-            Vertex key = vertexEdgeMapEntry.getKey();
-            stringBuilder.append(key.getWord().getStr() + "\n");
-        }
-        Mystem mystem = new Mystem();
-        MyStemResult analyze = mystem.analyze(stringBuilder.toString());
-        int count = 0;
-        Map<String, String> mapForSwap = new HashMap<>();
-        for (MyStemItem myStemItem : analyze.getItemList()) {
-            String firstAnalyseOrText = myStemItem.getFirstAnalyseOrText();
-            String before = myStemItem.getText();
-            String after = firstAnalyseOrText.replace("\n", "");
-            String result = before + "\t\t" + after;
-            if (!before.equals(" ") && !after.equals(" ")) {
 
-                if (!before.equals(after)) {
-                    mapForSwap.put(before, after);
-                    System.out.println(result);
-                    count++;
-                } else {
-                    // System.out.println(result);
-                }
-            }
-        }
-        System.out.println("\n\n" + "count = " + count);
+    public static void start() throws IOException, DictException, InterruptedException, IllegalAccessException {
 
-        // читаем теперь словарь, и меняем все неправильные глаголы К НОРМАЛЬНОЙ БАЗОВОЙ ФОРМЕ
-        String pathDictionary = "data" + File.separator + "connections2.csv";
-        String pathCorrectDictionary = "data" + File.separator + "connections3.csv";
-        List<String> strings = Helper.readFileLineByLine(pathDictionary);
-        String rowWithColumnTitle = strings.get(0);
-        strings.remove(0);
-
-        StringBuilder correctDictionaryBuilder = new StringBuilder();
-        correctDictionaryBuilder.append(rowWithColumnTitle + "\n");
-        for (String string : strings) {
-            String[] split = string.split(";");
-            String id = split[0];
-            String firstPartOfSpeech = split[1];
-            String secondPartOfSpeech = split[2];
-            String relationType = split[3];
-            String firstWord = split[4];
-            String secondWord = split[5];
-
-            String rightFirstWord = mapForSwap.get(firstWord);
-            if (rightFirstWord != null) {
-                firstWord = rightFirstWord;
-            }
-
-            String rightSecondWord = mapForSwap.get(secondWord);
-            if (rightSecondWord != null) {
-                secondWord = rightSecondWord;
-            }
-            String result = id + ";" + firstPartOfSpeech + ";" + secondPartOfSpeech + ";" + relationType +
-                    ";" + firstWord + ";" + secondWord;
-            System.out.println("==========================================");
-            System.out.println(string);
-            System.out.println(result);
-            correctDictionaryBuilder.append(result + "\n");
-        }
-        Helper.saveToFile(correctDictionaryBuilder.toString(), pathCorrectDictionary);
-    }
-
-    private static void perfomanceTest() throws IOException, DictException, InterruptedException {
-
-        Map<Bigram, Integer> bigramFrequensy;
-        Map<Unigram, Integer> unigramFrequensy;
-
-        boolean isNew = false;
-        if (isNew) {
-            Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
-            String data = String.join(" ", reviews.getTexts());
-            Mystem mystem = new Mystem();
-            MyStemResult myStemResult = mystem.analyze(data);
-
-            myStemResult.removeStopWords(StopWords.getInstance());
-            //myStemResult.saveText();
-
-
-            bigramFrequensy = myStemResult.getBigramFrequensy();
-            unigramFrequensy = myStemResult.getUnigramFrequensy();
-        } else {
-
-            Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
-            String data = String.join(" ", reviews.getTexts());
-
-            MyStemOld myStemOldText = new MyStemOld(data, "tt_");
-
-            myStemOldText.saveToFile(MyStemOld.FULL_TEXT);
-            myStemOldText = myStemOldText.removeStopWord();
-            myStemOldText.saveToFile(MyStemOld.TEXT_WITHOUT_STOPWORDS_txt);
-            myStemOldText.saveToFile("-" + File.separator + "text_withoutStopWord.txt");
-
-            myStemOldText.lemmatization();
-            myStemOldText.removeStopWordsFromLemmatization();
-
-
-            bigramFrequensy = myStemOldText.getMyStemResult().getBigramFrequensy();
-            unigramFrequensy = myStemOldText.getMyStemResult().getUnigramFrequensy();
-        }
-
-        Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
-        Helper.printUnigram(unigramFrequensy, "-" + File.separator + "_0_unigram_frequency.txt");
-        Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
-        Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
-        settings = new Settings(
-                100 / 100.0, 100 / 100.0, 100 / 100.0, 3, 0.65, 2
-        );
-        DictBase dictBase_base = CSV_DICT.loadFullDict();
-
-
-        long startTime;
-        for (int a = 0; a <= 100; a = a + 3) {
-            for (int s = 0; s <= 100; s = s + 3) {
-                // for (int d = 0; d <= 100; d = d + 3) {
-                startTime = System.currentTimeMillis();
-                settings = new Settings(
-                        a / 100.0, s / 100.0, 57 / 100.0, 3, 0.65, 2
-                );
-                DictBase dictBase = dictBase_base.copy();
-
-
-                dictBase.removeStopWords();
-
-                DictBase dictTrain = new DictBase();
-                for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
-                    Bigram key = bigramIntegerEntry.getKey();
-                    Edge edge = dictBase.getEdge(dictBase.getVertex(key.getFirst()), dictBase.getVertex(key.getSecond()));
-
-                    if (edge != null)
-                        dictTrain.addPair(key.getFirst(), key.getSecond(), edge.getWeight(), edge.getRelationType());
-                    else
-                        dictTrain.addPair(key.getFirst(), key.getSecond(), Edge.ASS_BASE_WEIGHT, RelationType.ASS);
-                }
-                dictTrain.removeStopWords();
-
-
-                DictBase.removeUnusedVertex(dictBase, dictTrain, settings.get_R_());
-
-                ModificateEdgeInterface modificateEdge =
-                        new ModificateEdgeInterfaceImpl(bigramFrequensy, 10, settings.get_R_());
-                modificateEdge.modificate(dictBase);
-
-
-                SetVertexWeightInterface setVertexWeightInterface =
-                        new SetVertexWeight(unigramFrequensy);
-                setVertexWeightInterface.setVertexWeight(dictBase);
-
-                CorrectVertexWeightInterface correctVertexWeight = new CorrectVertexWeight(
-                        settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true
-                );
-                correctVertexWeight.correctVertexWeight(dictBase);
-
-                dictBase.calculateWeightOfOutgoingVertex();
-
-                List<Vertex> allVertex = new ArrayList<>();
-                for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
-                    allVertex.add(vertexEdgeMapEntry.getKey());
-                }
-                Collections.sort(allVertex, (o1, o2) -> -Double.compare(o1.getWeight(), o2.getWeight()));
-                StringBuilder pretendents = new StringBuilder();
-                int tmpIndex = 0;
-                DecimalFormat decimalFormat = new DecimalFormat("#0.0000000");
-                for (int i = 0; i < 1000; i++) {
-                    Vertex vertex = allVertex.get(i);
-                    pretendents
-                            .append((tmpIndex++) + ") " + vertex.getWord().getStr() + "\t" + decimalFormat.format(vertex.getWeight()))
-                            .append("\n");
-                }
-                Helper.saveToFile(pretendents.toString(), "test" + File.separator +
-                        "A" + String.valueOf((int) Math.round(settings.get_ASS_WEIGHT_() * 100)) + "_" +
-                        "S" + String.valueOf((int) Math.round(settings.get_SYN_WEIGHT_() * 100)) + "_" +
-                        "D" + String.valueOf((int) Math.round(settings.get_DEF_WEIGHT_() * 100)) + ".txt"
-                );
-                double v = settings.get_DEF_WEIGHT_() * 100;
-
-                List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
-                String clusterStr = "";
-                tmpIndex = 0;
-                for (ClusterHelper cluster : clastering) {
-
-                    clusterStr += (tmpIndex++) + ")\t" + cluster.getVertex().getWord().getStr() + "\t" + "w=" +
-                            cluster.getVertex().getWeight() + "\t" + "wO=" + cluster.getVertex().getWeightOutgoingVertex() +
-                            "\t" + "wC=" + cluster.getClusterWeight() + "\n";
-                    if (tmpIndex > 1000)
-                        break;
-                }
-                Helper.saveToFile(clusterStr, "test" + File.separator +
-                        "A" + String.valueOf((int) Math.round(settings.get_ASS_WEIGHT_() * 100)) + "_" +
-                        "S" + String.valueOf((int) Math.round(settings.get_SYN_WEIGHT_() * 100)) + "_" +
-                        "D" + String.valueOf((int) Math.round(settings.get_DEF_WEIGHT_() * 100)) + "_cluster.txt"
-                );
-
-
-                System.out.println("\n====\ntime = " + (System.currentTimeMillis() - startTime) + "\n=====");
-                // }
-            }
-        }
-    }
-
-
-    public static void start() throws IOException, DictException, InterruptedException {
-
-        settings = new Settings(
-                0.09, 0.09, 0.09, 3, 0.65, 3
-//                0.6, 0.3, 0.2, 3, 0.65, 3
-        );
+//        settings = new Settings(
+//                0.15, 0.15, 0.25, 3, 0.65, 3
+////                0.6, 0.3, 0.2, 3, 0.65, 3
+//        );
         boolean isNew = false;
 
         Map<Bigram, Integer> bigramFrequensy;
         Map<Unigram, Integer> unigramFrequensy;
 
         if (isNew) {
-            Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
-            String data = String.join(" ", reviews.getTexts());
+            TrainLoader trainLoader = new TrainLoader();
+            List<String> load = trainLoader.load(Helper.path("data", "train"));
+
+            String data = String.join(" ", load);
             Mystem mystem = new Mystem();
             MyStemResult myStemResult = mystem.analyze(data);
 
             myStemResult.removeStopWords(StopWords.getInstance());
-            //myStemResult.saveText();
 
 
             bigramFrequensy = myStemResult.getBigramFrequensy();
@@ -309,9 +100,6 @@ public class Main {
 
 
         DictBase dictBase = CSV_DICT.loadFullDict();
-        // dictBase.drawNearVertex("ресторан", 1, "rest.png");
-        //dictBase.bidirectional(RelationType.ASS);///////////////////////////////////////////////////////////////////////
-
         dictBase.removeStopWords();
 
         DictBase dictTrain = new DictBase();
@@ -331,47 +119,36 @@ public class Main {
 
         calculate_countEdgeByTypes(dictBase);
 
-//        {
-//            DictBase dishes = dictBase.getSubDict(Vertex.getVertex("блюдо"), 1);
-//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(dishes), "-"  + File.separator + "dishes.jpg");
-//
-//            DictBase dishes_invert = dictBase.getInvertSubDict(Vertex.getVertex("блюдо"), 1);
-//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(dishes_invert), "-"  + File.separator + "dishes_invert.jpg");
-//
-//            DictBase both = DictBase.createFromDicts(dishes, dishes_invert);
-//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(both), "-"  + File.separator + "both.jpg");
-//        }
 
-        DictBase.removeUnusedVertex(dictBase, dictTrain, settings.get_R_());
+        DictBase.removeUnusedVertex(dictBase, dictTrain, Settings.getInstance().get_R_());
         dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
 
         ModificateEdgeInterface modificateEdge =
-                new ModificateEdgeInterfaceImpl(bigramFrequensy, 15, settings.get_R_());
+                new ModificateEdgeInterfaceImpl(bigramFrequensy, 15, Settings.getInstance().get_R_());
         modificateEdge.modificate(dictBase);
         dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
-
+        //////////////////
         SetVertexWeightInterface setVertexWeightInterface =
                 new SetVertexWeight(unigramFrequensy);
         setVertexWeightInterface.setVertexWeight(dictBase);
         dictBase.printSortedVertex("-" + File.separator + "_4_dictionary_base after setVertexWeight.txt");
 
 
-        //dictBase.saveAs("result" + File.separator + "restaurant.dat");
-
+        //////////////////
         CorrectVertexWeightInterface correctVertexWeight = new CorrectVertexWeight(
-                settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true
+                Settings.getInstance().get_R_(),
+                Settings.getInstance().get_GAMMA_(),
+                Settings.getInstance().get_GAMMA_ATTENUATION_RATE_(),
+                true
         );
         correctVertexWeight.correctVertexWeight(dictBase);
 
-        //dictBase.drawNearVertex("ресторан", 1, "rest2.png");
-
+        //////////////////
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
-                settings.get_R_() + ",gamma=" + settings.get_GAMMA_() + " 3 затухание).txt");
+                Settings.getInstance().get_R_() + ",gamma=" + Settings.getInstance().get_GAMMA_() + " 3 затухание).txt");
         dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base NOUN after correctVertexWeight(r=" +
-                settings.get_R_() + ",gamma=" + settings.get_GAMMA_() + " 3 затухание).txt", PartOfSpeech.NOUN, 100);
-
-        //DictBase.graphviz_graphSaveToFile(DictBase.graphviz_getGraphViz(dictBase), "result\\restaraunt.dot", Format.DOT);
+                Settings.getInstance().get_R_() + ",gamma=" + Settings.getInstance().get_GAMMA_() + " 3 затухание).txt", PartOfSpeech.NOUN, 100);
 
 
         dictBase.calculateWeightOfOutgoingVertex();
@@ -391,6 +168,7 @@ public class Main {
 
         List<ClusterHelper> sublist = new ArrayList<>(clastering);
 
+        /// Удаляем похожие кластера
         List<ClusterHelper> forRemoving = new ArrayList<>();
         for (ClusterHelper helper1 : sublist) {
             for (ClusterHelper helper2 : sublist) {
@@ -437,19 +215,7 @@ public class Main {
         // TODO какой радиус брать инвертированный или нет
         // TODO
 
-//        dictBase.drawNearVertex("ресторан", 0, "restic.png");
-        dictBase.distributeVertexIntoClusters(sublist, 15, settings.get_R_() - 1);
-//        dictBase.saveAs("result" + File.separator + "restaurant2_new.dat");
-
-        //check(dictBase);
-
-//        Vertex testVertex = dictBase.getVertex("отмечать");
-//        Set<Vertex> asdf = dictBase.getInvertMap().keySet();
-//        if(asdf.contains(testVertex))
-//            System.out.println();
-
-//        DictBase testDict = dictBase.getSubDict(testVertex, 1);
-//        testDict.draw("отмечать", Helper.path("result", "test.png"));
+        dictBase.distributeVertexIntoClusters(sublist, 15, Settings.getInstance().get_R_() - 1);
 
 
         prog22(dictBase);
@@ -729,6 +495,216 @@ public class Main {
             if (!checkHelper.str.equals(clusterNoun.get(checkHelper.num).getVertex().getWord().getStr()) ||
                     Math.abs(clusterNoun.get(checkHelper.num).getVertex().getWeight() - checkHelper.w) > 0.00001) {
                 throw new IOException("ЕЕЕЕРРРРРРОООООРРРРР");
+            }
+        }
+    }
+
+    private static void correctingDictionary() throws IOException, DictException, InterruptedException, IllegalAccessException {
+//        settings = new Settings(
+////                0.05, 0.05, 0.15, 3, 0.65, 3
+//                0.6, 0.3, 0.2, 3, 0.65, 3
+//        );
+        DictBase dictBase = CSV_DICT.loadFullDict();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
+            Vertex key = vertexEdgeMapEntry.getKey();
+            stringBuilder.append(key.getWord().getStr() + "\n");
+        }
+        Mystem mystem = new Mystem();
+        MyStemResult analyze = mystem.analyze(stringBuilder.toString());
+        int count = 0;
+        Map<String, String> mapForSwap = new HashMap<>();
+        for (MyStemItem myStemItem : analyze.getItemList()) {
+            String firstAnalyseOrText = myStemItem.getFirstAnalyseOrText();
+            String before = myStemItem.getText();
+            String after = firstAnalyseOrText.replace("\n", "");
+            String result = before + "\t\t" + after;
+            if (!before.equals(" ") && !after.equals(" ")) {
+
+                if (!before.equals(after)) {
+                    mapForSwap.put(before, after);
+                    System.out.println(result);
+                    count++;
+                } else {
+                    // System.out.println(result);
+                }
+            }
+        }
+        System.out.println("\n\n" + "count = " + count);
+
+        // читаем теперь словарь, и меняем все неправильные глаголы К НОРМАЛЬНОЙ БАЗОВОЙ ФОРМЕ
+        String pathDictionary = "data" + File.separator + "connections2.csv";
+        String pathCorrectDictionary = "data" + File.separator + "connections3.csv";
+        List<String> strings = Helper.readFileLineByLine(pathDictionary);
+        String rowWithColumnTitle = strings.get(0);
+        strings.remove(0);
+
+        StringBuilder correctDictionaryBuilder = new StringBuilder();
+        correctDictionaryBuilder.append(rowWithColumnTitle + "\n");
+        for (String string : strings) {
+            String[] split = string.split(";");
+            String id = split[0];
+            String firstPartOfSpeech = split[1];
+            String secondPartOfSpeech = split[2];
+            String relationType = split[3];
+            String firstWord = split[4];
+            String secondWord = split[5];
+
+            String rightFirstWord = mapForSwap.get(firstWord);
+            if (rightFirstWord != null) {
+                firstWord = rightFirstWord;
+            }
+
+            String rightSecondWord = mapForSwap.get(secondWord);
+            if (rightSecondWord != null) {
+                secondWord = rightSecondWord;
+            }
+            String result = id + ";" + firstPartOfSpeech + ";" + secondPartOfSpeech + ";" + relationType +
+                    ";" + firstWord + ";" + secondWord;
+            System.out.println("==========================================");
+            System.out.println(string);
+            System.out.println(result);
+            correctDictionaryBuilder.append(result + "\n");
+        }
+        Helper.saveToFile(correctDictionaryBuilder.toString(), pathCorrectDictionary);
+    }
+
+    private static void perfomanceTest() throws IOException, DictException, InterruptedException, IllegalAccessException {
+
+        Map<Bigram, Integer> bigramFrequensy;
+        Map<Unigram, Integer> unigramFrequensy;
+
+        boolean isNew = false;
+        if (isNew) {
+            Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
+            String data = String.join(" ", reviews.getTexts());
+            Mystem mystem = new Mystem();
+            MyStemResult myStemResult = mystem.analyze(data);
+
+            myStemResult.removeStopWords(StopWords.getInstance());
+            //myStemResult.saveText();
+
+
+            bigramFrequensy = myStemResult.getBigramFrequensy();
+            unigramFrequensy = myStemResult.getUnigramFrequensy();
+        } else {
+
+            Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
+            String data = String.join(" ", reviews.getTexts());
+
+            MyStemOld myStemOldText = new MyStemOld(data, "tt_");
+
+            myStemOldText.saveToFile(MyStemOld.FULL_TEXT);
+            myStemOldText = myStemOldText.removeStopWord();
+            myStemOldText.saveToFile(MyStemOld.TEXT_WITHOUT_STOPWORDS_txt);
+            myStemOldText.saveToFile("-" + File.separator + "text_withoutStopWord.txt");
+
+            myStemOldText.lemmatization();
+            myStemOldText.removeStopWordsFromLemmatization();
+
+
+            bigramFrequensy = myStemOldText.getMyStemResult().getBigramFrequensy();
+            unigramFrequensy = myStemOldText.getMyStemResult().getUnigramFrequensy();
+        }
+
+        Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
+        Helper.printUnigram(unigramFrequensy, "-" + File.separator + "_0_unigram_frequency.txt");
+        Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
+        Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
+//        settings = new Settings(
+//                100 / 100.0, 100 / 100.0, 100 / 100.0, 3, 0.65, 2
+//        );
+        DictBase dictBase_base = CSV_DICT.loadFullDict();
+
+
+        long startTime;
+        for (int a = 0; a <= 100; a = a + 3) {
+            for (int s = 0; s <= 100; s = s + 3) {
+                // for (int d = 0; d <= 100; d = d + 3) {
+                startTime = System.currentTimeMillis();
+//                settings = new Settings(
+//                        a / 100.0, s / 100.0, 57 / 100.0, 3, 0.65, 2
+//                );
+                DictBase dictBase = dictBase_base.copy();
+
+
+                dictBase.removeStopWords();
+
+                DictBase dictTrain = new DictBase();
+                for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
+                    Bigram key = bigramIntegerEntry.getKey();
+                    Edge edge = dictBase.getEdge(dictBase.getVertex(key.getFirst()), dictBase.getVertex(key.getSecond()));
+
+                    if (edge != null)
+                        dictTrain.addPair(key.getFirst(), key.getSecond(), edge.getWeight(), edge.getRelationType());
+                    else
+                        dictTrain.addPair(key.getFirst(), key.getSecond(), Edge.ASS_BASE_WEIGHT, RelationType.ASS);
+                }
+                dictTrain.removeStopWords();
+
+
+                DictBase.removeUnusedVertex(dictBase, dictTrain, Settings.getInstance().get_R_());
+
+                ModificateEdgeInterface modificateEdge =
+                        new ModificateEdgeInterfaceImpl(bigramFrequensy, 10, Settings.getInstance().get_R_());
+                modificateEdge.modificate(dictBase);
+
+
+                SetVertexWeightInterface setVertexWeightInterface =
+                        new SetVertexWeight(unigramFrequensy);
+                setVertexWeightInterface.setVertexWeight(dictBase);
+
+                CorrectVertexWeightInterface correctVertexWeight = new CorrectVertexWeight(
+                        Settings.getInstance().get_R_(),
+                        Settings.getInstance().get_GAMMA_(),
+                        Settings.getInstance().get_GAMMA_ATTENUATION_RATE_(),
+                        true
+                );
+                correctVertexWeight.correctVertexWeight(dictBase);
+
+                dictBase.calculateWeightOfOutgoingVertex();
+
+                List<Vertex> allVertex = new ArrayList<>();
+                for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
+                    allVertex.add(vertexEdgeMapEntry.getKey());
+                }
+                Collections.sort(allVertex, (o1, o2) -> -Double.compare(o1.getWeight(), o2.getWeight()));
+                StringBuilder pretendents = new StringBuilder();
+                int tmpIndex = 0;
+                DecimalFormat decimalFormat = new DecimalFormat("#0.0000000");
+                for (int i = 0; i < 1000; i++) {
+                    Vertex vertex = allVertex.get(i);
+                    pretendents
+                            .append((tmpIndex++) + ") " + vertex.getWord().getStr() + "\t" + decimalFormat.format(vertex.getWeight()))
+                            .append("\n");
+                }
+                Helper.saveToFile(pretendents.toString(), "test" + File.separator +
+                        "A" + String.valueOf((int) Math.round(Settings.getInstance().get_ASS_WEIGHT_() * 100)) + "_" +
+                        "S" + String.valueOf((int) Math.round(Settings.getInstance().get_SYN_WEIGHT_() * 100)) + "_" +
+                        "D" + String.valueOf((int) Math.round(Settings.getInstance().get_DEF_WEIGHT_() * 100)) + ".txt"
+                );
+                double v = Settings.getInstance().get_DEF_WEIGHT_() * 100;
+
+                List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
+                String clusterStr = "";
+                tmpIndex = 0;
+                for (ClusterHelper cluster : clastering) {
+
+                    clusterStr += (tmpIndex++) + ")\t" + cluster.getVertex().getWord().getStr() + "\t" + "w=" +
+                            cluster.getVertex().getWeight() + "\t" + "wO=" + cluster.getVertex().getWeightOutgoingVertex() +
+                            "\t" + "wC=" + cluster.getClusterWeight() + "\n";
+                    if (tmpIndex > 1000)
+                        break;
+                }
+                Helper.saveToFile(clusterStr, "test" + File.separator +
+                        "A" + String.valueOf((int) Math.round(Settings.getInstance().get_ASS_WEIGHT_() * 100)) + "_" +
+                        "S" + String.valueOf((int) Math.round(Settings.getInstance().get_SYN_WEIGHT_() * 100)) + "_" +
+                        "D" + String.valueOf((int) Math.round(Settings.getInstance().get_DEF_WEIGHT_() * 100)) + "_cluster.txt"
+                );
+
+
+                System.out.println("\n====\ntime = " + (System.currentTimeMillis() - startTime) + "\n=====");
+                // }
             }
         }
     }
