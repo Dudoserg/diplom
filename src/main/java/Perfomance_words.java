@@ -3,6 +3,9 @@ import utils.Helper;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -10,6 +13,21 @@ public class Perfomance_words {
     public static void main(String[] args) throws Exception {
         Perfomance_words perfomance = new Perfomance_words();
 
+        ///////////////////////////////////////
+        ///////////////////////////////////////
+        /// неверное название было 56 на 57 поменяли
+//        File dir = new File(perfomance.dirPath + File.separator + "test"); //path указывает на директорию
+//        File[] arrFiles = dir.listFiles();
+//        List<File> lst = Arrays.asList(arrFiles);
+//        lst = lst.stream().filter(file -> file.getName().contains("56")).collect(Collectors.toList());
+//        for (File file : lst) {
+//            String name = file.getName();
+//            name = name.replace("56", "57");
+//            Path source = Paths.get(file.getAbsolutePath());
+//            Files.move(source, source.resolveSibling(name));
+//        }
+//        if(true)
+//            return;
 
         ///////////////////////////////////////
         ///////////////////////////////////////

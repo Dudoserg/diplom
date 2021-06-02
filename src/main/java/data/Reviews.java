@@ -19,6 +19,9 @@ public class Reviews {
     public static final String RU_TRAIN_PATH = System.getProperty("user.dir") + File.separator +
             "data" + File.separator + "semeval" + File.separator +
             "restaurant" + File.separator + "train" + File.separator + "se16_ru_rest_train.xml";
+    public static final String RU_TRAIN_PATH_2= System.getProperty("user.dir") + File.separator +
+            "data" + File.separator + "semeval" + File.separator +
+            "restaurant" + File.separator + "train" + File.separator + "se16_ru_rest_train_task2.xml";
 
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "Review")

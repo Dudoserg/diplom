@@ -1,5 +1,6 @@
 package data;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -13,12 +14,17 @@ import java.util.stream.Collectors;
 @Setter
 
 @JacksonXmlRootElement(localName="Review")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Review {
     @JacksonXmlProperty(isAttribute=true)
     private String rid;
 
     @JacksonXmlElementWrapper(useWrapping=true)
     private List<Sentence> sentences;
+
+    @JacksonXmlElementWrapper(useWrapping=true)
+    @JacksonXmlProperty(localName = "Opinions")
+    private List<Opinion> opinions;
 
 
     public List<String> getSentence(){

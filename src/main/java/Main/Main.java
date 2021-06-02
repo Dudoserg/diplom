@@ -2,6 +2,7 @@ package Main;
 
 import SpellerChecker.Languagetool;
 import csv.CSV_DICT;
+import data.TrainLoader;
 import data.Reviews;
 import dict.*;
 import dict.CorrectVertexWeight.CorrectVertexWeight;
@@ -43,9 +44,9 @@ public class Main {
 //        System.out.println("Поехали?");
 //        System.in.read();
 
-        perfomanceTest();
+//        perfomanceTest();
 //        correctingDictionary();
-//        start();
+        start();
     }
 
     private static void correctingDictionary() throws IOException, DictException, InterruptedException {
@@ -169,88 +170,88 @@ public class Main {
         long startTime;
         for (int a = 0; a <= 100; a = a + 3) {
             for (int s = 0; s <= 100; s = s + 3) {
-                for (int d = 0; d <= 100; d = d + 3) {
-                    startTime = System.currentTimeMillis();
-                    settings = new Settings(
-                            a / 100.0, s / 100.0, 57 / 100.0, 3, 0.65, 2
-                    );
-                    DictBase dictBase = dictBase_base.copy();
+                // for (int d = 0; d <= 100; d = d + 3) {
+                startTime = System.currentTimeMillis();
+                settings = new Settings(
+                        a / 100.0, s / 100.0, 57 / 100.0, 3, 0.65, 2
+                );
+                DictBase dictBase = dictBase_base.copy();
 
 
-                    dictBase.removeStopWords();
+                dictBase.removeStopWords();
 
-                    DictBase dictTrain = new DictBase();
-                    for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
-                        Bigram key = bigramIntegerEntry.getKey();
-                        Edge edge = dictBase.getEdge(dictBase.getVertex(key.getFirst()), dictBase.getVertex(key.getSecond()));
+                DictBase dictTrain = new DictBase();
+                for (Map.Entry<Bigram, Integer> bigramIntegerEntry : bigramFrequensy.entrySet()) {
+                    Bigram key = bigramIntegerEntry.getKey();
+                    Edge edge = dictBase.getEdge(dictBase.getVertex(key.getFirst()), dictBase.getVertex(key.getSecond()));
 
-                        if (edge != null)
-                            dictTrain.addPair(key.getFirst(), key.getSecond(), edge.getWeight(), edge.getRelationType());
-                        else
-                            dictTrain.addPair(key.getFirst(), key.getSecond(), Edge.ASS_BASE_WEIGHT, RelationType.ASS);
-                    }
-                    dictTrain.removeStopWords();
-
-
-                    DictBase.removeUnusedVertex(dictBase, dictTrain, settings.get_R_());
-
-                    ModificateEdgeInterface modificateEdge =
-                            new ModificateEdgeInterfaceImpl(bigramFrequensy, 10, settings.get_R_());
-                    modificateEdge.modificate(dictBase);
-
-
-                    SetVertexWeightInterface setVertexWeightInterface =
-                            new SetVertexWeight(unigramFrequensy);
-                    setVertexWeightInterface.setVertexWeight(dictBase);
-
-                    CorrectVertexWeightInterface correctVertexWeight = new CorrectVertexWeight(
-                            settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true
-                    );
-                    correctVertexWeight.correctVertexWeight(dictBase);
-
-                    dictBase.calculateWeightOfOutgoingVertex();
-
-                    List<Vertex> allVertex = new ArrayList<>();
-                    for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
-                        allVertex.add(vertexEdgeMapEntry.getKey());
-                    }
-                    Collections.sort(allVertex, (o1, o2) -> -Double.compare(o1.getWeight(), o2.getWeight()));
-                    StringBuilder pretendents = new StringBuilder();
-                    int tmpIndex = 0;
-                    DecimalFormat decimalFormat = new DecimalFormat("#0.0000000");
-                    for (int i = 0; i < 1000; i++) {
-                        Vertex vertex = allVertex.get(i);
-                        pretendents
-                                .append((tmpIndex++) + ") " + vertex.getWord().getStr() + "\t" + decimalFormat.format(vertex.getWeight()))
-                                .append("\n");
-                    }
-                    Helper.saveToFile(pretendents.toString(), "test" + File.separator +
-                            "A" + String.valueOf((int) (settings.get_ASS_WEIGHT_() * 100)) + "_" +
-                            "S" + String.valueOf((int) (settings.get_SYN_WEIGHT_() * 100)) + "_" +
-                            "D" + String.valueOf((int) (settings.get_DEF_WEIGHT_() * 100)) + ".txt"
-                    );
-
-
-                    List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
-                    String clusterStr = "";
-                    tmpIndex = 0;
-                    for (ClusterHelper cluster : clastering) {
-
-                        clusterStr += (tmpIndex++) + ")\t" + cluster.getVertex().getWord().getStr() + "\t" + "w=" +
-                                cluster.getVertex().getWeight() + "\t" + "wO=" + cluster.getVertex().getWeightOutgoingVertex() +
-                                "\t" + "wC=" + cluster.getClusterWeight() + "\n";
-                        if (tmpIndex > 1000)
-                            break;
-                    }
-                    Helper.saveToFile(clusterStr, "test" + File.separator +
-                            "A" + String.valueOf((int) (settings.get_ASS_WEIGHT_() * 100)) + "_" +
-                            "S" + String.valueOf((int) (settings.get_SYN_WEIGHT_() * 100)) + "_" +
-                            "D" + String.valueOf((int) (settings.get_DEF_WEIGHT_() * 100)) + "_cluster.txt"
-                    );
-
-
-                    System.out.println("\n====\ntime = " + (System.currentTimeMillis() - startTime) + "\n=====");
+                    if (edge != null)
+                        dictTrain.addPair(key.getFirst(), key.getSecond(), edge.getWeight(), edge.getRelationType());
+                    else
+                        dictTrain.addPair(key.getFirst(), key.getSecond(), Edge.ASS_BASE_WEIGHT, RelationType.ASS);
                 }
+                dictTrain.removeStopWords();
+
+
+                DictBase.removeUnusedVertex(dictBase, dictTrain, settings.get_R_());
+
+                ModificateEdgeInterface modificateEdge =
+                        new ModificateEdgeInterfaceImpl(bigramFrequensy, 10, settings.get_R_());
+                modificateEdge.modificate(dictBase);
+
+
+                SetVertexWeightInterface setVertexWeightInterface =
+                        new SetVertexWeight(unigramFrequensy);
+                setVertexWeightInterface.setVertexWeight(dictBase);
+
+                CorrectVertexWeightInterface correctVertexWeight = new CorrectVertexWeight(
+                        settings.get_R_(), settings.get_GAMMA_(), settings.get_GAMMA_ATTENUATION_RATE_(), true
+                );
+                correctVertexWeight.correctVertexWeight(dictBase);
+
+                dictBase.calculateWeightOfOutgoingVertex();
+
+                List<Vertex> allVertex = new ArrayList<>();
+                for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
+                    allVertex.add(vertexEdgeMapEntry.getKey());
+                }
+                Collections.sort(allVertex, (o1, o2) -> -Double.compare(o1.getWeight(), o2.getWeight()));
+                StringBuilder pretendents = new StringBuilder();
+                int tmpIndex = 0;
+                DecimalFormat decimalFormat = new DecimalFormat("#0.0000000");
+                for (int i = 0; i < 1000; i++) {
+                    Vertex vertex = allVertex.get(i);
+                    pretendents
+                            .append((tmpIndex++) + ") " + vertex.getWord().getStr() + "\t" + decimalFormat.format(vertex.getWeight()))
+                            .append("\n");
+                }
+                Helper.saveToFile(pretendents.toString(), "test" + File.separator +
+                        "A" + String.valueOf((int) Math.round(settings.get_ASS_WEIGHT_() * 100)) + "_" +
+                        "S" + String.valueOf((int) Math.round(settings.get_SYN_WEIGHT_() * 100)) + "_" +
+                        "D" + String.valueOf((int) Math.round(settings.get_DEF_WEIGHT_() * 100)) + ".txt"
+                );
+                double v = settings.get_DEF_WEIGHT_() * 100;
+
+                List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
+                String clusterStr = "";
+                tmpIndex = 0;
+                for (ClusterHelper cluster : clastering) {
+
+                    clusterStr += (tmpIndex++) + ")\t" + cluster.getVertex().getWord().getStr() + "\t" + "w=" +
+                            cluster.getVertex().getWeight() + "\t" + "wO=" + cluster.getVertex().getWeightOutgoingVertex() +
+                            "\t" + "wC=" + cluster.getClusterWeight() + "\n";
+                    if (tmpIndex > 1000)
+                        break;
+                }
+                Helper.saveToFile(clusterStr, "test" + File.separator +
+                        "A" + String.valueOf((int) Math.round(settings.get_ASS_WEIGHT_() * 100)) + "_" +
+                        "S" + String.valueOf((int) Math.round(settings.get_SYN_WEIGHT_() * 100)) + "_" +
+                        "D" + String.valueOf((int) Math.round(settings.get_DEF_WEIGHT_() * 100)) + "_cluster.txt"
+                );
+
+
+                System.out.println("\n====\ntime = " + (System.currentTimeMillis() - startTime) + "\n=====");
+                // }
             }
         }
     }
@@ -259,7 +260,7 @@ public class Main {
     public static void start() throws IOException, DictException, InterruptedException {
 
         settings = new Settings(
-                0.30, 0.12, 0.21, 3, 0.65, 3
+                0.09, 0.09, 0.09, 3, 0.65, 3
 //                0.6, 0.3, 0.2, 3, 0.65, 3
         );
         boolean isNew = false;
@@ -281,8 +282,10 @@ public class Main {
             unigramFrequensy = myStemResult.getUnigramFrequensy();
         } else {
 
-            Reviews reviews = Reviews.readFromFile(Reviews.RU_TRAIN_PATH);
-            String data = String.join(" ", reviews.getTexts());
+            TrainLoader trainLoader = new TrainLoader();
+            List<String> load = trainLoader.load(Helper.path("data", "train"));
+
+            String data = String.join(" ", load);
 
             MyStemOld myStemOldText = new MyStemOld(data, "tt_");
 
@@ -303,8 +306,6 @@ public class Main {
         Helper.printUnigram(unigramFrequensy, "-" + File.separator + "_0_unigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
         Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
-
-
 
 
         DictBase dictBase = CSV_DICT.loadFullDict();
@@ -415,7 +416,7 @@ public class Main {
         }
         //sublist.removeAll(forRemoving);
 
-         tmpIndex = 0;
+        tmpIndex = 0;
         System.out.println("рассматриваемые кластера:");
         for (ClusterHelper claster : sublist) {
             if (claster.getVertex().isNoun())
