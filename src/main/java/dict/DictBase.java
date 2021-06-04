@@ -3,6 +3,7 @@ package dict;
 import Output.Output;
 import Output.VertexAndCluster;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ibm.icu.text.MessagePattern;
 import dict.Edge.Edge;
 import guru.nidi.graphviz.attribute.*;
 import guru.nidi.graphviz.engine.Format;
@@ -14,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import mystem.StopWords;
 import settings.Settings;
+import utils.Helper;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -38,7 +40,7 @@ public class DictBase implements Serializable {
     private Map<Vertex, EdgeMap> map;
 
     private Map<Vertex, EdgeMap> invertMap;
-    private List<Cluster> clusterList;
+    private List<Cluster> clusterList = new ArrayList<>();
 
     public DictBase() {
         this.map = new HashMap<>();
@@ -1524,5 +1526,122 @@ public class DictBase implements Serializable {
             }
         }
         output.saveVertexAndClusters();
+    }
+
+    public static DictBase loadFromFiles(String path) {
+        // TODO check dir path
+        String clusterPath = Helper.path("output", "cluster.txt");
+        String edgePath = Helper.path("output", "edge.txt");
+        String partOfSpeechPath = Helper.path("output", "partOfSpeech.txt");
+        String vertexPath = Helper.path("output", "vertex.txt");
+        String vertexAndClusters = Helper.path("output", "vertexAndClusters.txt");
+
+        DictBase dict = new DictBase();
+        /////////////////////////////////////////////////////////////////////////
+        // read PartOfSpeech
+        List<String> partOfSpeechStringList = Helper.readFileLineByLine(partOfSpeechPath);
+        partOfSpeechStringList.remove(0);
+        List<PartOfSpeech> partOfSpeechList = new ArrayList<>();
+        for (String s : partOfSpeechStringList) {
+            String[] split = s.split(";");
+            int id = Integer.parseInt(split[0]);
+            PartOfSpeech partOfSpeech = PartOfSpeech.getPart(split[1]);
+            partOfSpeechList.add(partOfSpeech);
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // read Vertex
+        List<String>  vertexStringList = Helper.readFileLineByLine(vertexPath);
+        vertexStringList.remove(0);
+        List<Vertex> vertexList = new ArrayList<>();
+        for(int i = 0 ; i < vertexStringList.size(); i++){
+            String row = vertexStringList.get(i);
+            String[] splitArray = row.split(";");
+            int id = Integer.parseInt(splitArray[0]);
+            String str = splitArray[1];
+            Integer partOfSpeechId = "null".equals(splitArray[2]) ? null : Integer.parseInt(splitArray[2]);
+            PartOfSpeech partOfSpeech = partOfSpeechId == null ? null : partOfSpeechList.get(partOfSpeechId);
+            double weight = Double.parseDouble(splitArray[3]);
+            double weightOutgoingVertex = Double.parseDouble(splitArray[4]);
+            boolean flagTrain = Integer.parseInt(splitArray[5]) != 0;
+
+            Vertex vertex = dict.getVertex(str, partOfSpeech);
+            vertex.setFlag_train(flagTrain);
+            vertex.setWeight(weight);
+            vertex.setWeightOutgoingVertex(weightOutgoingVertex);
+
+            vertexList.add(vertex);
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // read edge
+        List<String> edgeStringList = Helper.readFileLineByLine(edgePath);
+        edgeStringList.remove(0);
+        List<Edge> edgeList = new ArrayList<>();
+        for (String s : edgeStringList) {
+            String[] split = s.split(";");
+            int id = Integer.parseInt(split[0]);
+
+            int vertexFromId = Integer.parseInt(split[1]);
+            Vertex vertexFrom = vertexList.get(vertexFromId);
+
+            int vertexToId = Integer.parseInt(split[2]);
+            Vertex vertexTo = vertexList.get(vertexToId);
+
+            double weight = Double.parseDouble(split[3]);
+
+            RelationType relationType = RelationType.valueOf(split[4]);
+
+            /// Добавляем пару в словарь
+            dict.addPair(vertexFrom, vertexTo, weight, relationType);
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // read cluster
+        List<String> clusterStringList = Helper.readFileLineByLine(clusterPath);
+        clusterStringList.remove(0);
+        List<Cluster> clusterList = new ArrayList<>();
+        for (String s : clusterStringList) {
+            String[] split = s.split(";");
+            int id = Integer.parseInt(split[0]);
+
+            int vertexId = Integer.parseInt(split[1]);
+            Vertex vertex = vertexList.get(vertexId);
+
+            double weight = Double.parseDouble(split[2]);
+
+            Cluster cluster = new Cluster(vertex);
+            cluster.setWeight(weight);
+
+            clusterList.add(cluster);
+            dict.getClusterList().add(cluster);
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // read vertexAndClusters
+        List<String> vertexAndClustersStringList = Helper.readFileLineByLine(vertexAndClusters);
+        vertexAndClustersStringList.remove(0);
+        for (String s : vertexAndClustersStringList) {
+            String[] split = s.split(";");
+
+            int id = Integer.parseInt(split[0]);
+
+            int clusterId = Integer.parseInt(split[1]);
+            Cluster cluster = clusterList.get(clusterId);
+
+            int vertexId = Integer.parseInt(split[2]);
+            Vertex vertex = vertexList.get(vertexId);
+
+            int distance = Integer.parseInt(split[3]);
+
+            cluster.getVertexList().add(vertex);
+            vertex.getClusterList().add(new Pair<>(cluster, distance));
+        }
+
+        return dict;
     }
 }

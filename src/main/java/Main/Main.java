@@ -1,7 +1,9 @@
 package Main;
 
+import Ngrams.Ngrams;
+import Ngrams.NgramsInt;
 import SpellerChecker.Languagetool;
-import csv.CSV_DICT;
+import csv.DictionaryLoader;
 import data.TrainLoader;
 import data.Reviews;
 import dict.*;
@@ -43,8 +45,16 @@ public class Main {
         instance.setCountThreads(4);
 
         DictBase dictBase = start();
+
+        Long s = System.currentTimeMillis();
         dictBase.saveToFile("out.txt");
-//        prog22(dictBase);
+        System.out.println(System.currentTimeMillis() - s);
+//
+//        Long s = System.currentTimeMillis();
+//        DictBase dictBase = DictBase.loadFromFiles("");
+//        System.out.println(System.currentTimeMillis() - s);
+
+        prog22(dictBase);
         System.out.print("");
     }
 
@@ -62,17 +72,20 @@ public class Main {
 
         if (isNew) {
             TrainLoader trainLoader = new TrainLoader();
+
             List<String> load = trainLoader.load(Helper.path("data", "train"));
 
             String data = String.join(" ", load);
-            Mystem mystem = new Mystem();
-            MyStemResult myStemResult = mystem.analyze(data);
 
+            Mystem mystem = new Mystem();
+
+            MyStemResult myStemResult = mystem.analyze(data);
             myStemResult.removeStopWords(StopWords.getInstance());
 
 
-            bigramFrequensy = myStemResult.getBigramFrequensy();
-            unigramFrequensy = myStemResult.getUnigramFrequensy();
+            NgramsInt ngrams = new Ngrams();
+            bigramFrequensy = ngrams.getBigramFrequensy(myStemResult.getItemList());
+            unigramFrequensy = ngrams.getUnigramFrequensy(myStemResult.getItemList());
         } else {
 
             TrainLoader trainLoader = new TrainLoader();
@@ -90,9 +103,9 @@ public class Main {
             myStemOldText.lemmatization();
             myStemOldText.removeStopWordsFromLemmatization();
 
-
-            bigramFrequensy = myStemOldText.getMyStemResult().getBigramFrequensy();
-            unigramFrequensy = myStemOldText.getMyStemResult().getUnigramFrequensy();
+            NgramsInt ngrams = new Ngrams();
+            bigramFrequensy = ngrams.getBigramFrequensy(myStemOldText.getMyStemResult().getItemList());
+            unigramFrequensy = ngrams.getUnigramFrequensy(myStemOldText.getMyStemResult().getItemList());
         }
 
         Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
@@ -101,7 +114,7 @@ public class Main {
         Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
 
 
-        DictBase dictBase = CSV_DICT.loadFullDict();
+        DictBase dictBase = DictionaryLoader.loadFullDict();
         dictBase.removeStopWords();
 
         DictBase dictTrain = new DictBase();
@@ -115,6 +128,7 @@ public class Main {
                 dictTrain.addPair(key.getFirst(), key.getSecond(), Edge.ASS_BASE_WEIGHT, RelationType.ASS);
         }
         dictTrain.removeStopWords();
+
         dictTrain.printSortedEdge("-" + File.separator + "_1_dictionary_train.txt");
         dictBase.printSortedEdge("-" + File.separator + "_1_dictionary_base.txt");
         System.out.println("\t\t\tdone");
@@ -496,7 +510,7 @@ public class Main {
 ////                0.05, 0.05, 0.15, 3, 0.65, 3
 //                0.6, 0.3, 0.2, 3, 0.65, 3
 //        );
-        DictBase dictBase = CSV_DICT.loadFullDict();
+        DictBase dictBase = DictionaryLoader.loadFullDict();
         StringBuilder stringBuilder = new StringBuilder();
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
             Vertex key = vertexEdgeMapEntry.getKey();
@@ -606,7 +620,7 @@ public class Main {
 //        settings = new Settings(
 //                100 / 100.0, 100 / 100.0, 100 / 100.0, 3, 0.65, 2
 //        );
-        DictBase dictBase_base = CSV_DICT.loadFullDict();
+        DictBase dictBase_base = DictionaryLoader.loadFullDict();
 
 
         long startTime;

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -11,7 +12,7 @@ import java.util.List;
 public class Cluster implements Serializable {
     private Vertex vertex;
     private double weight;
-    private List<Vertex> vertexList;
+    private List<Vertex> vertexList = new ArrayList<>();
 
 
     public Cluster(Vertex vertex) {

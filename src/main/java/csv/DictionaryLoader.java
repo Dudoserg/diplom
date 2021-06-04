@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class CSV_DICT {
+public class DictionaryLoader {
 
     public static final String DICTIONARY_PATH = "data" + File.separator + "connections3.csv";
 

@@ -182,7 +182,7 @@ public class Output {
             );
         }
         String text = result.stream().collect(Collectors.joining("\n"));
-        text = "id;clusterId;vertexId\n" + text;
+        text = "id;clusterId;vertexId;distance\n" + text;
 
         Helper.saveToFile(text, Helper.path("output", "vertexAndClusters.txt"));
     }
