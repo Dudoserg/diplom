@@ -34,6 +34,8 @@ public class Languagetool {
 
 
     public String getCorrect(String text) throws IOException, InterruptedException {
+        long startTime = System.currentTimeMillis();
+        System.out.print("correct text...");
         String result = "";
        /* try {
             this.saveToFile();
@@ -100,11 +102,10 @@ public class Languagetool {
                 result += text.substring(prevPos, match.getFromPos());
                 result += match.getSuggestedReplacements().get(0);
                 prevPos = match.getToPos();
-//            }
-
         }
         result += text.substring(prevPos, text.length());
 
+        System.out.println("\t\tdone for " + (System.currentTimeMillis() - startTime) +" ms.");
         return result;
     }
 

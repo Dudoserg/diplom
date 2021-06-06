@@ -96,17 +96,12 @@ public class MyStemOld {
                     "--format json -c -l -s -i ";
             Process p = Runtime.getRuntime()
                     .exec(command);
-            System.out.println(command);
             p.waitFor();
-            System.out.println("1");
             String json = Helper.readFile(addId(MYSTEM_RESULT_json));
-            System.out.println("2");
 
             Helper.saveToFile(json, addId("-" + File.separator + "mystemResult.json"));
-            System.out.println("3");
 
             ObjectMapper objectMapper = new ObjectMapper();
-            System.out.println("4");
 
             // читаем результаты работы лемманизатора MyStem
             System.out.println("path = " + addId(MYSTEM_RESULT_json));

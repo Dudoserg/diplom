@@ -1,15 +1,13 @@
 package dict.CorrectVertexWeight;
 
-import Main.Main;
+import dict.CorrectVertexWeight.threads.CorrectVertexWeight_ThPojo;
+import dict.CorrectVertexWeight.threads.CorrectVertexWeight_ThRun;
 import dict.DictBase;
 import dict.DictException;
 import dict.Edge.Edge;
 import dict.EdgeMap;
 import dict.Vertex;
 import javafx.util.Pair;
-import dict.CorrectVertexWeight.threads.Th;
-import dict.CorrectVertexWeight.threads.ThRun;
-import settings.Settings;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,13 +21,13 @@ public class CorrectVertexWeight implements CorrectVertexWeightInterface {
     private final int radius;
     private final double gamma;
     private final int gamma_degree;
-    private final boolean thread;
+    private final int countThreads;
 
-    public CorrectVertexWeight(int radius, double gamma, int gamma_degree, boolean thread) {
+    public CorrectVertexWeight(int radius, double gamma, int gamma_degree, int countThreads) {
         this.radius = radius;
         this.gamma = gamma;
         this.gamma_degree = gamma_degree;
-        this.thread = thread;
+        this.countThreads = countThreads;
     }
 
     @Override
@@ -54,9 +52,9 @@ public class CorrectVertexWeight implements CorrectVertexWeightInterface {
             }
         }
         long startTime = System.currentTimeMillis();
-        if (thread) {
+        if (countThreads > 0) {
             System.out.print("correctVertexWeightThread ...\t\t");
-            correctVertexWeightThread(dictBase, radius, gamma, function);
+            correctVertexWeightThread(dictBase, radius, gamma, function, countThreads);
         } else {
             System.out.print("correctVertexWeight ...\t\t");
             correctVertexWeight(dictBase, radius, gamma, function);
@@ -103,19 +101,19 @@ public class CorrectVertexWeight implements CorrectVertexWeightInterface {
     }
 
     @Deprecated
-    private void correctVertexWeightThread(DictBase dictBase, int radius, double gamma, Function<Double, Double> gammaFunction)
+    private void correctVertexWeightThread(DictBase dictBase, int radius, double gamma, Function<Double, Double> gammaFunction,
+                                           int countThreads)
             throws InterruptedException, IOException, IllegalAccessException {
         double weightAdd = 0;
         int counter = 0;
 
-        List<Th> threads = new ArrayList<>();
-        int countThreads = Settings.getInstance().getCountThreads();
+        List<CorrectVertexWeight_ThPojo> threads = new ArrayList<>();
         int numThread = 0;
         // создаем треды
         for (int i = 0; i < countThreads; i++) {
-            Th th = new Th();
-            th.thread = new Thread(new ThRun(th, this, dictBase, radius, gamma, gammaFunction));
-            threads.add(th);
+            CorrectVertexWeight_ThPojo correctVertexWeightThPojo = new CorrectVertexWeight_ThPojo();
+            correctVertexWeightThPojo.thread = new Thread(new CorrectVertexWeight_ThRun(correctVertexWeightThPojo, this, dictBase, radius, gamma, gammaFunction));
+            threads.add(correctVertexWeightThPojo);
         }
         // помещаем в них обрабатываемые вершины
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
@@ -125,16 +123,16 @@ public class CorrectVertexWeight implements CorrectVertexWeightInterface {
                 numThread = 0;
         }
 
-        for (Th thread : threads) {
+        for (CorrectVertexWeight_ThPojo thread : threads) {
             thread.thread.start();
         }
-        for (Th thread : threads) {
+        for (CorrectVertexWeight_ThPojo thread : threads) {
             thread.thread.join();
         }
 
         Map<Vertex, Double> tmpWeight = new HashMap<>();
-        for (Th th : threads) {
-            for (Map.Entry<Vertex, Double> vertexDoubleEntry : th.tmpWeight.entrySet()) {
+        for (CorrectVertexWeight_ThPojo correctVertexWeightThPojo : threads) {
+            for (Map.Entry<Vertex, Double> vertexDoubleEntry : correctVertexWeightThPojo.tmpWeight.entrySet()) {
                 Vertex v = vertexDoubleEntry.getKey();
                 Double w = vertexDoubleEntry.getValue();
                 tmpWeight.put(v, tmpWeight.get(v) == null ? w : tmpWeight.get(v) + w);

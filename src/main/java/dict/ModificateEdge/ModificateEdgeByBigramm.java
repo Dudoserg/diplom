@@ -6,13 +6,13 @@ import utils.Bigram;
 
 import java.util.Map;
 
-public class ModificateEdgeInterfaceImpl implements ModificateEdgeInterface {
+public class ModificateEdgeByBigramm implements ModificateEdgeInterface {
 
     private final Map<Bigram, Integer> bigramFrequensy;
     private final int treshold;
     private final int radius;
 
-    public ModificateEdgeInterfaceImpl(Map<Bigram, Integer> bigramFrequensy, int treshold, int radius) {
+    public ModificateEdgeByBigramm(Map<Bigram, Integer> bigramFrequensy, int treshold, int radius) {
         this.bigramFrequensy = bigramFrequensy;
         this.treshold = treshold;
         this.radius = radius;

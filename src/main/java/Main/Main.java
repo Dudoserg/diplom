@@ -11,16 +11,17 @@ import dict.CorrectVertexWeight.CorrectVertexWeight;
 import dict.CorrectVertexWeight.CorrectVertexWeightInterface;
 import dict.Edge.Edge;
 import dict.ModificateEdge.ModificateEdgeInterface;
-import dict.ModificateEdge.ModificateEdgeInterfaceImpl;
+import dict.ModificateEdge.ModificateEdgeByBigramm;
 import dict.SetVertexWeight.SetVertexWeight;
 import dict.SetVertexWeight.SetVertexWeightInterface;
-import javafx.util.Pair;
+
 import mystem.*;
 import prog2.Sentence;
 import prog2.WordOfSentence;
 import settings.Settings;
 import utils.Bigram;
 import utils.Helper;
+import utils.Pair;
 import utils.Unigram;
 
 import java.io.File;
@@ -42,7 +43,7 @@ public class Main {
         instance.set_GAMMA_(0.65);
         instance.set_R_(3);
         instance.set_GAMMA_ATTENUATION_RATE_(3);
-        instance.setCountThreads(4);
+        instance.setCountThreads(Runtime.getRuntime().availableProcessors());
 
         DictBase dictBase = start();
 
@@ -108,10 +109,10 @@ public class Main {
             unigramFrequensy = ngrams.getUnigramFrequensy(myStemOldText.getMyStemResult().getItemList());
         }
 
-        Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
-        Helper.printUnigram(unigramFrequensy, "-" + File.separator + "_0_unigram_frequency.txt");
-        Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
-        Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
+        //Helper.printUnigram(unigramFrequensy, "result" + File.separator + "unigram_frequency.txt");
+        //Helper.printUnigram(unigramFrequensy, "-" + File.separator + "_0_unigram_frequency.txt");
+        //Helper.printBigram(bigramFrequensy, "result" + File.separator + "bigram_frequency.txt");
+        //Helper.printBigram(bigramFrequensy, "-" + File.separator + "_0_bigram_frequency.txt");
 
 
         DictBase dictBase = DictionaryLoader.loadFullDict();
@@ -129,42 +130,46 @@ public class Main {
         }
         dictTrain.removeStopWords();
 
-        dictTrain.printSortedEdge("-" + File.separator + "_1_dictionary_train.txt");
-        dictBase.printSortedEdge("-" + File.separator + "_1_dictionary_base.txt");
-        System.out.println("\t\t\tdone");
+        //dictTrain.printSortedEdge("-" + File.separator + "_1_dictionary_train.txt");
+        //dictBase.printSortedEdge("-" + File.separator + "_1_dictionary_base.txt");
+        //System.out.println("\t\t\tdone");
 
         calculate_countEdgeByTypes(dictBase);
 
 
         DictBase.removeUnusedVertex(dictBase, dictTrain, Settings.getInstance().get_R_());
-        dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
+        //dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
+
+
 
         ModificateEdgeInterface modificateEdge =
-                new ModificateEdgeInterfaceImpl(bigramFrequensy, 15, Settings.getInstance().get_R_());
+                new ModificateEdgeByBigramm(bigramFrequensy, 15, Settings.getInstance().get_R_());
         modificateEdge.modificate(dictBase);
-        dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
+        //dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
         //////////////////
         SetVertexWeightInterface setVertexWeightInterface =
                 new SetVertexWeight(unigramFrequensy);
         setVertexWeightInterface.setVertexWeight(dictBase);
-        dictBase.printSortedVertex("-" + File.separator + "_4_dictionary_base after setVertexWeight.txt");
+        //dictBase.printSortedVertex("-" + File.separator + "_4_dictionary_base after setVertexWeight.txt");
 
 
         //////////////////
+        long l = System.currentTimeMillis();
         CorrectVertexWeightInterface correctVertexWeight = new CorrectVertexWeight(
                 Settings.getInstance().get_R_(),
                 Settings.getInstance().get_GAMMA_(),
                 Settings.getInstance().get_GAMMA_ATTENUATION_RATE_(),
-                true
+                Settings.getInstance().getCountThreads()
         );
         correctVertexWeight.correctVertexWeight(dictBase);
+        System.out.println("THTIME = " + (System.currentTimeMillis() - l));
 
         //////////////////
-        dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
-                Settings.getInstance().get_R_() + ",gamma=" + Settings.getInstance().get_GAMMA_() + " 3 затухание).txt");
-        dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base NOUN after correctVertexWeight(r=" +
-                Settings.getInstance().get_R_() + ",gamma=" + Settings.getInstance().get_GAMMA_() + " 3 затухание).txt", PartOfSpeech.NOUN, 100);
+        //dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base after correctVertexWeight(r=" +
+        //        Settings.getInstance().get_R_() + ",gamma=" + Settings.getInstance().get_GAMMA_() + " 3 затухание).txt");
+        //dictBase.printSortedVertex("-" + File.separator + "_5_dictionary_base NOUN after correctVertexWeight(r=" +
+        //        Settings.getInstance().get_R_() + ",gamma=" + Settings.getInstance().get_GAMMA_() + " 3 затухание).txt", PartOfSpeech.NOUN, 100);
 
         //////////////////
         dictBase.calculateWeightOfOutgoingVertex();
@@ -290,10 +295,10 @@ public class Main {
                 // слово может относиться к нескольким кластерам, перебираем каждый из кластеров
                 for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getShortest()) {
                     wordOfSentence.addCluster(
-                            clusterIntegerPair.getKey(),
-                            clusterIntegerPair.getValue()
+                            clusterIntegerPair.getFirst(),
+                            clusterIntegerPair.getSecond()
                     );
-                    System.out.println(clusterIntegerPair.getKey().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getValue());
+                    System.out.println(clusterIntegerPair.getFirst().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getSecond());
                     System.out.print("");
                 }
 
@@ -651,8 +656,11 @@ public class Main {
 
                 DictBase.removeUnusedVertex(dictBase, dictTrain, Settings.getInstance().get_R_());
 
+
+
+
                 ModificateEdgeInterface modificateEdge =
-                        new ModificateEdgeInterfaceImpl(bigramFrequensy, 10, Settings.getInstance().get_R_());
+                        new ModificateEdgeByBigramm(bigramFrequensy, 10, Settings.getInstance().get_R_());
                 modificateEdge.modificate(dictBase);
 
 
@@ -664,7 +672,7 @@ public class Main {
                         Settings.getInstance().get_R_(),
                         Settings.getInstance().get_GAMMA_(),
                         Settings.getInstance().get_GAMMA_ATTENUATION_RATE_(),
-                        true
+                        Settings.getInstance().getCountThreads()
                 );
                 correctVertexWeight.correctVertexWeight(dictBase);
 

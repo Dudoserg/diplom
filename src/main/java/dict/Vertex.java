@@ -1,8 +1,8 @@
 package dict;
 
-import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
+import utils.Pair;
 
 import java.io.Serializable;
 import java.util.*;
@@ -79,11 +79,11 @@ public class Vertex implements Serializable {
         if(this.shortest == null){
             this.shortest = new ArrayList<>();
             for (Pair<Cluster, Integer> clusterIntegerPair : this.clusterList) {
-                Cluster key = clusterIntegerPair.getKey();
-                Integer value = clusterIntegerPair.getValue();
+                Cluster key = clusterIntegerPair.getFirst();
+                Integer value = clusterIntegerPair.getSecond();
 
                 Pair<Cluster, Integer> resultContain = shortest.stream()
-                        .filter(r -> r.getKey().getVertex().equals(key.getVertex()))
+                        .filter(r -> r.getFirst().getVertex().equals(key.getVertex()))
                         .findFirst()
                         .orElse(null);
 
@@ -92,7 +92,7 @@ public class Vertex implements Serializable {
                 }
             }
         }
-        shortest.sort((o1, o2) -> Integer.compare(o1.getValue(), o2.getValue()));
+        shortest.sort((o1, o2) -> Integer.compare(o1.getSecond(), o2.getSecond()));
         return shortest;
     }
 

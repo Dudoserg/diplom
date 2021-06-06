@@ -8,11 +8,12 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import dict.*;
-import javafx.util.Pair;
+
 import mystem.MyStemOld;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
 import settings.Settings;
+import utils.Pair;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -163,7 +164,7 @@ public class DictionaryLoader {
             threadList.add(new Thread(() -> {
                 List<CSV_CONNECTIONS> connections = null;
                 try {
-                    connections = new CsvToBeanBuilder(new FileReader(row.getValue()))
+                    connections = new CsvToBeanBuilder(new FileReader(row.getSecond()))
                             .withSeparator(';')
                             .withType(CSV_CONNECTIONS.class)
                             .build()
@@ -172,7 +173,7 @@ public class DictionaryLoader {
                     e.printStackTrace();
                 }
 
-                DictBase dict = row.getKey();
+                DictBase dict = row.getFirst();
                 int j = 2;
                 for (CSV_CONNECTIONS con : connections) {
 
