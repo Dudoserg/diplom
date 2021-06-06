@@ -10,12 +10,13 @@ import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Node;
-import javafx.util.Pair;
+
 import lombok.Getter;
 import lombok.Setter;
 import mystem.StopWords;
 import settings.Settings;
 import utils.Helper;
+import utils.Pair;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -1093,7 +1094,7 @@ public class DictBase implements Serializable {
         }
         List<Pair<Vertex, Double>> collect = tmpMap.entrySet().stream()
                 .map(v -> new Pair<Vertex, Double>(v.getKey(), v.getValue()))
-                .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
+                .sorted((o1, o2) -> -Double.compare(o1.getSecond(), o2.getSecond()))
                 .collect(Collectors.toList());
     }
 
@@ -1520,8 +1521,8 @@ public class DictBase implements Serializable {
             Vertex vertex = vertexEdgeMapEntry.getKey();
             List<Pair<Cluster, Integer>> clusterList = vertex.getClusterList();
             for (Pair<Cluster, Integer> clusterIntegerPair : clusterList) {
-                Integer distance = clusterIntegerPair.getValue();
-                Cluster cluster = clusterIntegerPair.getKey();
+                Integer distance = clusterIntegerPair.getSecond();
+                Cluster cluster = clusterIntegerPair.getFirst();
                 output.getVertexAndClustersList().add(new VertexAndCluster(vertex, cluster, distance));
             }
         }

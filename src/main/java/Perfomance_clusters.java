@@ -1,5 +1,6 @@
-import javafx.util.Pair;
+
 import utils.Helper;
+import utils.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,13 +49,13 @@ public class Perfomance_clusters {
             for (Map.Entry<String, Double> elem : results.entrySet()) {
                 list.add(new Pair<>(elem.getKey(), elem.getValue()));
             }
-            Collections.sort(list, (first, second) -> -Double.compare(first.getValue(), second.getValue()));
+            Collections.sort(list, (first, second) -> -Double.compare(first.getSecond(), second.getSecond()));
 
             for (Pair<String, Double> stringDoublePair : list) {
-                System.out.println(stringDoublePair.getKey() + "\t\t" + stringDoublePair.getValue());
+                System.out.println(stringDoublePair.getFirst() + "\t\t" + stringDoublePair.getSecond());
             }
             String collect = list.stream()
-                    .map(stringDoublePair -> stringDoublePair.getKey() + "\t" + stringDoublePair.getValue())
+                    .map(stringDoublePair -> stringDoublePair.getFirst() + "\t" + stringDoublePair.getSecond())
                     .collect(Collectors.joining("\n"));
             Helper.saveToFile(collect, perfomanceClusters.dirPath + File.separator + "rating_cluster.txt");
             System.out.println();

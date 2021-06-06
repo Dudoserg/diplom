@@ -4,12 +4,13 @@ import com.oracle.truffle.api.ArrayUtils;
 import dict.Cluster;
 import dict.DictBase;
 import dict.Vertex;
-import javafx.util.Pair;
+
 import mystem.MyStemOld;
 import org.checkerframework.checker.units.qual.C;
 import prog2.Sentence;
 import prog2.WordOfSentence;
 import utils.Helper;
+import utils.Pair;
 
 import java.io.IOException;
 import java.util.*;
@@ -70,10 +71,10 @@ public class Main2 {
                 // слово может относиться к нескольким кластерам, перебираем каждый из кластеров
                 for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getShortest()) {
                     wordOfSentence.addCluster(
-                            clusterIntegerPair.getKey(),
-                            clusterIntegerPair.getValue()
+                            clusterIntegerPair.getFirst(),
+                            clusterIntegerPair.getSecond()
                     );
-                    System.out.println(clusterIntegerPair.getKey().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getValue());
+                    System.out.println(clusterIntegerPair.getFirst().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getSecond());
                     System.out.print("");
                 }
 
@@ -138,19 +139,18 @@ public class Main2 {
                         + elem.getValue());
             }
             System.out.println();
-            sentence.setResult(result);
+
+            sentence.setResultMap(result);
             analyzerRezult.addSentence(sentence);
         }
 
         List<Double> values = new ArrayList<>();
         for (Sentence sentence : analyzerRezult.getSentenceList()) {
-            int i = 0;
-            for (Map.Entry<Cluster, Double> clusterDoubleEntry : sentence.getResult().entrySet()) {
-                values.add(clusterDoubleEntry.getValue());
-                i++;
-                if (i >= 5)
-                    break;
-                ;
+            for(int i = 0 ; i < 5; i++){
+                Pair<Cluster, Double> clusterDoublePair = sentence.getResult().get(i);
+                Cluster first = clusterDoublePair.getFirst();
+                Double second = clusterDoublePair.getSecond();
+                values.add(second);
             }
         }
         Collections.sort(values);

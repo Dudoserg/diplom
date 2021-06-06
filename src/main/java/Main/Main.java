@@ -403,7 +403,7 @@ public class Main {
                 /////////////////////
                 System.out.println(vertex.getWord().getStr());
                 for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getShortest()) {
-                    System.out.println("\t" + clusterIntegerPair.getKey().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getValue());
+                    System.out.println("\t" + clusterIntegerPair.getFirst().getVertex().getWord().getStr() + "\t" + clusterIntegerPair.getSecond());
                 }
                 System.out.println();
                 /////////////////////
@@ -412,8 +412,8 @@ public class Main {
                 // все кластеры, в которые входит данное слово из графа, помещаем в объект-слово
                 if (vertex != null && vertex.getShortest() != null && vertex.getShortest().size() > 0) {
                     for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getShortest()) {
-                        Cluster cluster = clusterIntegerPair.getKey();
-                        Integer value = clusterIntegerPair.getValue();
+                        Cluster cluster = clusterIntegerPair.getFirst();
+                        Integer value = clusterIntegerPair.getSecond();
                         word.getFunc().put(cluster, value);
                     }
                 }

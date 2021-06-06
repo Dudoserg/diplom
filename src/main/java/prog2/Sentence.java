@@ -22,4 +22,13 @@ public class Sentence {
         processedText += elem + " ";
     }
 
+    public void setResultMap(Map<Cluster, Double> result) {
+        this.result = new ArrayList<>();
+        for (Map.Entry<Cluster, Double> clusterDoubleEntry : result.entrySet()) {
+            Double value = clusterDoubleEntry.getValue();
+            Cluster key = clusterDoubleEntry.getKey();
+            this.result.add(new Pair<>(key, value));
+        }
+        this.result.sort((o1, o2) -> -Double.compare(o1.getSecond(), o2.getSecond()));
+    }
 }

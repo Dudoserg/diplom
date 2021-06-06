@@ -7,7 +7,8 @@ import dict.DictException;
 import dict.Edge.Edge;
 import dict.EdgeMap;
 import dict.Vertex;
-import javafx.util.Pair;
+import utils.Pair;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -82,10 +83,10 @@ public class CorrectVertexWeight implements CorrectVertexWeightInterface {
 
         List<Pair<Vertex, Double>> collect = tmpWeight.entrySet().stream()
                 .map(v -> new Pair<>(v.getKey(), v.getValue()))
-                .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
+                .sorted((o1, o2) -> -Double.compare(o1.getSecond(), o2.getSecond()))
                 .collect(Collectors.toList());
         collect.forEach(v -> {
-            System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
+            System.out.println(v.getFirst().getWord().getStr() + "\t\t" + v.getSecond());
         });
         for (Map.Entry<Vertex, EdgeMap> vertexEdgeMapEntry : dictBase.getInvertMap().entrySet()) {
             Vertex v = vertexEdgeMapEntry.getKey();
@@ -153,7 +154,7 @@ public class CorrectVertexWeight implements CorrectVertexWeightInterface {
 
         List<Pair<Vertex, Double>> collect = tmpWeight.entrySet().stream()
                 .map(v -> new Pair<>(v.getKey(), v.getValue()))
-                .sorted((o1, o2) -> -Double.compare(o1.getValue(), o2.getValue()))
+                .sorted((o1, o2) -> -Double.compare(o1.getSecond(), o2.getSecond()))
                 .collect(Collectors.toList());
 //        collect.forEach(v -> {
 //            System.out.println(v.getKey().getWord().getStr() + "\t\t" + v.getValue());
