@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class Languagetool {
+public class Languagetool implements SpellCheckingInterface{
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Languagetool languagetool = new Languagetool();
@@ -32,8 +32,7 @@ public class Languagetool {
         pathToFile = PATH_FOLDER + File.separator + id + ".txt";
     }
 
-
-    public String getCorrect(String text) throws IOException, InterruptedException {
+    public String getCorrect(String text) {
         long startTime = System.currentTimeMillis();
         System.out.print("correct text...");
         String result = "";
@@ -90,7 +89,13 @@ public class Languagetool {
         //langTool.activateLanguageModelRules(new File("/data/google-ngram-data"));
         int prevPos = 0;
         int currentPos = 0;
-        List<RuleMatch> matches = langTool.check(text);
+        List<RuleMatch> matches = null;
+        try {
+            matches = langTool.check(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
         for (RuleMatch match : matches) {
 //            System.out.println("Potential error at characters " +
 //                    match.getFromPos() + "-" + match.getToPos() + ": " +

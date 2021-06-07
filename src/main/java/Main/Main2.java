@@ -1,12 +1,16 @@
 package Main;
 
-import com.oracle.truffle.api.ArrayUtils;
+import Main.Analyzer.AnalyzerRezult;
+import Main.Analyzer.CustomMath;
+import Main.Analyzer.SentiAnalyze;
+import SpellerChecker.Languagetool;
+import SpellerChecker.SpellCheckingInterface;
 import dict.Cluster;
 import dict.DictBase;
+import dict.DictException;
 import dict.Vertex;
 
 import mystem.MyStemOld;
-import org.checkerframework.checker.units.qual.C;
 import prog2.Sentence;
 import prog2.WordOfSentence;
 import utils.Helper;
@@ -17,11 +21,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main2 {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws DictException, IOException {
         Long s = System.currentTimeMillis();
         System.out.print("read dictionary...\t\t");
         DictBase dictBase = DictBase.loadFromFiles("");
         System.out.println("done for " + (System.currentTimeMillis() - s) + " ms.");
+
+
+//        String name = "ресторан";
+//        Vertex ресторан = dictBase.getVertex(name);
+//        {
+//            DictBase subdict = dictBase.getInvertSubDict(ресторан, 0);
+//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "rest1.png");
+//        }
+//        {
+//            DictBase subdict = dictBase.getInvertSubDict(ресторан, 1);
+//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "rest2.png");
+//        }
+
         try {
             prog22(dictBase);
         } catch (IOException | InterruptedException e) {
@@ -33,8 +50,8 @@ public class Main2 {
         long startTime = System.currentTimeMillis();
         String s = Helper.readFile(Helper.path("data", "semeval", "restaurant", "test", "test.txt"));
 
-        //Languagetool languagetool = new Languagetool();
-        //s = languagetool.getCorrect(s);
+        SpellCheckingInterface spellCheker = new Languagetool();
+        s = spellCheker.getCorrect(s);
         System.out.println(s);
 
         MyStemOld myStemOld = new MyStemOld(s, UUID.randomUUID().toString());
@@ -146,7 +163,7 @@ public class Main2 {
 
         List<Double> values = new ArrayList<>();
         for (Sentence sentence : analyzerRezult.getSentenceList()) {
-            for(int i = 0 ; i < 5; i++){
+            for (int i = 0; i < 1; i++) {
                 Pair<Cluster, Double> clusterDoublePair = sentence.getResult().get(i);
                 Cluster first = clusterDoublePair.getFirst();
                 Double second = clusterDoublePair.getSecond();
@@ -156,14 +173,32 @@ public class Main2 {
         Collections.sort(values);
         double maxValue = values.stream().mapToDouble(value -> value.doubleValue()).max().orElse(0.0);
 
-        values = values.stream()
-                .filter(aDouble -> Math.abs(aDouble) > maxValue * 0.06 )
-                .collect(Collectors.toList());
+//        values = values.stream()
+//                .filter(aDouble -> Math.abs(aDouble) > maxValue * 0.06)
+//                .collect(Collectors.toList());
         double median = CustomMath.FindMedian(values.stream().mapToDouble(Double::doubleValue).toArray());
+        median *= 0.6;
         double geometricAverage = CustomMath.FindGeometricAverage(values.stream().mapToDouble(Double::doubleValue).toArray());
 
+        SentiAnalyze sentiAnalyze = new SentiAnalyze();
+        Map<String, Double> results = new HashMap<>();
         for (Sentence sentence : analyzerRezult.getSentenceList()) {
+            Pair<Cluster, Double> pair = sentence.getResult().get(0);
+            Double value = pair.getSecond();
+            if (value < median)
+                continue;
+            Double analyzeValue = sentiAnalyze.analyze(sentence);
+            sentence.setSentiAnalyzeResult(analyzeValue);
+
+            String clusterStr = pair.getFirst().getVertex().getWord().getStr();
+            results.put(clusterStr, results.get(clusterStr) == null ? analyzeValue : results.get(clusterStr) + analyzeValue);
         }
+
+        List<Pair<String, Double>> collect = results.entrySet().stream().map(e -> new Pair<String, Double>(e.getKey(), e.getValue()))
+                .sorted((o1, o2) -> -Double.compare(o1.getSecond(), o2.getSecond()))
+                .filter(e -> Math.abs(e.getSecond()) > 0.5)
+                .collect(Collectors.toList());
+        collect.forEach(e -> System.out.println(e.getFirst() + "\t=\t" + e.getSecond()));
 
         System.out.println("prog 22 time = " + (System.currentTimeMillis() - startTime) + " ms.");
 

@@ -15,8 +15,8 @@ public class Sentence {
 
     private List<WordOfSentence> wordOfSentenceList = new ArrayList<>();
     private String processedText = "";
-    List <Pair<Cluster, Double>> result;
-
+    private List <Pair<Cluster, Double>> result;
+    private Double sentiAnalyzeResult;
 
     public void addElemToProcessedText(String elem) {
         processedText += elem + " ";

@@ -50,12 +50,12 @@ public class Main {
         Long s = System.currentTimeMillis();
         dictBase.saveToFile("out.txt");
         System.out.println(System.currentTimeMillis() - s);
-//
+
 //        Long s = System.currentTimeMillis();
 //        DictBase dictBase = DictBase.loadFromFiles("");
 //        System.out.println(System.currentTimeMillis() - s);
 
-        prog22(dictBase);
+//        prog22(dictBase);
         System.out.print("");
     }
 
