@@ -2,6 +2,7 @@ package Main;
 
 import Main.Analyzer.AnalyzerRezult;
 import Main.Analyzer.CustomMath;
+import Main.Analyzer.Senti.SentiLoader;
 import Main.Analyzer.SentiAnalyze;
 import Main.Analyzer.SentiResult.*;
 import SpellerChecker.Languagetool;
@@ -31,12 +32,12 @@ public class Main2 {
         System.out.println("done for " + (System.currentTimeMillis() - s) + " ms.");
 
 
-//        String name = "ресторан";
-//        Vertex ресторан = dictBase.getVertex(name);
-//        {
-//            DictBase subdict = dictBase.getInvertSubDict(ресторан, 0);
-//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "rest1.png");
-//        }
+        String name = "ресторан";
+        Vertex ресторан = dictBase.getVertex(name);
+        {
+            DictBase subdict = dictBase.getFullSubDict(ресторан, 0);
+            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "limonad.png");
+        }
 //        {
 //            DictBase subdict = dictBase.getInvertSubDict(ресторан, 1);
 //            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "rest2.png");
@@ -204,7 +205,7 @@ public class Main2 {
         median *= 0.6;
         double geometricAverage = CustomMath.FindGeometricAverage(values.stream().mapToDouble(Double::doubleValue).toArray());
 
-        SentiAnalyze sentiAnalyze = new SentiAnalyze();
+        SentiAnalyze sentiAnalyze = new SentiAnalyze(new SentiLoader());
         Map<String, List<Double>> clusterAndValues = new HashMap<>();
         int counter = 0;
         for (Sentence sentence : analyzerRezult.getSentenceList()) {

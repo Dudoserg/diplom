@@ -23,7 +23,7 @@ public class Languagetool implements SpellCheckingInterface{
     }
 
     private final static String PATH_FOLDER = "SpellerChecker";
-    private final static String PATH_RESULT = PATH_FOLDER + File.separator + "yaspeller_report.json";
+//    private final static String PATH_RESULT = PATH_FOLDER + File.separator + "yaspeller_report.json";
     private final String pathToFile;
     private final String id;
 

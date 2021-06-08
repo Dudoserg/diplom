@@ -8,12 +8,11 @@ import java.util.List;
 
 @Getter
 @Setter
-public class SentiLoader {
+public class SentiLoader implements SentiLoaderInterface{
+
     private static final String PATH = Helper.path("data", "sentiDictionary.csv");
 
-    public SentiLoader() {
-    }
-
+    @Override
     public SentimentDictionary load() {
         List<String> strings = Helper.readFileLineByLine(PATH);
         strings.remove(0);
@@ -36,5 +35,4 @@ public class SentiLoader {
         }
         return dictionary;
     }
-
 }

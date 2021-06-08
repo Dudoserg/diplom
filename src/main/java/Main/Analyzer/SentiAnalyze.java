@@ -1,6 +1,7 @@
 package Main.Analyzer;
 
 import Main.Analyzer.Senti.SentiLoader;
+import Main.Analyzer.Senti.SentiLoaderInterface;
 import Main.Analyzer.Senti.SentiValue;
 import Main.Analyzer.Senti.SentimentDictionary;
 import prog2.Sentence;
@@ -9,9 +10,8 @@ import prog2.WordOfSentence;
 public class SentiAnalyze {
     private final SentimentDictionary dictionary;
 
-    public SentiAnalyze() {
-        SentiLoader sentiLoader = new SentiLoader();
-         dictionary = sentiLoader.load();
+    public SentiAnalyze(SentiLoaderInterface sentiLoaderInterface) {
+         dictionary = sentiLoaderInterface.load();
     }
 
     public Double analyze(Sentence sentence){
