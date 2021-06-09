@@ -5,3 +5,4 @@
 #r = 3							радиус рассмотрения вершин
 #gamma_attenuation_rate = 3		степень функции затухания(квадратичная, кубическая(0,1,2,3))
 #countThreads = 4				количество потоков используемых программой
+#outputPath = bin\output  		(или C:\Users\Dudoser\IdeaProjects\diplom\bin)

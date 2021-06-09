@@ -18,7 +18,7 @@ import dict.SetVertexWeight.SetVertexWeightInterface;
 import mystem.*;
 import prog2.Sentence;
 import prog2.WordOfSentence;
-import settings.Settings;
+import settings.Settings_constructor;
 import utils.Bigram;
 import utils.Helper;
 import utils.Pair;
@@ -36,7 +36,7 @@ public class Main {
     //public static Settings settings;
 
     public static void main(String[] args) throws Exception {
-        Settings instance = Settings.load();
+        Settings_constructor instance = Settings_constructor.load();
         instance.set_ASS_WEIGHT_(0.15);
         instance.set_SYN_WEIGHT_(0.1);
         instance.set_DEF_WEIGHT_(0.3);
@@ -138,13 +138,13 @@ public class Main {
         calculate_countEdgeByTypes(dictBase);
 
 
-        DictBase.removeUnusedVertex(dictBase, dictTrain, Settings.getInstance().get_R_());
+        DictBase.removeUnusedVertex(dictBase, dictTrain, Settings_constructor.getInstance().get_R_());
         //dictBase.printSortedEdge("-" + File.separator + "_2_dictionary_base after removeUnusedVertex.txt");
 
 
 
         ModificateEdgeInterface modificateEdge =
-                new ModificateEdgeByBigramm(bigramFrequensy, 15, Settings.getInstance().get_R_());
+                new ModificateEdgeByBigramm(bigramFrequensy, 15, Settings_constructor.getInstance().get_R_());
         modificateEdge.modificate(dictBase);
         //dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
@@ -158,10 +158,10 @@ public class Main {
         //////////////////
         long l = System.currentTimeMillis();
         CorrectVertexWeightInterface correctVertexWeight = new CorrectVertexWeight(
-                Settings.getInstance().get_R_(),
-                Settings.getInstance().get_GAMMA_(),
-                Settings.getInstance().get_GAMMA_ATTENUATION_RATE_(),
-                Settings.getInstance().getCountThreads()
+                Settings_constructor.getInstance().get_R_(),
+                Settings_constructor.getInstance().get_GAMMA_(),
+                Settings_constructor.getInstance().get_GAMMA_ATTENUATION_RATE_(),
+                Settings_constructor.getInstance().getCountThreads()
         );
         correctVertexWeight.correctVertexWeight(dictBase);
         System.out.println("THTIME = " + (System.currentTimeMillis() - l));
@@ -230,7 +230,7 @@ public class Main {
 
 
         // TODO какой радиус брать инвертированный или нет
-        dictBase.distributeVertexIntoClusters(sublist, 15, Settings.getInstance().get_R_() - 1);
+        dictBase.distributeVertexIntoClusters(sublist, 15, Settings_constructor.getInstance().get_R_() - 1);
 
 
         return dictBase;
@@ -260,7 +260,7 @@ public class Main {
 
     public static void prog22(DictBase dictBase) throws IOException, InterruptedException {
         long startTime = System.currentTimeMillis();
-        String s = Helper.readFile(Helper.path("data", "semeval", "restaurant", "test", "test.txt"));
+        String s = Helper.readFile(Helper.path("bin", "test.txt"));
         Languagetool languagetool = new Languagetool();
         s = languagetool.getCorrect(s);
         System.out.println(s);
@@ -370,7 +370,7 @@ public class Main {
 
     public static void prog2(DictBase dictBase) throws IOException, InterruptedException {
         long startTime = System.currentTimeMillis();
-        String s = Helper.readFile(Helper.path("data", "semeval", "restaurant", "test", "test.txt"));
+        String s = Helper.readFile(Helper.path("bin", "test.txt"));
         Languagetool languagetool = new Languagetool();
         s = languagetool.getCorrect(s);
         System.out.println(s);
@@ -655,13 +655,13 @@ public class Main {
                 dictTrain.removeStopWords();
 
 
-                DictBase.removeUnusedVertex(dictBase, dictTrain, Settings.getInstance().get_R_());
+                DictBase.removeUnusedVertex(dictBase, dictTrain, Settings_constructor.getInstance().get_R_());
 
 
 
 
                 ModificateEdgeInterface modificateEdge =
-                        new ModificateEdgeByBigramm(bigramFrequensy, 10, Settings.getInstance().get_R_());
+                        new ModificateEdgeByBigramm(bigramFrequensy, 10, Settings_constructor.getInstance().get_R_());
                 modificateEdge.modificate(dictBase);
 
 
@@ -670,10 +670,10 @@ public class Main {
                 setVertexWeightInterface.setVertexWeight(dictBase);
 
                 CorrectVertexWeightInterface correctVertexWeight = new CorrectVertexWeight(
-                        Settings.getInstance().get_R_(),
-                        Settings.getInstance().get_GAMMA_(),
-                        Settings.getInstance().get_GAMMA_ATTENUATION_RATE_(),
-                        Settings.getInstance().getCountThreads()
+                        Settings_constructor.getInstance().get_R_(),
+                        Settings_constructor.getInstance().get_GAMMA_(),
+                        Settings_constructor.getInstance().get_GAMMA_ATTENUATION_RATE_(),
+                        Settings_constructor.getInstance().getCountThreads()
                 );
                 correctVertexWeight.correctVertexWeight(dictBase);
 
@@ -694,11 +694,11 @@ public class Main {
                             .append("\n");
                 }
                 Helper.saveToFile(pretendents.toString(), "test" + File.separator +
-                        "A" + String.valueOf((int) Math.round(Settings.getInstance().get_ASS_WEIGHT_() * 100)) + "_" +
-                        "S" + String.valueOf((int) Math.round(Settings.getInstance().get_SYN_WEIGHT_() * 100)) + "_" +
-                        "D" + String.valueOf((int) Math.round(Settings.getInstance().get_DEF_WEIGHT_() * 100)) + ".txt"
+                        "A" + String.valueOf((int) Math.round(Settings_constructor.getInstance().get_ASS_WEIGHT_() * 100)) + "_" +
+                        "S" + String.valueOf((int) Math.round(Settings_constructor.getInstance().get_SYN_WEIGHT_() * 100)) + "_" +
+                        "D" + String.valueOf((int) Math.round(Settings_constructor.getInstance().get_DEF_WEIGHT_() * 100)) + ".txt"
                 );
-                double v = Settings.getInstance().get_DEF_WEIGHT_() * 100;
+                double v = Settings_constructor.getInstance().get_DEF_WEIGHT_() * 100;
 
                 List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
                 String clusterStr = "";
@@ -712,9 +712,9 @@ public class Main {
                         break;
                 }
                 Helper.saveToFile(clusterStr, "test" + File.separator +
-                        "A" + String.valueOf((int) Math.round(Settings.getInstance().get_ASS_WEIGHT_() * 100)) + "_" +
-                        "S" + String.valueOf((int) Math.round(Settings.getInstance().get_SYN_WEIGHT_() * 100)) + "_" +
-                        "D" + String.valueOf((int) Math.round(Settings.getInstance().get_DEF_WEIGHT_() * 100)) + "_cluster.txt"
+                        "A" + String.valueOf((int) Math.round(Settings_constructor.getInstance().get_ASS_WEIGHT_() * 100)) + "_" +
+                        "S" + String.valueOf((int) Math.round(Settings_constructor.getInstance().get_SYN_WEIGHT_() * 100)) + "_" +
+                        "D" + String.valueOf((int) Math.round(Settings_constructor.getInstance().get_DEF_WEIGHT_() * 100)) + "_cluster.txt"
                 );
 
 

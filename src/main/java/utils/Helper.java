@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Helper {
@@ -46,9 +47,10 @@ public class Helper {
         writer.write(text);
         writer.close();
     }
-    public static boolean removeFile(String path){
+
+    public static boolean removeFile(String path) {
         File file = new File(path);
-        if(file.exists())
+        if (file.exists())
             return file.delete();
         return false;
     }
@@ -126,6 +128,34 @@ public class Helper {
     }
 
     public static String path(String... str) {
-        return Arrays.stream(str).collect(Collectors.joining(File.separator));
+        String collect = Arrays.stream(str).collect(Collectors.joining(File.separator));
+        checkDir(collect);
+
+        return collect;
+    }
+
+    private static void checkDir(String path){
+        String pattern = Pattern.quote(System.getProperty("file.separator"));
+        String[] split = path.split(pattern);
+        if(split[split.length - 1].contains(".")){
+            // this is file
+            String dirPath = path.substring(0, path.lastIndexOf(File.separator) + 1);
+            createPath(dirPath);
+        }
+    }
+
+    private static void createPath(String path){
+        String pattern = Pattern.quote(System.getProperty("file.separator"));
+        String[] split = path.split(pattern);
+        String pth = "";
+        if(split.length > 0){
+            for (String s : split) {
+                pth += s + File.separator;
+                File file = new File(pth);
+                if (!file.exists()) {
+                    file.mkdir();
+                }
+            }
+        }
     }
 }

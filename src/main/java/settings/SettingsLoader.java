@@ -24,10 +24,4 @@ public class SettingsLoader {
 
     public SettingsLoader(String path) {
     }
-
-    // Дефолтные настройки, пересоздаем файл настроек, если его кто то удалил
-    public SettingsLoader() throws IOException {
-        Helper.saveToFile(SettingsLoader.DEFAULT_SETTINGS, Helper.path("settings"));
-
-    }
 }

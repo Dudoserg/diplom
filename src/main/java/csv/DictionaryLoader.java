@@ -1,6 +1,5 @@
 package csv;
 
-import Main.Main;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -12,7 +11,7 @@ import dict.*;
 import mystem.MyStemOld;
 import mystem.MyStemItem;
 import mystem.MyStemResult;
-import settings.Settings;
+import settings.Settings_constructor;
 import utils.Pair;
 
 import java.io.*;
@@ -63,15 +62,15 @@ public class DictionaryLoader {
             // TODO ПОПРАВИТЬ, ВЫБРАТЬ МАКСИМАЛЬНЫЙ ВЕС, А НЕ ПРОСТО больше 0
             if (con.getDefWeight() > 0) {
                 weight = con.getDefWeight();
-                weight = Settings.getInstance().get_DEF_WEIGHT_();
+                weight = Settings_constructor.getInstance().get_DEF_WEIGHT_();
                 relationType = RelationType.DEF;
             } else if (con.getAssWeight() > 0) {
                 weight = con.getAssWeight();
-                weight = Settings.getInstance().get_ASS_WEIGHT_();
+                weight = Settings_constructor.getInstance().get_ASS_WEIGHT_();
                 relationType = RelationType.ASS;
             } else if (con.getSynWeight() > 0) {
                 weight = con.getSynWeight();
-                weight = Settings.getInstance().get_SYN_WEIGHT_();
+                weight = Settings_constructor.getInstance().get_SYN_WEIGHT_();
                 relationType = RelationType.SYN;
             } else {
                 throw new DictException("weight of edge equals 0.0 [id=" + con.getId() + "]");
@@ -138,7 +137,7 @@ public class DictionaryLoader {
             dict.addPair(
                     con.getWordFrom(),
                     con.getWordTo(),
-                    Settings.getInstance().getWeight(con.getRelationType()),
+                    Settings_constructor.getInstance().getWeight(con.getRelationType()),
                     con.getRelationType()
             );
             j++;
@@ -191,7 +190,7 @@ public class DictionaryLoader {
                         dict.addPair(
                                 con.getWordFrom(),
                                 con.getWordTo(),
-                                Settings.getInstance().getWeight(con.getRelationType()),
+                                Settings_constructor.getInstance().getWeight(con.getRelationType()),
                                 con.getRelationType()
                         );
                     } catch (DictException e) {

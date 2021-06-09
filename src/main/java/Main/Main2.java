@@ -12,11 +12,11 @@ import dict.Cluster;
 import dict.DictBase;
 import dict.DictException;
 import dict.Vertex;
-
 import mystem.MyStemOld;
 import mystem.StopWords;
 import prog2.Sentence;
 import prog2.WordOfSentence;
+import settings.Settings_analyzer;
 import utils.Helper;
 import utils.Pair;
 
@@ -26,23 +26,25 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main2 {
-    public static void main(String[] args) throws DictException, IOException {
+    public static void main(String[] args) throws DictException, IOException, IllegalAccessException {
+
+        Settings_analyzer instance = Settings_analyzer.load();
+
+
+
         Long s = System.currentTimeMillis();
         System.out.print("read dictionary...\t\t");
-        DictBase dictBase = DictBase.loadFromFiles("");
+        DictBase dictBase = DictBase.loadFromFiles(Settings_analyzer.getInstance().getDomainPath());
         System.out.println("done for " + (System.currentTimeMillis() - s) + " ms.");
 
 
-        String name = "ресторан";
-        Vertex ресторан = dictBase.getVertex(name);
-        {
+        ///String name = "ресторан";
+        //Vertex ресторан = dictBase.getVertex(name);
+        //{
            // DictBase subdict = dictBase.getFullSubDict(ресторан, 0);
            // DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "limonad.png");
-        }
-//        {
-//            DictBase subdict = dictBase.getInvertSubDict(ресторан, 1);
-//            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "rest2.png");
-//        }
+        //}
+
 
         try {
             prog22(dictBase);
@@ -51,8 +53,8 @@ public class Main2 {
         }
     }
 
-    public static void prog22(DictBase dictBase) throws IOException, InterruptedException {
-        String s = Helper.readFile(Helper.path("data", "semeval", "restaurant", "test", "test.txt"));
+    public static void prog22(DictBase dictBase) throws IOException, InterruptedException, IllegalAccessException {
+        String s = Helper.readFile(Helper.path("bin", "test.txt"));
 
         SpellCheckingInterface spellCheker = new Languagetool();
         s = spellCheker.getCorrect(s);
@@ -257,7 +259,8 @@ public class Main2 {
 
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(sentiResult);
-        Helper.saveToFile(json, Helper.path("result", "result_analyze.json"));
+        String resultPath = Helper.path(Settings_analyzer.getInstance().getResultPath());
+        Helper.saveToFile(json, resultPath);
 
     }
 

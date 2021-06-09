@@ -3,7 +3,6 @@ package dict;
 import Output.Output;
 import Output.VertexAndCluster;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ibm.icu.text.MessagePattern;
 import dict.Edge.Edge;
 import guru.nidi.graphviz.attribute.*;
 import guru.nidi.graphviz.engine.Format;
@@ -14,7 +13,7 @@ import guru.nidi.graphviz.model.Node;
 import lombok.Getter;
 import lombok.Setter;
 import mystem.StopWords;
-import settings.Settings;
+import settings.Settings_constructor;
 import utils.Helper;
 import utils.Pair;
 
@@ -545,7 +544,7 @@ public class DictBase implements Serializable {
                 Edge edge = vertexEdgeEntry.getValue();
 
                 dictBase.addPair(second.getWord().getStr(), first.getWord().getStr(),
-                        Settings.getInstance().getWeight(edge.getRelationType()), edge.getRelationType());
+                        Settings_constructor.getInstance().getWeight(edge.getRelationType()), edge.getRelationType());
 
             }
         }
@@ -1476,7 +1475,7 @@ public class DictBase implements Serializable {
     }
 
 
-    public void saveToFile(String filePath) throws IOException {
+    public void saveToFile(String filePath) throws IOException, IllegalAccessException {
 
 
         Output output = new Output();
@@ -1531,11 +1530,11 @@ public class DictBase implements Serializable {
 
     public static DictBase loadFromFiles(String path) {
         // TODO check dir path
-        String clusterPath = Helper.path("output", "cluster.txt");
-        String edgePath = Helper.path("output", "edge.txt");
-        String partOfSpeechPath = Helper.path("output", "partOfSpeech.txt");
-        String vertexPath = Helper.path("output", "vertex.txt");
-        String vertexAndClusters = Helper.path("output", "vertexAndClusters.txt");
+        String clusterPath = Helper.path(path, "cluster.txt");
+        String edgePath = Helper.path(path, "edge.txt");
+        String partOfSpeechPath = Helper.path(path, "partOfSpeech.txt");
+        String vertexPath = Helper.path(path, "vertex.txt");
+        String vertexAndClusters = Helper.path(path, "vertexAndClusters.txt");
 
         DictBase dict = new DictBase();
         /////////////////////////////////////////////////////////////////////////

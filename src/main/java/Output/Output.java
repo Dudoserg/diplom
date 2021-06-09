@@ -7,6 +7,8 @@ import dict.RelationType;
 import dict.Vertex;
 import lombok.Getter;
 import lombok.Setter;
+import settings.Setting_Base;
+import settings.Settings_constructor;
 import utils.Helper;
 
 import java.io.IOException;
@@ -20,6 +22,12 @@ public class Output {
 
     private Map<PartOfSpeech, Integer> partOfSpeechIntegerMap = new HashMap<>();
     private Map<Integer, PartOfSpeech> integerPartOfSpeechMap = new HashMap<>();
+
+
+    private static  String OUTPUT_PATH = null;
+    public Output() throws IOException, IllegalAccessException {
+        OUTPUT_PATH = Settings_constructor.getInstance().getOutputPath();
+    }
 
     public void createPartOfSpeechHashMap() {
         for (PartOfSpeech partOfSpeech : this.partOfSpeechSet) {
@@ -45,7 +53,8 @@ public class Output {
         }
         String text = csvVertex.stream().collect(Collectors.joining("\n"));
         text = "id;str\n" + text;
-        Helper.saveToFile(text, Helper.path("output", "partOfSpeech.txt"));
+
+        Helper.saveToFile(text, Helper.path(OUTPUT_PATH, "partOfSpeech.txt"));
     }
 
     //////////////////////////
@@ -89,7 +98,7 @@ public class Output {
         }
         String text = csvVertex.stream().collect(Collectors.joining("\n"));
         text = "id;str;partOfSpeech;weight;weightOutgoingVertex;flagTrain\n" + text;
-        Helper.saveToFile(text, Helper.path("output", "vertex.txt"));
+        Helper.saveToFile(text, Helper.path(OUTPUT_PATH, "vertex.txt"));
     }
 
     //////////////////////////
@@ -119,7 +128,7 @@ public class Output {
         }
         String text = result.stream().collect(Collectors.joining("\n"));
         text = "id;fromId;toId;weight;relationType\n" + text;
-        Helper.saveToFile(text, Helper.path("output", "edge.txt"));
+        Helper.saveToFile(text, Helper.path(OUTPUT_PATH, "edge.txt"));
     }
 
     //////////////////////////
@@ -154,7 +163,7 @@ public class Output {
         }
         String text = csvVertex.stream().collect(Collectors.joining("\n"));
         text = "id;vertexId;weight\n" + text;
-        Helper.saveToFile(text, Helper.path("output", "cluster.txt"));
+        Helper.saveToFile(text, Helper.path(OUTPUT_PATH, "cluster.txt"));
     }
 
     ////////////////////////// vertex cluster
@@ -184,6 +193,6 @@ public class Output {
         String text = result.stream().collect(Collectors.joining("\n"));
         text = "id;clusterId;vertexId;distance\n" + text;
 
-        Helper.saveToFile(text, Helper.path("output", "vertexAndClusters.txt"));
+        Helper.saveToFile(text, Helper.path(OUTPUT_PATH, "vertexAndClusters.txt"));
     }
 }
