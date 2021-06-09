@@ -56,7 +56,8 @@ public class Main {
 //        System.out.println(System.currentTimeMillis() - s);
 
 //        prog22(dictBase);
-        System.out.print("");
+        System.out.print("------------------------------------------------------------------\n");
+        Main2.main(null);
     }
 
 
@@ -97,7 +98,7 @@ public class Main {
             MyStemOld myStemOldText = new MyStemOld(data, "tt_");
 
             myStemOldText.saveToFile(MyStemOld.FULL_TEXT);
-            myStemOldText = myStemOldText.removeStopWord();
+            myStemOldText = myStemOldText.removeStopWord(StopWords.getInstance());
             myStemOldText.saveToFile(MyStemOld.TEXT_WITHOUT_STOPWORDS_txt);
             myStemOldText.saveToFile("-" + File.separator + "text_withoutStopWord.txt");
 
@@ -265,7 +266,7 @@ public class Main {
         System.out.println(s);
 
         MyStemOld myStemOld = new MyStemOld(s, UUID.randomUUID().toString());
-        myStemOld = myStemOld.removeStopWord();
+        myStemOld = myStemOld.removeStopWord(StopWords.getInstance());
         myStemOld.lemmatization();
         myStemOld.removeStopWordsFromLemmatization();
         myStemOld.removeTmpFiles();
@@ -375,7 +376,7 @@ public class Main {
         System.out.println(s);
 
         MyStemOld myStemOld = new MyStemOld(s, UUID.randomUUID().toString());
-        myStemOld = myStemOld.removeStopWord();
+        myStemOld = myStemOld.removeStopWord(StopWords.getInstance());
         myStemOld.lemmatization();
         myStemOld.removeStopWordsFromLemmatization();
         myStemOld.removeTmpFiles();
@@ -606,7 +607,7 @@ public class Main {
             MyStemOld myStemOldText = new MyStemOld(data, "tt_");
 
             myStemOldText.saveToFile(MyStemOld.FULL_TEXT);
-            myStemOldText = myStemOldText.removeStopWord();
+            myStemOldText = myStemOldText.removeStopWord(StopWords.getInstance());
             myStemOldText.saveToFile(MyStemOld.TEXT_WITHOUT_STOPWORDS_txt);
             myStemOldText.saveToFile("-" + File.separator + "text_withoutStopWord.txt");
 

@@ -14,6 +14,7 @@ import dict.DictException;
 import dict.Vertex;
 
 import mystem.MyStemOld;
+import mystem.StopWords;
 import prog2.Sentence;
 import prog2.WordOfSentence;
 import utils.Helper;
@@ -35,8 +36,8 @@ public class Main2 {
         String name = "ресторан";
         Vertex ресторан = dictBase.getVertex(name);
         {
-            DictBase subdict = dictBase.getFullSubDict(ресторан, 0);
-            DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "limonad.png");
+           // DictBase subdict = dictBase.getFullSubDict(ресторан, 0);
+           // DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "limonad.png");
         }
 //        {
 //            DictBase subdict = dictBase.getInvertSubDict(ресторан, 1);
@@ -58,7 +59,11 @@ public class Main2 {
         System.out.println(s);
 
         MyStemOld myStemOld = new MyStemOld(s, UUID.randomUUID().toString());
-        myStemOld = myStemOld.removeStopWord();
+
+        StopWords stopWords = StopWords.getInstance();
+        stopWords.ignore("не");
+
+        myStemOld = myStemOld.removeStopWord(stopWords);
         myStemOld.lemmatization();
         long startTime = System.currentTimeMillis();
 

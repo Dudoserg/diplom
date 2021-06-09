@@ -63,10 +63,10 @@ public class MyStemOld {
         }
     }
 
-    public MyStemOld removeStopWord() {
-        if (stopWords == null) {
-            stopWords = StopWords.getInstance();
-        }
+    public MyStemOld removeStopWord(StopWords stopWords) {
+
+        this.stopWords = stopWords;
+
         MyStemOld result = new MyStemOld(words, id);
         result.words = result.words.stream()
                 .filter(s -> {

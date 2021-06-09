@@ -34,4 +34,8 @@ public class StopWords implements StopWordsInterface{
     public List<String> getStopWords() {
         return StopWords.getInstance().stopWords;
     }
+
+    public void ignore(String word) {
+        stopWords.remove(word);
+    }
 }

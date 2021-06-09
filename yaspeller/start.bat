@@ -1,0 +1,1 @@
+npm run SpellerChecker orf.txt --report json
