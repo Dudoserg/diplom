@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class MyStemOld {
-    private static final String MYSTEM_exe = "mystem" + File.separator + "exe" + File.separator + "mystem.exe";
-    private static final String MYSTEM_RESULT_json = "mystem" + File.separator + "mystemResult.json";
-    public static final String FULL_TEXT = "mystem" + File.separator + "full_text.txt";
-    public static final String TEXT_WITHOUT_STOPWORDS_txt = "mystem" + File.separator + "text_withoutStopWord.txt";
+    private static final String MYSTEM_exe = Helper.path("mystem", "exe", "mystem.exe");
+    private static final String MYSTEM_RESULT_json = Helper.path("mystem", "mystemResult.json");
+    public static final String FULL_TEXT = Helper.path("mystem", "full_text.txt");
+    public static final String TEXT_WITHOUT_STOPWORDS_txt = Helper.path("mystem", "text_withoutStopWord.txt");
 
     private String id;
 
@@ -99,7 +99,7 @@ public class MyStemOld {
             p.waitFor();
             String json = Helper.readFile(addId(MYSTEM_RESULT_json));
 
-            Helper.saveToFile(json, addId("-" + File.separator + "mystemResult.json"));
+            Helper.saveToFile(json, addId(Helper.path("-", "mystemResult.json")));
 
             ObjectMapper objectMapper = new ObjectMapper();
 

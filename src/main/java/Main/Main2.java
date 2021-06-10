@@ -17,6 +17,7 @@ import mystem.StopWords;
 import prog2.Sentence;
 import prog2.WordOfSentence;
 import settings.Settings_analyzer;
+import utils.Analyzer_ARGS;
 import utils.Helper;
 import utils.Pair;
 
@@ -28,33 +29,50 @@ import java.util.stream.Collectors;
 public class Main2 {
     public static void main(String[] args) throws DictException, IOException, IllegalAccessException {
 
-        Settings_analyzer instance = Settings_analyzer.load();
-
-
-
-        Long s = System.currentTimeMillis();
-        System.out.print("read dictionary...\t\t");
-        DictBase dictBase = DictBase.loadFromFiles(Settings_analyzer.getInstance().getDomainPath());
-        System.out.println("done for " + (System.currentTimeMillis() - s) + " ms.");
-
-
-        ///String name = "ресторан";
-        //Vertex ресторан = dictBase.getVertex(name);
-        //{
-           // DictBase subdict = dictBase.getFullSubDict(ресторан, 0);
-           // DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "limonad.png");
-        //}
-
-
         try {
-            prog22(dictBase);
-        } catch (IOException | InterruptedException e) {
+            Analyzer_ARGS analyzer_args = new Analyzer_ARGS(args);
+
+            System.out.println(analyzer_args.getSetting());
+            System.out.println("!!!?!?!??");
+            System.in.read();
+
+            Settings_analyzer instance = Settings_analyzer.load(
+                    analyzer_args.getSetting()
+            );
+
+
+            Long s = System.currentTimeMillis();
+            System.out.print("read dictionary...\t\t");
+            DictBase dictBase = DictBase.loadFromFiles(Settings_analyzer.getInstance().getDomainPath());
+            System.out.println("done for " + (System.currentTimeMillis() - s) + " ms.");
+
+
+            ///String name = "ресторан";
+            //Vertex ресторан = dictBase.getVertex(name);
+            //{
+            // DictBase subdict = dictBase.getFullSubDict(ресторан, 0);
+            // DictBase.graphviz_draw(DictBase.graphviz_getGraphViz(subdict, name), "limonad.png");
+            //}
+
+
+            try {
+                if (analyzer_args.getOtziv() != null)
+                    prog22(dictBase, Helper.path(analyzer_args.getOtziv()));
+                else
+                    prog22(dictBase, Helper.path("bin", "test.txt"));
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            System.in.read();
         }
+
     }
 
-    public static void prog22(DictBase dictBase) throws IOException, InterruptedException, IllegalAccessException {
-        String s = Helper.readFile(Helper.path("bin", "test.txt"));
+    public static void prog22(DictBase dictBase, String otzivPath) throws IOException, InterruptedException, IllegalAccessException {
+        String s = Helper.readFile(otzivPath);
 
         SpellCheckingInterface spellCheker = new Languagetool();
         s = spellCheker.getCorrect(s);
@@ -107,7 +125,7 @@ public class Main2 {
                 }
 
                 // слово может относиться к нескольким кластерам, перебираем каждый из кластеров
-                WordAndClusters wordAndClusters = new WordAndClusters( wordOfSentence.getWord());
+                WordAndClusters wordAndClusters = new WordAndClusters(wordOfSentence.getWord());
                 sentiResultSentence.getWordAndClustersList().add(wordAndClusters);
 
                 for (Pair<Cluster, Integer> clusterIntegerPair : vertex.getShortest()) {

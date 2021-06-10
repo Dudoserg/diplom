@@ -36,15 +36,21 @@ public class Settings_constructor extends Setting_Base {
     @CustomAnnotation(key = "countThreads")
     protected int countThreads = 4;
 
-
     @CustomAnnotation(key = "outputPath")
     protected String outputPath = "";
+
+    @CustomAnnotation(key = "trainPath")
+    protected String trainPath = "";
 
     protected static Settings_constructor instance;
 
     public static Settings_constructor load(String path) throws IOException, IllegalAccessException {
-        instance = new Settings_constructor(path);
-        return instance;
+        if(path == null){
+            return load();
+        }else{
+            instance = new Settings_constructor(path);
+            return instance;
+        }
     }
 
     public static Settings_constructor load() throws IOException, IllegalAccessException {
@@ -62,9 +68,13 @@ public class Settings_constructor extends Setting_Base {
     private Settings_constructor(String path) throws IOException, IllegalAccessException {
         File file = new File(path);
         if (!file.exists()) {
-            System.out.println("Файл настроек не найдет, будут применены стандартный настройки 'settings/setting.conf' ");
-            Helper.saveToFile(Settings_constructor.DEFAULT_SETTINGS, CONST.SETTING_DEFAULT_PATH);
-            readSettingsFromFile(Helper.path("settings", "setting_default.conf"));
+            System.out.println("Файл настроек не найдет, будут применены стандартный настройки '" +
+                    CONST.SETTING_CONSTRUCTOR_DEFAULT_PATH + "' ");
+            Helper.saveToFile(
+                    Helper.readFileLineByLine(CONST.SETTING_BIN_CONSTRUCTOR_DEFAULT_PATH).stream().collect(Collectors.joining("\n")),
+                    CONST.SETTING_CONSTRUCTOR_DEFAULT_PATH
+            );
+            readSettingsFromFile(Helper.path(CONST.SETTING_CONSTRUCTOR_DEFAULT_PATH));
         } else {
             readSettingsFromFile(path);
         }
@@ -110,22 +120,5 @@ public class Settings_constructor extends Setting_Base {
     }
 
 
-    private static final String DEFAULT_SETTINGS =
-            "#assoc = 0.15\t\t\t\t\tвес связи ассоциации\n" +
-                    "#syn = 0.15\t\t\t\t\t\tвес связи синонимии\n" +
-                    "#def = 0.3\t\t\t\t\t\tвес связи определения\n" +
-                    "#gamma = 0.65\t\t\t\t\tкоэффициент затухания\n" +
-                    "#r = 3\t\t\t\t\t\t\tрадиус рассмотрения вершин\n" +
-                    "#gamma_attenuation_rate = 3\t\tстепень функции затухания(квадратичная, кубическая(0,1,2,3))\n" +
-                    "#countThreads = 4\t\t\t\tколичество потоков используемых программой\n" +
-                    "\n" +
-                    "assoc = 0.15\n" +
-                    "syn = 0.15\n" +
-                    "def = 0.3\n" +
-                    "gamma = 0.65\n" +
-                    "r = 3\n" +
-                    "gamma_attenuation_rate = 3\n" +
-                    "countThreads = 4\n" +
-                    "outputPath = bin\\output"
-            ;
+
 }

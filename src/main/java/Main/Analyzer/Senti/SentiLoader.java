@@ -1,5 +1,6 @@
 package Main.Analyzer.Senti;
 
+import constant.CONST;
 import lombok.Getter;
 import lombok.Setter;
 import utils.Helper;
@@ -10,7 +11,7 @@ import java.util.List;
 @Setter
 public class SentiLoader implements SentiLoaderInterface{
 
-    private static final String PATH = Helper.path("data", "sentiDictionary.csv");
+    private static final String PATH = CONST.SENTI_DICTIONARY_PATH;
 
     @Override
     public SentimentDictionary load() {

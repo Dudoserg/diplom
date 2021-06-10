@@ -25,8 +25,12 @@ public class Settings_analyzer extends Setting_Base {
     protected static Settings_analyzer instance;
 
     public static Settings_analyzer load(String path) throws IOException, IllegalAccessException {
-        instance = new Settings_analyzer(path);
-        return instance;
+        if (path == null) {
+            return load();
+        } else {
+            instance = new Settings_analyzer(path);
+            return instance;
+        }
     }
 
     public static Settings_analyzer load() throws IOException, IllegalAccessException {
@@ -44,9 +48,13 @@ public class Settings_analyzer extends Setting_Base {
     private Settings_analyzer(String path) throws IOException, IllegalAccessException {
         File file = new File(path);
         if (!file.exists()) {
-            System.out.println("Файл настроек не найдет, будут применены стандартный настройки 'settings/setting.conf' ");
-            Helper.saveToFile(Settings_analyzer.DEFAULT_SETTINGS, CONST.SETTING_DEFAULT_PATH);
-            readSettingsFromFile(Helper.path("settings", "setting_default.conf"));
+            System.out.println("Файл настроек не найдет, будут применены стандартный настройки '" +
+                    CONST.SETTING_ANALYZER_DEFAULT_PATH + "' ");
+            Helper.saveToFile(
+                    Helper.readFileLineByLine(CONST.SETTING_BIN_ANALYZER_DEFAULT_PATH).stream().collect(Collectors.joining("\n")),
+                    CONST.SETTING_ANALYZER_DEFAULT_PATH
+            );
+            readSettingsFromFile(Helper.path(CONST.SETTING_ANALYZER_DEFAULT_PATH));
         } else {
             readSettingsFromFile(path);
         }
@@ -74,10 +82,4 @@ public class Settings_analyzer extends Setting_Base {
     }
 
 
-    private static final String DEFAULT_SETTINGS =
-            "#domainPath \tпуть к директории, в которой расположен доменный граф\n" +
-                    "\n" +
-                    "domainPath = bin\\output" + "\n" +
-                    "resultPath = res\\pth\\result.json"
-            ;
 }

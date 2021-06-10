@@ -1475,7 +1475,7 @@ public class DictBase implements Serializable {
     }
 
 
-    public void saveToFile(String filePath) throws IOException, IllegalAccessException {
+    public void saveToFile() throws IOException, IllegalAccessException {
 
 
         Output output = new Output();

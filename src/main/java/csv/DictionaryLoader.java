@@ -6,6 +6,7 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import constant.CONST;
 import dict.*;
 
 import mystem.MyStemOld;
@@ -25,7 +26,6 @@ import java.util.stream.Collectors;
 
 public class DictionaryLoader {
 
-    public static final String DICTIONARY_PATH = "data" + File.separator + "connections3.csv";
 
     public static DictBase loadFullDict_old() throws DictException, IOException, IllegalAccessException {
         System.out.print("loadFullDict...");
@@ -112,7 +112,7 @@ public class DictionaryLoader {
 
 
 //        String connections_fileName = "data" + File.separator + "connections2.csv";
-        String connections_fileName = DICTIONARY_PATH;
+        String connections_fileName = CONST.DICTIONARY_PATH;
 
         List<CSV_CONNECTIONS> connections = new CsvToBeanBuilder(new FileReader(connections_fileName))
                 .withSeparator(';')

@@ -1,5 +1,6 @@
 package mystem;
 
+import constant.CONST;
 import utils.Helper;
 
 import java.io.File;
@@ -19,7 +20,7 @@ public class StopWords implements StopWordsInterface{
         if (instance == null) {
             instance = new StopWords(
                     Helper.readFileLineByLine(
-                            "mystem" + File.separator + "stopWords" + File.separator + "stop_words2.txt"
+                            CONST.SETTING_STOPWORDS_PATH
                     )
             );
         }
