@@ -30,8 +30,8 @@ public class Main {
         Constructor_ARGS constructorARGS = new Constructor_ARGS(args);
 
         System.out.println(constructorARGS.getSetting());
-        System.out.println("ПОЕХАЛИ?");
-        System.in.read();
+        System.out.println("Начать подготовку словаря?");
+        //System.in.read();
 
         Settings_constructor instance = Settings_constructor.load(
                 constructorARGS.getSetting()
@@ -52,8 +52,10 @@ public class Main {
         System.out.println(System.currentTimeMillis() - s);
 
         System.out.print("------------------------------------------------------------------\n");
-        System.in.read();
-        System.in.read();
+        String[] ss = new  String[0];
+        Main2.main(ss);
+        //System.in.read();
+        //System.in.read();
     }
 
 
@@ -134,7 +136,8 @@ public class Main {
 
 
         ModificateEdgeInterface modificateEdge =
-                new ModificateEdgeByBigramm(bigramFrequensy, 15, Settings_constructor.getInstance().get_R_());
+                new ModificateEdgeByBigramm(bigramFrequensy, Settings_constructor.getInstance().getTreshold(),
+                        Settings_constructor.getInstance().get_R_());
         modificateEdge.modificate(dictBase);
         //dictBase.printSortedEdge("-" + File.separator + "_3_dictionary_base after correctEdgeWeight.txt");
 
@@ -164,7 +167,10 @@ public class Main {
 
         //////////////////
         dictBase.calculateWeightOfOutgoingVertex();
-        List<ClusterHelper> clastering = dictBase.clastering(1, 0.1);
+        List<ClusterHelper> clastering = dictBase.clastering(
+                Settings_constructor.getInstance().getClusterWeightVertex(),
+                Settings_constructor.getInstance().getClusterWeightNeighborsVertex()
+        );
 
         System.out.println("==============================================================================");
 
@@ -174,7 +180,7 @@ public class Main {
                 System.out.println((tmpIndex++) + ") " + claster.getVertex().getWord().getStr() + "\t" + "w=" +
                         claster.getVertex().getWeight() + "\t" + "wO=" + claster.getVertex().getWeightOutgoingVertex() +
                         "\t" + "wC=" + claster.getClusterWeight());
-            if (tmpIndex > 40)
+            if (tmpIndex > Settings_constructor.getInstance().getCountOfCalculatedClusters())
                 break;
         }
 
@@ -213,14 +219,15 @@ public class Main {
                 System.out.println((tmpIndex++) + ") " + claster.getVertex().getWord().getStr() + "\t" + "w=" +
                         claster.getVertex().getWeight() + "\t" + "wO=" + claster.getVertex().getWeightOutgoingVertex() +
                         "\t" + "wC=" + claster.getClusterWeight());
-            if (tmpIndex > 40)
+            if (tmpIndex > Settings_constructor.getInstance().getCountOfCalculatedClusters())
                 break;
         }
         System.out.println();
 
 
         // TODO какой радиус брать инвертированный или нет
-        dictBase.distributeVertexIntoClusters(sublist, 15, Settings_constructor.getInstance().get_R_() - 1);
+        dictBase.distributeVertexIntoClusters(sublist, Settings_constructor.getInstance().getCountCluster(),
+                Settings_constructor.getInstance().get_R_() - 1);
 
 
         return dictBase;

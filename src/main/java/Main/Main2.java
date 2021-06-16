@@ -33,8 +33,8 @@ public class Main2 {
             Analyzer_ARGS analyzer_args = new Analyzer_ARGS(args);
 
             System.out.println(analyzer_args.getSetting());
-            System.out.println("!!!?!?!??");
-            System.in.read();
+            System.out.println("Начать анализ отзыва?");
+            //System.in.read();
 
             Settings_analyzer instance = Settings_analyzer.load(
                     analyzer_args.getSetting()
@@ -66,7 +66,7 @@ public class Main2 {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            System.in.read();
+            //System.in.read();
         }
 
     }

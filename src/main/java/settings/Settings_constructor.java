@@ -42,6 +42,24 @@ public class Settings_constructor extends Setting_Base {
     @CustomAnnotation(key = "trainPath")
     protected String trainPath = "";
 
+    @CustomAnnotation(key = "treshold")
+    protected Integer treshold;
+
+    @CustomAnnotation(key = "countCluster")
+    protected Integer countCluster;
+
+    @CustomAnnotation(key = "cluster_weight_vertex")
+    protected Double clusterWeightVertex;
+
+    @CustomAnnotation(key = "cluster_weight_neighbors_vertex")
+    protected Double clusterWeightNeighborsVertex;
+
+    @CustomAnnotation(key = "count_of_calculated_clusters")
+    protected Integer countOfCalculatedClusters;
+
+    @CustomAnnotation(key = "top_vertex")
+    protected Integer topVertex;
+
     protected static Settings_constructor instance;
 
     public static Settings_constructor load(String path) throws IOException, IllegalAccessException {

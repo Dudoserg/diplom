@@ -1108,7 +1108,7 @@ public class DictBase implements Serializable {
      * @param B коэффициент умножаемый на сумму весов соседних вершин
      * @return список объектов, в которых указаны порядки сортировки по весу вершины, по сумме весов вершин
      */
-    public List<ClusterHelper> clastering(double A, double B) {
+    public List<ClusterHelper> clastering(double A, double B) throws IOException, IllegalAccessException {
         List<ClusterHelper> sortedWeight = this.getSortedWeight();
         //Map<Vertex, ClusterHelper> mapWeight = new HashMap<>();
         //sortedWeight.forEach(cl -> mapWeight.put(cl.getVertex(), cl));
@@ -1117,8 +1117,10 @@ public class DictBase implements Serializable {
         //Map<Vertex, ClusterHelper> mapWeightOutgoing = new HashMap<>();
         //sortedWeightOutgoing.forEach(cl -> mapWeightOutgoing.put(cl.getVertex(), cl));
 
-        double topWeight = sortedWeight.get(150).getVertex().getWeight();
-        double topWeightOutgoing = sortedWeightOutgoing.get(150).getVertex().getWeightOutgoingVertex();
+        double topWeight = sortedWeight.get(
+                Settings_constructor.getInstance().getTopVertex()
+        ).getVertex().getWeight();
+
 
         List<ClusterHelper> result = new ArrayList<>();
         for (ClusterHelper clusterHelper : sortedWeight) {
