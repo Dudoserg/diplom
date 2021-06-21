@@ -1,1 +1,1138 @@
-{"result":[{"cluster":"меню","sentimentMark":"4,00"},{"cluster":"персонал","sentimentMark":"3,26"},{"cluster":"блюдо","sentimentMark":"2,82"},{"cluster":"впечатление","sentimentMark":"2,00"},{"cluster":"еда","sentimentMark":"1,46"},{"cluster":"интерьер","sentimentMark":"-2,59"}],"sentiResultSentenceList":[{"originalStr":"персонал дружелюбный, всегда готов помочь в выборе заказа.","lemmatizationStr":"персонал дружелюбный готовый помогать выбор заказ","sentenceSentiMark":3.26,"wordAndClustersList":[{"word":"персонал","clusterAndDistanceList":[{"distance":-1,"cluster":"персонал"},{"distance":1,"cluster":"официант"},{"distance":1,"cluster":"столик"},{"distance":1,"cluster":"обслуживание"},{"distance":1,"cluster":"заведение"}]},{"word":"дружелюбный","clusterAndDistanceList":[]},{"word":"готовый","clusterAndDistanceList":[{"distance":1,"cluster":"блюдо"},{"distance":1,"cluster":"еда"}]},{"word":"помогать","clusterAndDistanceList":[{"distance":0,"cluster":"персонал"}]},{"word":"выбор","clusterAndDistanceList":[{"distance":1,"cluster":"меню"},{"distance":1,"cluster":"персонал"}]},{"word":"заказ","clusterAndDistanceList":[]}],"clustersAndWeightList":[{"first":"персонал","second":15.737509686518623},{"first":"меню","second":6.678341108563318},{"first":"столик","second":6.380583522325804},{"first":"обслуживание","second":6.317758153848169},{"first":"официант","second":5.328626836320774}]},{"originalStr":" отличный ресторан, была здесь уже не раз и вот решилась отпраздновать свой день рождения.","lemmatizationStr":"отличный ресторан не решаться отпраздновать рождение","sentenceSentiMark":2.42,"wordAndClustersList":[{"word":"отличный","clusterAndDistanceList":[]},{"word":"ресторан","clusterAndDistanceList":[{"distance":-1,"cluster":"ресторан"},{"distance":0,"cluster":"официант"},{"distance":0,"cluster":"столик"},{"distance":0,"cluster":"порция"},{"distance":1,"cluster":"еда"},{"distance":1,"cluster":"обслуживание"}]},{"word":"решаться","clusterAndDistanceList":[{"distance":1,"cluster":"кухня"},{"distance":1,"cluster":"впечатление"}]},{"word":"отпраздновать","clusterAndDistanceList":[]},{"word":"рождение","clusterAndDistanceList":[]}],"clustersAndWeightList":[{"first":"ресторан","second":40.228564192390266},{"first":"столик","second":37.46798788737401},{"first":"официант","second":31.290700146939976},{"first":"обслуживание","second":29.67925239507955},{"first":"порция","second":28.07096248855269}]},{"originalStr":" гости остались довольны.","lemmatizationStr":"гость оставаться довольный","sentenceSentiMark":1.46,"wordAndClustersList":[{"word":"гость","clusterAndDistanceList":[{"distance":1,"cluster":"ресторан"},{"distance":1,"cluster":"официант"},{"distance":1,"cluster":"столик"},{"distance":1,"cluster":"еда"},{"distance":1,"cluster":"зал"}]},{"word":"оставаться","clusterAndDistanceList":[{"distance":1,"cluster":"еда"},{"distance":1,"cluster":"впечатление"}]},{"word":"довольный","clusterAndDistanceList":[]}],"clustersAndWeightList":[{"first":"еда","second":8.111254843952363},{"first":"столик","second":5.432137530497297},{"first":"впечатление","second":5.247127420980555},{"first":"зал","second":4.734396064909241},{"first":"ресторан","second":4.665894395063415}]},{"originalStr":" готовка на уровне, все свежее, вкусное и аутентичное.","lemmatizationStr":"готовка уровень свежий вкусный аутентичный","sentenceSentiMark":2.82,"wordAndClustersList":[{"word":"готовка","clusterAndDistanceList":[]},{"word":"уровень","clusterAndDistanceList":[{"distance":1,"cluster":"зал"},{"distance":1,"cluster":"впечатление"}]},{"word":"свежий","clusterAndDistanceList":[{"distance":1,"cluster":"блюдо"},{"distance":1,"cluster":"кухня"},{"distance":1,"cluster":"еда"},{"distance":1,"cluster":"салат"},{"distance":1,"cluster":"впечатление"}]},{"word":"вкусный","clusterAndDistanceList":[{"distance":0,"cluster":"еда"},{"distance":1,"cluster":"блюдо"},{"distance":1,"cluster":"порция"}]},{"word":"аутентичный","clusterAndDistanceList":[]}],"clustersAndWeightList":[{"first":"блюдо","second":11.298196099276067},{"first":"еда","second":10.101993831992258},{"first":"порция","second":9.413408996496345},{"first":"впечатление","second":3.283653436573996},{"first":"зал","second":3.261722065264484}]},{"originalStr":" особенно хочется отметить спиртные напитки — вино просто великолепное, коктейли бесподобны.","lemmatizationStr":"хотеться отмечать спиртной напиток вино великолепный коктейль бесподобный","sentenceSentiMark":2.9299999999999997,"wordAndClustersList":[{"word":"хотеться","clusterAndDistanceList":[]},{"word":"отмечать","clusterAndDistanceList":[{"distance":1,"cluster":"меню"}]},{"word":"спиртной","clusterAndDistanceList":[{"distance":1,"cluster":"еда"}]},{"word":"напиток","clusterAndDistanceList":[{"distance":0,"cluster":"еда"},{"distance":1,"cluster":"блюдо"},{"distance":1,"cluster":"порция"}]},{"word":"вино","clusterAndDistanceList":[{"distance":1,"cluster":"ресторан"},{"distance":1,"cluster":"еда"},{"distance":1,"cluster":"заведение"}]},{"word":"великолепный","clusterAndDistanceList":[{"distance":1,"cluster":"впечатление"}]},{"word":"коктейль","clusterAndDistanceList":[{"distance":1,"cluster":"еда"}]},{"word":"бесподобный","clusterAndDistanceList":[]}],"clustersAndWeightList":[{"first":"меню","second":8.830665911671923},{"first":"еда","second":6.68949239642455},{"first":"блюдо","second":4.109887186348298},{"first":"порция","second":3.835075844630541},{"first":"ресторан","second":3.1447440917617326}]},{"originalStr":" порадовали музыканты — играли душевно, так что мы не упустили возможности потанцевать.","lemmatizationStr":"порадовать музыкант играть душевно не упускать возможность потанцевать","sentenceSentiMark":-2.5,"wordAndClustersList":[{"word":"порадовать","clusterAndDistanceList":[]},{"word":"музыкант","clusterAndDistanceList":[{"distance":1,"cluster":"ресторан"}]},{"word":"играть","clusterAndDistanceList":[{"distance":1,"cluster":"ресторан"},{"distance":1,"cluster":"впечатление"}]},{"word":"душевно","clusterAndDistanceList":[]},{"word":"упускать","clusterAndDistanceList":[]},{"word":"возможность","clusterAndDistanceList":[]}],"clustersAndWeightList":[{"first":"ресторан","second":1.1455256539158816},{"first":"впечатление","second":0.700401843736987},{"first":"персонал","second":0.0},{"first":"меню","second":0.0},{"first":"обслуживание","second":0.0}]},{"originalStr":" счет за все это великолепие оказался совсем небольшим — особенно учитывая то, что сидели мы 6 часов и ни в чем себе не отказывали.","lemmatizationStr":"счет великолепие оказываться небольшой учитывать не отказывать","sentenceSentiMark":-2.59,"wordAndClustersList":[{"word":"счет","clusterAndDistanceList":[{"distance":1,"cluster":"блюдо"}]},{"word":"великолепие","clusterAndDistanceList":[]},{"word":"оказываться","clusterAndDistanceList":[]},{"word":"небольшой","clusterAndDistanceList":[{"distance":0,"cluster":"столик"},{"distance":1,"cluster":"ресторан"},{"distance":1,"cluster":"еда"},{"distance":1,"cluster":"заведение"},{"distance":1,"cluster":"салат"},{"distance":1,"cluster":"зал"}]},{"word":"учитывать","clusterAndDistanceList":[]},{"word":"отказывать","clusterAndDistanceList":[]}],"clustersAndWeightList":[{"first":"столик","second":4.858882253415079},{"first":"зал","second":3.3878189410745287},{"first":"ресторан","second":3.3388008083671687},{"first":"салат","second":2.950289956304336},{"first":"заведение","second":2.9233502798105606}]},{"originalStr":" из небольших недочетов — сигары оказались староваты — слишком пересушены, забыли подать несколько закусок (впрочем, это оказалось к лучшему — мы бы их уже не осилили).","lemmatizationStr":"небольшой недочет сигара оказываться староватый пересушивать забывать подавать закуска оказываться не осиливать","sentenceSentiMark":5.069999999999999,"wordAndClustersList":[{"word":"небольшой","clusterAndDistanceList":[{"distance":0,"cluster":"столик"},{"distance":1,"cluster":"ресторан"},{"distance":1,"cluster":"еда"},{"distance":1,"cluster":"заведение"},{"distance":1,"cluster":"салат"},{"distance":1,"cluster":"зал"}]},{"word":"недочет","clusterAndDistanceList":[]},{"word":"сигара","clusterAndDistanceList":[{"distance":1,"cluster":"салат"}]},{"word":"оказываться","clusterAndDistanceList":[]},{"word":"пересушивать","clusterAndDistanceList":[]},{"word":"забывать","clusterAndDistanceList":[{"distance":1,"cluster":"впечатление"}]},{"word":"подавать","clusterAndDistanceList":[{"distance":0,"cluster":"официант"},{"distance":1,"cluster":"ресторан"},{"distance":1,"cluster":"блюдо"},{"distance":1,"cluster":"еда"},{"distance":1,"cluster":"заведение"}]},{"word":"закуска","clusterAndDistanceList":[{"distance":0,"cluster":"блюдо"},{"distance":0,"cluster":"еда"},{"distance":1,"cluster":"официант"},{"distance":1,"cluster":"меню"},{"distance":1,"cluster":"салат"},{"distance":1,"cluster":"порция"}]},{"word":"оказываться","clusterAndDistanceList":[]},{"word":"осиливать","clusterAndDistanceList":[]}],"clustersAndWeightList":[{"first":"ресторан","second":5.681503164938654},{"first":"еда","second":5.604287106548836},{"first":"заведение","second":4.9745476954914825},{"first":"столик","second":4.858882253415079},{"first":"официант","second":4.807972751821947}]},{"originalStr":" атмосфера в помещении мне не понравилась, стены были скучного цвета, обои серые и унылые.","lemmatizationStr":"атмосфера помещение не понравиться стена скучный цвет обои серый унылый","sentenceSentiMark":2.0,"wordAndClustersList":[{"word":"атмосфера","clusterAndDistanceList":[]},{"word":"помещение","clusterAndDistanceList":[{"distance":0,"cluster":"кухня"},{"distance":0,"cluster":"интерьер"},{"distance":0,"cluster":"зал"},{"distance":1,"cluster":"заведение"},{"distance":1,"cluster":"салат"},{"distance":1,"cluster":"впечатление"}]},{"word":"понравиться","clusterAndDistanceList":[]},{"word":"стена","clusterAndDistanceList":[{"distance":1,"cluster":"кухня"},{"distance":1,"cluster":"интерьер"},{"distance":1,"cluster":"зал"},{"distance":1,"cluster":"впечатление"}]},{"word":"скучный","clusterAndDistanceList":[]},{"word":"цвет","clusterAndDistanceList":[{"distance":1,"cluster":"салат"}]},{"word":"обои","clusterAndDistanceList":[{"distance":1,"cluster":"интерьер"}]},{"word":"серый","clusterAndDistanceList":[]},{"word":"унылый","clusterAndDistanceList":[]}],"clustersAndWeightList":[{"first":"интерьер","second":5.811611455166171},{"first":"зал","second":5.233637184917662},{"first":"кухня","second":4.2468549444505355},{"first":"салат","second":3.9551689710872946},{"first":"заведение","second":3.220162891063328}]},{"originalStr":" администратору, принимающему заказы на банкет, стоит быть немного приветливей и более заинтересованной в процессе — например, помогать в выборе блюд, что-то советовать, а не просто записывать со скучающим лицом.","lemmatizationStr":"администратор принимать заказ банкет приветливый заинтересованный процесс например помогать выбор блюдо что-то советовать не записывать скучающий","sentenceSentiMark":0.0,"wordAndClustersList":[{"word":"администратор","clusterAndDistanceList":[]},{"word":"принимать","clusterAndDistanceList":[{"distance":1,"cluster":"персонал"},{"distance":1,"cluster":"впечатление"}]},{"word":"заказ","clusterAndDistanceList":[]},{"word":"банкет","clusterAndDistanceList":[{"distance":1,"cluster":"ресторан"},{"distance":1,"cluster":"еда"}]},{"word":"приветливый","clusterAndDistanceList":[]},{"word":"заинтересованный","clusterAndDistanceList":[]},{"word":"процесс","clusterAndDistanceList":[{"distance":1,"cluster":"кухня"},{"distance":1,"cluster":"обслуживание"},{"distance":1,"cluster":"впечатление"}]},{"word":"например","clusterAndDistanceList":[{"distance":1,"cluster":"еда"}]},{"word":"помогать","clusterAndDistanceList":[{"distance":0,"cluster":"персонал"}]},{"word":"выбор","clusterAndDistanceList":[{"distance":1,"cluster":"меню"},{"distance":1,"cluster":"персонал"}]},{"word":"блюдо","clusterAndDistanceList":[{"distance":-1,"cluster":"блюдо"},{"distance":0,"cluster":"еда"},{"distance":1,"cluster":"официант"},{"distance":1,"cluster":"меню"},{"distance":1,"cluster":"салат"},{"distance":1,"cluster":"порция"}]},{"word":"что-то","clusterAndDistanceList":[]},{"word":"советовать","clusterAndDistanceList":[]},{"word":"записывать","clusterAndDistanceList":[{"distance":1,"cluster":"персонал"},{"distance":1,"cluster":"впечатление"}]}],"clustersAndWeightList":[{"first":"меню","second":22.20807555995566},{"first":"блюдо","second":18.1512656547739},{"first":"еда","second":12.18983356396875},{"first":"официант","second":12.083393543847237},{"first":"персонал","second":11.72721070064841}]},{"originalStr":" в целом праздник удался, все было на уровне.","lemmatizationStr":"целое праздник удаваться уровень","sentenceSentiMark":0.0,"wordAndClustersList":[{"word":"целое","clusterAndDistanceList":[{"distance":1,"cluster":"персонал"},{"distance":1,"cluster":"впечатление"}]},{"word":"праздник","clusterAndDistanceList":[{"distance":1,"cluster":"заведение"},{"distance":1,"cluster":"впечатление"}]},{"word":"удаваться","clusterAndDistanceList":[]},{"word":"уровень","clusterAndDistanceList":[{"distance":1,"cluster":"зал"},{"distance":1,"cluster":"впечатление"}]}],"clustersAndWeightList":[{"first":"впечатление","second":6.325997814189782},{"first":"зал","second":3.261722065264484},{"first":"персонал","second":2.493507137999518},{"first":"заведение","second":2.275669899552933},{"first":"меню","second":0.0}]}]}
+{
+  "result": [
+    {
+      "cluster": "меню",
+      "sentimentMark": "4,00"
+    },
+    {
+      "cluster": "персонал",
+      "sentimentMark": "3,26"
+    },
+    {
+      "cluster": "блюдо",
+      "sentimentMark": "2,82"
+    },
+    {
+      "cluster": "впечатление",
+      "sentimentMark": "2,00"
+    },
+    {
+      "cluster": "еда",
+      "sentimentMark": "1,46"
+    },
+    {
+      "cluster": "интерьер",
+      "sentimentMark": "-2,59"
+    }
+  ],
+  "sentiResultSentenceList": [
+    {
+      "originalStr": "персонал дружелюбный, всегда готов помочь в выборе заказа.",
+      "lemmatizationStr": "персонал дружелюбный готовый помогать выбор заказ",
+      "sentenceSentiMark": 3.26,
+      "wordAndClustersList": [
+        {
+          "word": "персонал",
+          "clusterAndDistanceList": [
+            {
+              "distance": -1,
+              "cluster": "персонал"
+            },
+            {
+              "distance": 1,
+              "cluster": "официант"
+            },
+            {
+              "distance": 1,
+              "cluster": "столик"
+            },
+            {
+              "distance": 1,
+              "cluster": "обслуживание"
+            },
+            {
+              "distance": 1,
+              "cluster": "заведение"
+            }
+          ]
+        },
+        {
+          "word": "дружелюбный",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "готовый",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "блюдо"
+            },
+            {
+              "distance": 1,
+              "cluster": "еда"
+            }
+          ]
+        },
+        {
+          "word": "помогать",
+          "clusterAndDistanceList": [
+            {
+              "distance": 0,
+              "cluster": "персонал"
+            }
+          ]
+        },
+        {
+          "word": "выбор",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "меню"
+            },
+            {
+              "distance": 1,
+              "cluster": "персонал"
+            }
+          ]
+        },
+        {
+          "word": "заказ",
+          "clusterAndDistanceList": []
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "персонал",
+          "second": 15.737509686518623
+        },
+        {
+          "first": "меню",
+          "second": 6.678341108563318
+        },
+        {
+          "first": "столик",
+          "second": 6.380583522325804
+        },
+        {
+          "first": "обслуживание",
+          "second": 6.317758153848169
+        },
+        {
+          "first": "официант",
+          "second": 5.328626836320774
+        }
+      ]
+    },
+    {
+      "originalStr": " отличный ресторан, была здесь уже не раз и вот решилась отпраздновать свой день рождения.",
+      "lemmatizationStr": "отличный ресторан не решаться отпраздновать рождение",
+      "sentenceSentiMark": 2.42,
+      "wordAndClustersList": [
+        {
+          "word": "отличный",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "ресторан",
+          "clusterAndDistanceList": [
+            {
+              "distance": -1,
+              "cluster": "ресторан"
+            },
+            {
+              "distance": 0,
+              "cluster": "официант"
+            },
+            {
+              "distance": 0,
+              "cluster": "столик"
+            },
+            {
+              "distance": 0,
+              "cluster": "порция"
+            },
+            {
+              "distance": 1,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "обслуживание"
+            }
+          ]
+        },
+        {
+          "word": "решаться",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "кухня"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "отпраздновать",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "рождение",
+          "clusterAndDistanceList": []
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "ресторан",
+          "second": 40.228564192390266
+        },
+        {
+          "first": "столик",
+          "second": 37.46798788737401
+        },
+        {
+          "first": "официант",
+          "second": 31.290700146939976
+        },
+        {
+          "first": "обслуживание",
+          "second": 29.67925239507955
+        },
+        {
+          "first": "порция",
+          "second": 28.07096248855269
+        }
+      ]
+    },
+    {
+      "originalStr": " гости остались довольны.",
+      "lemmatizationStr": "гость оставаться довольный",
+      "sentenceSentiMark": 1.46,
+      "wordAndClustersList": [
+        {
+          "word": "гость",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "ресторан"
+            },
+            {
+              "distance": 1,
+              "cluster": "официант"
+            },
+            {
+              "distance": 1,
+              "cluster": "столик"
+            },
+            {
+              "distance": 1,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "зал"
+            }
+          ]
+        },
+        {
+          "word": "оставаться",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "довольный",
+          "clusterAndDistanceList": []
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "еда",
+          "second": 8.111254843952363
+        },
+        {
+          "first": "столик",
+          "second": 5.432137530497297
+        },
+        {
+          "first": "впечатление",
+          "second": 5.247127420980555
+        },
+        {
+          "first": "зал",
+          "second": 4.734396064909241
+        },
+        {
+          "first": "ресторан",
+          "second": 4.665894395063415
+        }
+      ]
+    },
+    {
+      "originalStr": " готовка на уровне, все свежее, вкусное и аутентичное.",
+      "lemmatizationStr": "готовка уровень свежий вкусный аутентичный",
+      "sentenceSentiMark": 2.82,
+      "wordAndClustersList": [
+        {
+          "word": "готовка",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "уровень",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "зал"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "свежий",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "блюдо"
+            },
+            {
+              "distance": 1,
+              "cluster": "кухня"
+            },
+            {
+              "distance": 1,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "салат"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "вкусный",
+          "clusterAndDistanceList": [
+            {
+              "distance": 0,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "блюдо"
+            },
+            {
+              "distance": 1,
+              "cluster": "порция"
+            }
+          ]
+        },
+        {
+          "word": "аутентичный",
+          "clusterAndDistanceList": []
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "блюдо",
+          "second": 11.298196099276067
+        },
+        {
+          "first": "еда",
+          "second": 10.101993831992258
+        },
+        {
+          "first": "порция",
+          "second": 9.413408996496345
+        },
+        {
+          "first": "впечатление",
+          "second": 3.283653436573996
+        },
+        {
+          "first": "зал",
+          "second": 3.261722065264484
+        }
+      ]
+    },
+    {
+      "originalStr": " особенно хочется отметить спиртные напитки — вино просто великолепное, коктейли бесподобны.",
+      "lemmatizationStr": "хотеться отмечать спиртной напиток вино великолепный коктейль бесподобный",
+      "sentenceSentiMark": 2.9299999999999997,
+      "wordAndClustersList": [
+        {
+          "word": "хотеться",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "отмечать",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "меню"
+            }
+          ]
+        },
+        {
+          "word": "спиртной",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "еда"
+            }
+          ]
+        },
+        {
+          "word": "напиток",
+          "clusterAndDistanceList": [
+            {
+              "distance": 0,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "блюдо"
+            },
+            {
+              "distance": 1,
+              "cluster": "порция"
+            }
+          ]
+        },
+        {
+          "word": "вино",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "ресторан"
+            },
+            {
+              "distance": 1,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "заведение"
+            }
+          ]
+        },
+        {
+          "word": "великолепный",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "коктейль",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "еда"
+            }
+          ]
+        },
+        {
+          "word": "бесподобный",
+          "clusterAndDistanceList": []
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "меню",
+          "second": 8.830665911671923
+        },
+        {
+          "first": "еда",
+          "second": 6.68949239642455
+        },
+        {
+          "first": "блюдо",
+          "second": 4.109887186348298
+        },
+        {
+          "first": "порция",
+          "second": 3.835075844630541
+        },
+        {
+          "first": "ресторан",
+          "second": 3.1447440917617326
+        }
+      ]
+    },
+    {
+      "originalStr": " порадовали музыканты — играли душевно, так что мы не упустили возможности потанцевать.",
+      "lemmatizationStr": "порадовать музыкант играть душевно не упускать возможность потанцевать",
+      "sentenceSentiMark": -2.5,
+      "wordAndClustersList": [
+        {
+          "word": "порадовать",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "музыкант",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "ресторан"
+            }
+          ]
+        },
+        {
+          "word": "играть",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "ресторан"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "душевно",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "упускать",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "возможность",
+          "clusterAndDistanceList": []
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "ресторан",
+          "second": 1.1455256539158816
+        },
+        {
+          "first": "впечатление",
+          "second": 0.700401843736987
+        },
+        {
+          "first": "персонал",
+          "second": 0.0
+        },
+        {
+          "first": "меню",
+          "second": 0.0
+        },
+        {
+          "first": "обслуживание",
+          "second": 0.0
+        }
+      ]
+    },
+    {
+      "originalStr": " счет за все это великолепие оказался совсем небольшим — особенно учитывая то, что сидели мы 6 часов и ни в чем себе не отказывали.",
+      "lemmatizationStr": "счет великолепие оказываться небольшой учитывать не отказывать",
+      "sentenceSentiMark": -2.59,
+      "wordAndClustersList": [
+        {
+          "word": "счет",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "блюдо"
+            }
+          ]
+        },
+        {
+          "word": "великолепие",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "оказываться",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "небольшой",
+          "clusterAndDistanceList": [
+            {
+              "distance": 0,
+              "cluster": "столик"
+            },
+            {
+              "distance": 1,
+              "cluster": "ресторан"
+            },
+            {
+              "distance": 1,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "заведение"
+            },
+            {
+              "distance": 1,
+              "cluster": "салат"
+            },
+            {
+              "distance": 1,
+              "cluster": "зал"
+            }
+          ]
+        },
+        {
+          "word": "учитывать",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "отказывать",
+          "clusterAndDistanceList": []
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "столик",
+          "second": 4.858882253415079
+        },
+        {
+          "first": "зал",
+          "second": 3.3878189410745287
+        },
+        {
+          "first": "ресторан",
+          "second": 3.3388008083671687
+        },
+        {
+          "first": "салат",
+          "second": 2.950289956304336
+        },
+        {
+          "first": "заведение",
+          "second": 2.9233502798105606
+        }
+      ]
+    },
+    {
+      "originalStr": " из небольших недочетов — сигары оказались староваты — слишком пересушены, забыли подать несколько закусок (впрочем, это оказалось к лучшему — мы бы их уже не осилили).",
+      "lemmatizationStr": "небольшой недочет сигара оказываться староватый пересушивать забывать подавать закуска оказываться не осиливать",
+      "sentenceSentiMark": 5.069999999999999,
+      "wordAndClustersList": [
+        {
+          "word": "небольшой",
+          "clusterAndDistanceList": [
+            {
+              "distance": 0,
+              "cluster": "столик"
+            },
+            {
+              "distance": 1,
+              "cluster": "ресторан"
+            },
+            {
+              "distance": 1,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "заведение"
+            },
+            {
+              "distance": 1,
+              "cluster": "салат"
+            },
+            {
+              "distance": 1,
+              "cluster": "зал"
+            }
+          ]
+        },
+        {
+          "word": "недочет",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "сигара",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "салат"
+            }
+          ]
+        },
+        {
+          "word": "оказываться",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "пересушивать",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "забывать",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "подавать",
+          "clusterAndDistanceList": [
+            {
+              "distance": 0,
+              "cluster": "официант"
+            },
+            {
+              "distance": 1,
+              "cluster": "ресторан"
+            },
+            {
+              "distance": 1,
+              "cluster": "блюдо"
+            },
+            {
+              "distance": 1,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "заведение"
+            }
+          ]
+        },
+        {
+          "word": "закуска",
+          "clusterAndDistanceList": [
+            {
+              "distance": 0,
+              "cluster": "блюдо"
+            },
+            {
+              "distance": 0,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "официант"
+            },
+            {
+              "distance": 1,
+              "cluster": "меню"
+            },
+            {
+              "distance": 1,
+              "cluster": "салат"
+            },
+            {
+              "distance": 1,
+              "cluster": "порция"
+            }
+          ]
+        },
+        {
+          "word": "оказываться",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "осиливать",
+          "clusterAndDistanceList": []
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "ресторан",
+          "second": 5.681503164938654
+        },
+        {
+          "first": "еда",
+          "second": 5.604287106548836
+        },
+        {
+          "first": "заведение",
+          "second": 4.9745476954914825
+        },
+        {
+          "first": "столик",
+          "second": 4.858882253415079
+        },
+        {
+          "first": "официант",
+          "second": 4.807972751821947
+        }
+      ]
+    },
+    {
+      "originalStr": " атмосфера в помещении мне не понравилась, стены были скучного цвета, обои серые и унылые.",
+      "lemmatizationStr": "атмосфера помещение не понравиться стена скучный цвет обои серый унылый",
+      "sentenceSentiMark": 2.0,
+      "wordAndClustersList": [
+        {
+          "word": "атмосфера",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "помещение",
+          "clusterAndDistanceList": [
+            {
+              "distance": 0,
+              "cluster": "кухня"
+            },
+            {
+              "distance": 0,
+              "cluster": "интерьер"
+            },
+            {
+              "distance": 0,
+              "cluster": "зал"
+            },
+            {
+              "distance": 1,
+              "cluster": "заведение"
+            },
+            {
+              "distance": 1,
+              "cluster": "салат"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "понравиться",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "стена",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "кухня"
+            },
+            {
+              "distance": 1,
+              "cluster": "интерьер"
+            },
+            {
+              "distance": 1,
+              "cluster": "зал"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "скучный",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "цвет",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "салат"
+            }
+          ]
+        },
+        {
+          "word": "обои",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "интерьер"
+            }
+          ]
+        },
+        {
+          "word": "серый",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "унылый",
+          "clusterAndDistanceList": []
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "интерьер",
+          "second": 5.811611455166171
+        },
+        {
+          "first": "зал",
+          "second": 5.233637184917662
+        },
+        {
+          "first": "кухня",
+          "second": 4.2468549444505355
+        },
+        {
+          "first": "салат",
+          "second": 3.9551689710872946
+        },
+        {
+          "first": "заведение",
+          "second": 3.220162891063328
+        }
+      ]
+    },
+    {
+      "originalStr": " администратору, принимающему заказы на банкет, стоит быть немного приветливей и более заинтересованной в процессе — например, помогать в выборе блюд, что-то советовать, а не просто записывать со скучающим лицом.",
+      "lemmatizationStr": "администратор принимать заказ банкет приветливый заинтересованный процесс например помогать выбор блюдо что-то советовать не записывать скучающий",
+      "sentenceSentiMark": 0.0,
+      "wordAndClustersList": [
+        {
+          "word": "администратор",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "принимать",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "персонал"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "заказ",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "банкет",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "ресторан"
+            },
+            {
+              "distance": 1,
+              "cluster": "еда"
+            }
+          ]
+        },
+        {
+          "word": "приветливый",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "заинтересованный",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "процесс",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "кухня"
+            },
+            {
+              "distance": 1,
+              "cluster": "обслуживание"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "например",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "еда"
+            }
+          ]
+        },
+        {
+          "word": "помогать",
+          "clusterAndDistanceList": [
+            {
+              "distance": 0,
+              "cluster": "персонал"
+            }
+          ]
+        },
+        {
+          "word": "выбор",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "меню"
+            },
+            {
+              "distance": 1,
+              "cluster": "персонал"
+            }
+          ]
+        },
+        {
+          "word": "блюдо",
+          "clusterAndDistanceList": [
+            {
+              "distance": -1,
+              "cluster": "блюдо"
+            },
+            {
+              "distance": 0,
+              "cluster": "еда"
+            },
+            {
+              "distance": 1,
+              "cluster": "официант"
+            },
+            {
+              "distance": 1,
+              "cluster": "меню"
+            },
+            {
+              "distance": 1,
+              "cluster": "салат"
+            },
+            {
+              "distance": 1,
+              "cluster": "порция"
+            }
+          ]
+        },
+        {
+          "word": "что-то",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "советовать",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "записывать",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "персонал"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "меню",
+          "second": 22.20807555995566
+        },
+        {
+          "first": "блюдо",
+          "second": 18.1512656547739
+        },
+        {
+          "first": "еда",
+          "second": 12.18983356396875
+        },
+        {
+          "first": "официант",
+          "second": 12.083393543847237
+        },
+        {
+          "first": "персонал",
+          "second": 11.72721070064841
+        }
+      ]
+    },
+    {
+      "originalStr": " в целом праздник удался, все было на уровне.",
+      "lemmatizationStr": "целое праздник удаваться уровень",
+      "sentenceSentiMark": 0.0,
+      "wordAndClustersList": [
+        {
+          "word": "целое",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "персонал"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "праздник",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "заведение"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        },
+        {
+          "word": "удаваться",
+          "clusterAndDistanceList": []
+        },
+        {
+          "word": "уровень",
+          "clusterAndDistanceList": [
+            {
+              "distance": 1,
+              "cluster": "зал"
+            },
+            {
+              "distance": 1,
+              "cluster": "впечатление"
+            }
+          ]
+        }
+      ],
+      "clustersAndWeightList": [
+        {
+          "first": "впечатление",
+          "second": 6.325997814189782
+        },
+        {
+          "first": "зал",
+          "second": 3.261722065264484
+        },
+        {
+          "first": "персонал",
+          "second": 2.493507137999518
+        },
+        {
+          "first": "заведение",
+          "second": 2.275669899552933
+        },
+        {
+          "first": "меню",
+          "second": 0.0
+        }
+      ]
+    }
+  ]
+}

@@ -5,8 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.FIELD)     // чтобы использовать для класса
-@Retention(RetentionPolicy.RUNTIME)  // хотим чтобы наша аннотация дожила до рантайма
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface CustomAnnotation {
     public String key() default "";
 }
+

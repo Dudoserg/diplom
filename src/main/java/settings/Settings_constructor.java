@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class Settings_constructor extends Setting_Base {
+
     @CustomAnnotation(key = "assoc")
     protected Double _ASS_WEIGHT_;
 
@@ -39,6 +40,9 @@ public class Settings_constructor extends Setting_Base {
     @CustomAnnotation(key = "outputPath")
     protected String outputPath = "";
 
+    @CustomAnnotation(key = "top_vertex")
+    protected Integer topVertex;
+
     @CustomAnnotation(key = "trainPath")
     protected String trainPath = "";
 
@@ -57,8 +61,7 @@ public class Settings_constructor extends Setting_Base {
     @CustomAnnotation(key = "count_of_calculated_clusters")
     protected Integer countOfCalculatedClusters;
 
-    @CustomAnnotation(key = "top_vertex")
-    protected Integer topVertex;
+
 
     protected static Settings_constructor instance;
 

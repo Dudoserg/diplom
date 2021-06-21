@@ -3,7 +3,9 @@ package settings;
 import java.lang.reflect.Field;
 
 public class Setting_Base {
-    protected void setField(String fieldName, String value, Class classs) throws IllegalAccessException {
+
+    protected void setField(String fieldName, String value, Class classs)
+            throws IllegalAccessException {
         for (Field f : classs.getDeclaredFields()) {
             CustomAnnotation column = f.getAnnotation(CustomAnnotation.class);
             if (column != null) {
